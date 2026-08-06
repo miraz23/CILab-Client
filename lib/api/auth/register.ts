@@ -1,5 +1,7 @@
 import { RegisterApiPayload, RegisterApiResponse } from "@/lib/types/auth/register";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
+
 export class RegisterApiError extends Error {
     status: number;
 
@@ -16,7 +18,7 @@ export async function submitRegisterApplication(
     let response: Response;
 
     try {
-        response = await fetch("/api/register", {
+        response = await fetch(`${API_BASE_URL}/api/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),

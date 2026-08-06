@@ -1,5 +1,7 @@
 import { LoginApiPayload, LoginApiResponse } from "@/lib/types/auth/login";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
+
 export class LoginApiError extends Error {
     status: number;
 
@@ -16,7 +18,7 @@ export async function submitLoginApplication(
     let response: Response;
 
     try {
-        response = await fetch("/api/login", {
+        response = await fetch(`${API_BASE_URL}/api/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
