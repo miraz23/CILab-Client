@@ -63,6 +63,7 @@ export default function LoginForm() {
                 });
                 localStorage.setItem("token", data.token ?? "");
                 localStorage.setItem("user", JSON.stringify({ userId: data.userId }));
+                document.cookie = `auth_token=${data.token ?? ""}; path=/; max-age=86400; samesite=lax`;
                 window.dispatchEvent(new Event("auth-changed"));
                 toast.success("Signed in. Redirecting to your dashboard…");
                 router.push("/dashboard");

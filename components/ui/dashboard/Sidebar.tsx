@@ -68,6 +68,7 @@ export default function Sidebar() {
     const handleLogout = () => {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+        document.cookie = "auth_token=; path=/; max-age=0";
         window.location.href = "/";
     };
 
@@ -91,7 +92,7 @@ export default function Sidebar() {
                 <div className={cn("flex items-center justify-center gap-2", collapsed && "flex-col")}>
                     {collapsed ? (
                         <Image
-                            src="/logos/logo.png"
+                            src="/logos/sidebar-logo.png"
                             alt="Computational Intelligence Lab Logo"
                             width={59}
                             height={59}
@@ -100,7 +101,7 @@ export default function Sidebar() {
                         />
                     ) : (
                         <Image
-                            src="/logos/logo.png"
+                            src="/logos/sidebar-logo.png"
                             alt="Computational Intelligence Lab Logo"
                             width={175}
                             height={54}
