@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Sidebar from "@/components/ui/dashboard/Sidebar";
 
 export const metadata: Metadata = {
     title: "Dashboard | Computational Intelligence Lab",
@@ -11,8 +12,11 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <main className="min-h-screen bg-[#F1F5F9]">
-            {children}
-        </main>
+        <div className="flex min-h-screen bg-linear-to-br from-[#716f49] to-[#1f321c]">
+            <Sidebar />
+            <main className="w-full p-6 pb-24 lg:pb-6">
+                {children}
+            </main>
+        </div>
     );
 }
