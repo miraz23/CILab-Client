@@ -188,7 +188,7 @@ export default function Sidebar() {
                         type="button"
                         onClick={handleLogout}
                         className={cn(
-                            "flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-white/80 transition-colors duration-150 hover:bg-red-500/20 hover:text-white",
+                            "flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-white/80 transition-colors duration-150 hover:bg-red-500/20 hover:text-white cursor-pointer",
                             collapsed && "justify-center px-2"
                         )}
                         title={collapsed ? "Logout" : undefined}

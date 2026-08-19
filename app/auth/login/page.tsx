@@ -57,10 +57,13 @@ export default function LoginForm() {
 
             setIsSubmitting(true);
             try {
-                await submitLoginApplication({
+                const data = await submitLoginApplication({
                     email: formData.email,
                     password: formData.password,
                 });
+                localStorage.setItem("token", data.token ?? "");
+                localStorage.setItem("user", JSON.stringify({ userId: data.userId }));
+                window.dispatchEvent(new Event("auth-changed"));
                 toast.success("Signed in. Redirecting to your dashboard…");
                 router.push("/dashboard");
             } catch (error) {

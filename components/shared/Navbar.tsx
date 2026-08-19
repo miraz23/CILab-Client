@@ -55,7 +55,7 @@ const NAV_ITEMS: NavItem[] = [
 // ─── Dropdown Menu ────────────────────────────────────────────────────────────
 function DropdownMenu({ items }: { items: NavChild[] }) {
     return (
-        <div className="absolute top-full left-1/2 z-50 min-w-[200px] -translate-x-1/2 pt-2">
+        <div className="absolute top-full left-1/2 z-50 min-w-50 -translate-x-1/2 pt-2">
             <div className="overflow-hidden rounded-xl bg-[#FFFFFF]/97 py-1 shadow-2xl backdrop-blur-md">
                 {items.map((child) => (
                     <Link
@@ -113,7 +113,7 @@ function NavLink({ item }: { item: NavItem }) {
 }
 
 // ─── Mobile Menu ──────────────────────────────────────────────────────────────
-function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+function MobileMenu({ open, onClose, isLoggedIn }: { open: boolean; onClose: () => void; isLoggedIn: boolean }) {
     const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
     if (!open) return null;
@@ -184,11 +184,11 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
             <div className="mt-auto px-5 pb-8 pt-4">
                 <Link
-                    href="/auth/login"
+                    href={isLoggedIn ? "/dashboard" : "/auth/login"}
                     onClick={onClose}
                     className="block w-full rounded-full bg-[#1f321c] py-3 text-center text-sm font-bold tracking-wider text-white"
                 >
-                    Login
+                    {isLoggedIn ? "Dashboard" : "Login"}
                 </Link>
             </div>
         </div>
@@ -214,6 +214,18 @@ function ComputationalIntelligenceLabLogo() {
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const sync = () => setIsLoggedIn(Boolean(localStorage.getItem("user") || localStorage.getItem("token")));
+        sync();
+        window.addEventListener("storage", sync);
+        window.addEventListener("auth-changed", sync);
+        return () => {
+            window.removeEventListener("storage", sync);
+            window.removeEventListener("auth-changed", sync);
+        };
+    }, []);
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 10);
@@ -252,10 +264,10 @@ export default function Navbar() {
                     {/* CTA */}
                     <div className="hidden items-center lg:flex">
                         <Link
-                            href="/auth/login"
+                            href={isLoggedIn ? "/dashboard" : "/auth/login"}
                             className="group inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-linear-to-br from-[#716f49]/95 to-[#1f321c]/80 px-5 py-2 text-sm font-semibold tracking-[0.06em] text-white shadow-[0_12px_30px_rgba(31,50,28,0.35),0_4px_12px_rgba(113,111,73,0.25),inset_0_1px_0_rgba(255,255,255,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98]"
                         >
-                            Login
+                            {isLoggedIn ? "Dashboard" : "Login"}
                             <ArrowUpRight
                                 size={15}
                                 className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -279,7 +291,7 @@ export default function Navbar() {
                 <div className="h-px w-full bg-linear-to-r from-transparent via-[#716f49]/40 to-transparent" />
             </header>
 
-            <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
+            <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} isLoggedIn={isLoggedIn} />
         </>
     );
 }
