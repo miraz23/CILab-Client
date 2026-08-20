@@ -3,6 +3,7 @@ import OverviewComponent from '@/components/ui/dashboard/overview/OverviewCompon
 import TaskManager from '@/components/ui/dashboard/overview/TaskManager'
 import TodoItems from '@/components/ui/dashboard/overview/TodoList'
 import EventsComponent from '@/components/ui/dashboard/overview/EventsComponent'
+import PaperStats from '@/components/ui/dashboard/overview/PaperStats'
 import React from 'react'
 
 export default function page() {
@@ -19,7 +20,7 @@ export default function page() {
           </div>
           <div className="col-span-1 lg:col-span-2">
             <TodoItems />
-            
+            <PaperStats />
           </div>
         </div>
       </div>
