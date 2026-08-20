@@ -1,11 +1,21 @@
 import StateCards from '@/components/ui/dashboard/overview/StateCards'
+import OverviewComponent from '@/components/ui/dashboard/overview/OverviewComponent'
 import React from 'react'
 
 export default function page() {
   return (
-    <section className='w-[95%] mx-auto py-10'>
+    <section className='w-[95%] mx-auto py-5'>
       <div>
         <StateCards />
+
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full">
+          <div className="col-span-1 md:col-span-3 lg:col-span-4">
+            <OverviewComponent />
+          </div>
+          <div className="col-span-1 lg:col-span-2">
+
+          </div>
+        </div>
       </div>
     </section>
   )
