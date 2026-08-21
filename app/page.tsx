@@ -1,4 +1,5 @@
-import Banner from "@/components/ui/home/Banner";
+import Banner from "@/components/home/Banner";
+
 
 export default function Home() {
   return (

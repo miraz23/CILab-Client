@@ -1,5 +1,6 @@
+import Sidebar from "@/components/dashboard/Sidebar";
 import type { Metadata } from "next";
-import Sidebar from "@/components/ui/dashboard/Sidebar";
+
 
 export const metadata: Metadata = {
     title: "Dashboard | Computational Intelligence Lab",

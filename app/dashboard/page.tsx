@@ -1,10 +1,10 @@
-import StateCards from '@/components/ui/dashboard/overview/StateCards'
-import OverviewComponent from '@/components/ui/dashboard/overview/OverviewComponent'
-import TaskManager from '@/components/ui/dashboard/overview/TaskManager'
-import TodoItems from '@/components/ui/dashboard/overview/TodoList'
-import EventsComponent from '@/components/ui/dashboard/overview/EventsComponent'
-import PaperStats from '@/components/ui/dashboard/overview/PaperStats'
-import ActivityStats from '@/components/ui/dashboard/overview/ActivityStats'
+import ActivityStats from '@/components/dashboard/overview/ActivityStats'
+import EventsComponent from '@/components/dashboard/overview/EventsComponent'
+import OverviewComponent from '@/components/dashboard/overview/OverviewComponent'
+import PaperStats from '@/components/dashboard/overview/PaperStats'
+import StateCards from '@/components/dashboard/overview/StateCards'
+import TaskManager from '@/components/dashboard/overview/TaskManager'
+import TodoItems from '@/components/dashboard/overview/TodoList'
 import React from 'react'
 
 export default function page() {
