@@ -61,15 +61,9 @@ export default function UploadHistory() {
   return (
     <div>
       {/* Header */}
-      <div className="p-5 border-b border-[#E6E6E6]">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#1C1D1D0D]">
-            <FileText className="w-5 h-5 text-[#716f49]" aria-hidden />
-          </div>
-          <h2 className="text-lg font-semibold text-gray-900">Upload History</h2>
-        </div>
+      <div className="px-2.5 py-5 border-b border-[#E6E6E6]">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-          <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+          <TabsList className="grid grid-cols-3 gap-5 bg-gray-100">
             <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
               All ({uploads.length})
             </TabsTrigger>
@@ -85,55 +79,57 @@ export default function UploadHistory() {
 
       {/* List */}
       <CardContent className="p-0">
-        <div className="divide-y divide-[#E6E6E6]">
-          {filteredUploads.map((upload) => (
-            <div key={upload.id} className="px-5 py-4 hover:bg-gray-50 transition-colors">
-              <div className="flex items-center gap-3">
-                {/* Icon */}
-                <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center ${upload.type === 'paper' ? 'bg-[#716f49]/10 text-[#716f49]' : 'bg-[#FFB200]/10 text-[#FFB200]'
-                  }`}>
-                  {upload.type === 'paper'
-                    ? <FileText className="w-4 h-4" aria-hidden />
-                    : <Presentation className="w-4 h-4" aria-hidden />}
-                </div>
-
-                {/* Title + meta + actions row */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium text-gray-900 truncate">{upload.title}</p>
-                    {getStatusBadge(upload.status)}
+        <div className="overflow-x-auto">
+          <div className="min-w-130 divide-y divide-[#E6E6E6]">
+            {filteredUploads.map((upload) => (
+              <div key={upload.id} className="px-5 py-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  {/* Icon */}
+                  <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center ${upload.type === 'paper' ? 'bg-[#716f49]/10 text-[#716f49]' : 'bg-[#FFB200]/10 text-[#FFB200]'
+                    }`}>
+                    {upload.type === 'paper'
+                      ? <FileText className="w-4 h-4" aria-hidden />
+                      : <Presentation className="w-4 h-4" aria-hidden />}
                   </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span>{upload.category}</span>
-                      <span>·</span>
-                      <span>{formatDate(upload.date)}</span>
-                      <span>·</span>
-                      <span>{formatFileSize(upload.fileSize)}</span>
+
+                  {/* Title + meta + actions row */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-gray-900 truncate">{upload.title}</p>
+                      {getStatusBadge(upload.status)}
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => window.open(upload.fileUrl, '_blank')}>
-                        <Eye className="w-3.5 h-3.5" aria-hidden />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => window.open(upload.fileUrl, '_blank')}>
-                        <Download className="w-3.5 h-3.5" aria-hidden />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50" onClick={() => handleDelete(upload.id)}>
-                        <Trash2 className="w-3.5 h-3.5" aria-hidden />
-                      </Button>
+                    <div className="flex items-center justify-between mt-1">
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <span>{upload.category}</span>
+                        <span>·</span>
+                        <span>{formatDate(upload.date)}</span>
+                        <span>·</span>
+                        <span>{formatFileSize(upload.fileSize)}</span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => window.open(upload.fileUrl, '_blank')}>
+                          <Eye className="w-3.5 h-3.5" aria-hidden />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => window.open(upload.fileUrl, '_blank')}>
+                          <Download className="w-3.5 h-3.5" aria-hidden />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50" onClick={() => handleDelete(upload.id)}>
+                          <Trash2 className="w-3.5 h-3.5" aria-hidden />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {filteredUploads.length === 0 && (
-            <div className="py-12 text-center text-gray-500">
-              <FileText className="w-10 h-10 mx-auto mb-3 text-gray-300" aria-hidden />
-              <p className="text-sm">No uploads found</p>
-            </div>
-          )}
+            {filteredUploads.length === 0 && (
+              <div className="py-12 text-center text-gray-500">
+                <FileText className="w-10 h-10 mx-auto mb-3 text-gray-300" aria-hidden />
+                <p className="text-sm">No uploads found</p>
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </div>

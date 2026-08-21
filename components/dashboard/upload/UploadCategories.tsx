@@ -14,7 +14,6 @@ interface Category {
   color: string;
 }
 
-// ✅ Defined outside — stable component reference across renders
 function CategoryRow({
   category,
   isEditing,
@@ -72,25 +71,25 @@ function CategoryRow({
 }
 
 const paperCategories: Category[] = [
-  { id: '1', name: 'Machine Learning', count: 45, icon: Brain, color: 'bg-[#716f49]' },
-  { id: '2', name: 'Computer Vision', count: 32, icon: Cpu, color: 'bg-[#4A90E2]' },
-  { id: '3', name: 'NLP', count: 28, icon: Network, color: 'bg-[#0AA90F]' },
-  { id: '4', name: 'Graph Neural Networks', count: 15, icon: Users, color: 'bg-[#8E24AA]' },
-  { id: '5', name: 'Optimization', count: 12, icon: Lightbulb, color: 'bg-[#FF7043]' },
-  { id: '6', name: 'Robotics', count: 8, icon: Microscope, color: 'bg-[#E63946]' },
-  { id: '7', name: 'Reinforcement Learning', count: 6, icon: BookOpen, color: 'bg-[#FFB200]' },
-  { id: '8', name: 'Other', count: 4, icon: Tag, color: 'bg-gray-500' },
+  { id: 'p1', name: 'Machine Learning', count: 45, icon: Brain, color: 'bg-[#716f49]' },
+  { id: 'p2', name: 'Computer Vision', count: 32, icon: Cpu, color: 'bg-[#4A90E2]' },
+  { id: 'p3', name: 'NLP', count: 28, icon: Network, color: 'bg-[#0AA90F]' },
+  { id: 'p4', name: 'Graph Neural Networks', count: 15, icon: Users, color: 'bg-[#8E24AA]' },
+  { id: 'p5', name: 'Optimization', count: 12, icon: Lightbulb, color: 'bg-[#FF7043]' },
+  { id: 'p6', name: 'Robotics', count: 8, icon: Microscope, color: 'bg-[#E63946]' },
+  { id: 'p7', name: 'Reinforcement Learning', count: 6, icon: BookOpen, color: 'bg-[#FFB200]' },
+  { id: 'p8', name: 'Other', count: 4, icon: Tag, color: 'bg-gray-500' },
 ];
 
 const presentationCategories: Category[] = [
-  { id: '1', name: 'Conference Talk', count: 12, icon: Users, color: 'bg-[#716f49]' },
-  { id: '2', name: 'Workshop', count: 8, icon: Lightbulb, color: 'bg-[#4A90E2]' },
-  { id: '3', name: 'Seminar', count: 6, icon: BookOpen, color: 'bg-[#0AA90F]' },
-  { id: '4', name: 'Poster Session', count: 4, icon: Network, color: 'bg-[#8E24AA]' },
-  { id: '5', name: 'Demo Session', count: 3, icon: Cpu, color: 'bg-[#FF7043]' },
-  { id: '6', name: 'Tutorial', count: 2, icon: Brain, color: 'bg-[#E63946]' },
-  { id: '7', name: 'Keynote', count: 1, icon: Microscope, color: 'bg-[#FFB200]' },
-  { id: '8', name: 'Other', count: 2, icon: Tag, color: 'bg-gray-500' },
+  { id: 'pr1', name: 'Conference Talk', count: 12, icon: Users, color: 'bg-[#716f49]' },
+  { id: 'pr2', name: 'Workshop', count: 8, icon: Lightbulb, color: 'bg-[#4A90E2]' },
+  { id: 'pr3', name: 'Seminar', count: 6, icon: BookOpen, color: 'bg-[#0AA90F]' },
+  { id: 'pr4', name: 'Poster Session', count: 4, icon: Network, color: 'bg-[#8E24AA]' },
+  { id: 'pr5', name: 'Demo Session', count: 3, icon: Cpu, color: 'bg-[#FF7043]' },
+  { id: 'pr6', name: 'Tutorial', count: 2, icon: Brain, color: 'bg-[#E63946]' },
+  { id: 'pr7', name: 'Keynote', count: 1, icon: Microscope, color: 'bg-[#FFB200]' },
+  { id: 'pr8', name: 'Other', count: 2, icon: Tag, color: 'bg-gray-500' },
 ];
 
 export default function UploadCategories() {
@@ -98,16 +97,21 @@ export default function UploadCategories() {
   const [presentationCats, setPresentationCats] = useState<Category[]>(presentationCategories);
   const [newPaperCat, setNewPaperCat] = useState('');
   const [newPresentationCat, setNewPresentationCat] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState('');
 
-  const handleEdit = (id: string, currentName: string) => {
-    setEditingId(id);
-    setEditValue(currentName);
-  };
+  // ✅ Separate editing state per list
+  const [editingPaperId, setEditingPaperId] = useState<string | null>(null);
+  const [editingPaperValue, setEditingPaperValue] = useState('');
+  const [editingPresentationId, setEditingPresentationId] = useState<string | null>(null);
+  const [editingPresentationValue, setEditingPresentationValue] = useState('');
 
-  const handleSaveEdit = (setCategories: React.Dispatch<React.SetStateAction<Category[]>>) => {
-    if (!editValue.trim()) return;
+  const handleSaveEdit = (
+    editingId: string | null,
+    editValue: string,
+    setCategories: React.Dispatch<React.SetStateAction<Category[]>>,
+    setEditingId: (id: string | null) => void,
+    setEditValue: (val: string) => void,
+  ) => {
+    if (!editValue.trim() || !editingId) return;
     setCategories((prev) =>
       prev.map((cat) => (cat.id === editingId ? { ...cat, name: editValue.trim() } : cat))
     );
@@ -127,7 +131,14 @@ export default function UploadCategories() {
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>
   ) => {
     if (!name.trim()) return;
-    setCategories((prev) => [...prev, { id: Date.now().toString(), name: name.trim(), count: 0, icon: Tag, color: 'bg-gray-500' }]);
+    const prefix = type === 'paper' ? 'p' : 'pr';
+    setCategories((prev) => [...prev, {
+      id: `${prefix}-${Date.now()}`,
+      name: name.trim(),
+      count: 0,
+      icon: Tag,
+      color: 'bg-gray-500',
+    }]);
     if (type === 'paper') setNewPaperCat('');
     else setNewPresentationCat('');
   };
@@ -152,11 +163,11 @@ export default function UploadCategories() {
             <CategoryRow
               key={cat.id}
               category={cat}
-              isEditing={editingId === cat.id}
-              editValue={editValue}
-              onEditValueChange={setEditValue}
-              onEdit={() => handleEdit(cat.id, cat.name)}
-              onSave={() => handleSaveEdit(setPaperCats)}
+              isEditing={editingPaperId === cat.id}
+              editValue={editingPaperValue}
+              onEditValueChange={setEditingPaperValue}
+              onEdit={() => { setEditingPaperId(cat.id); setEditingPaperValue(cat.name); }}
+              onSave={() => handleSaveEdit(editingPaperId, editingPaperValue, setPaperCats, setEditingPaperId, setEditingPaperValue)}
               onDelete={() => handleDelete(cat.id, setPaperCats)}
             />
           ))}
@@ -194,11 +205,11 @@ export default function UploadCategories() {
             <CategoryRow
               key={cat.id}
               category={cat}
-              isEditing={editingId === cat.id}
-              editValue={editValue}
-              onEditValueChange={setEditValue}
-              onEdit={() => handleEdit(cat.id, cat.name)}
-              onSave={() => handleSaveEdit(setPresentationCats)}
+              isEditing={editingPresentationId === cat.id}
+              editValue={editingPresentationValue}
+              onEditValueChange={setEditingPresentationValue}
+              onEdit={() => { setEditingPresentationId(cat.id); setEditingPresentationValue(cat.name); }}
+              onSave={() => handleSaveEdit(editingPresentationId, editingPresentationValue, setPresentationCats, setEditingPresentationId, setEditingPresentationValue)}
               onDelete={() => handleDelete(cat.id, setPresentationCats)}
             />
           ))}

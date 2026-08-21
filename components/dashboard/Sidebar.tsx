@@ -200,7 +200,7 @@ export default function Sidebar() {
                 </div>
             </aside>
 
-            <nav className="fixed bottom-2 left-2 right-2 z-50 flex items-stretch justify-around gap-1 border border-white/10 bg-white/10 shadow-2xl px-2 py-2 backdrop-blur-xl rounded-2xl lg:hidden">
+            <nav className="fixed bottom-2 left-2 right-2 z-50 flex items-stretch justify-around gap-1 border border-white/10 bg-[#716f49]/80 shadow-2xl px-2 py-2 backdrop-blur-xl rounded-2xl lg:hidden">
                 {NAV_ITEMS.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href;
