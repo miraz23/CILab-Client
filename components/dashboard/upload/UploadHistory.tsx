@@ -63,14 +63,14 @@ export default function UploadHistory() {
       {/* Header */}
       <div className="px-2.5 py-5 border-b border-[#E6E6E6]">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-          <TabsList className="grid grid-cols-3 gap-5 bg-gray-100">
-            <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsList className="grid grid-cols-3 bg-gray-100">
+            <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs">
               All ({uploads.length})
             </TabsTrigger>
-            <TabsTrigger value="papers" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <TabsTrigger value="papers" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs">
               Papers ({uploads.filter(u => u.type === 'paper').length})
             </TabsTrigger>
-            <TabsTrigger value="presentations" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <TabsTrigger value="presentations" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs">
               Presentations ({uploads.filter(u => u.type === 'presentation').length})
             </TabsTrigger>
           </TabsList>
