@@ -121,6 +121,7 @@ export default function ReceivedRequests() {
 
     const pendingCount = requests.filter((r) => r.status === "pending").length;
     const acceptedCount = requests.filter((r) => r.status === "accepted").length;
+    const declinedCount = requests.filter((r) => r.status === "declined").length;
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("en-US", {
@@ -177,7 +178,7 @@ export default function ReceivedRequests() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Card className="bg-white rounded-2xl shadow-sm p-4">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-yellow-100">
@@ -197,6 +198,17 @@ export default function ReceivedRequests() {
                         <div>
                             <p className="text-sm text-gray-500">Accepted</p>
                             <p className="text-2xl font-bold text-gray-900">{acceptedCount}</p>
+                        </div>
+                    </div>
+                </Card>
+                <Card className="bg-white rounded-2xl shadow-sm p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-red-100">
+                            <XCircle className="w-5 h-5 text-red-600" aria-hidden />
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Declined</p>
+                            <p className="text-2xl font-bold text-gray-900">{declinedCount}</p>
                         </div>
                     </div>
                 </Card>
