@@ -17,6 +17,7 @@
     "motion": "^12.42.2",
     "next": "16.2.4",
     "pdf-parse": "^2.4.5",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.4",
     "react-countup": "^6.5.3",
     "react-day-picker": "^10.0.1",
