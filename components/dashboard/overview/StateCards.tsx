@@ -1,7 +1,13 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Presentation, Users, Lightbulb } from "lucide-react";
+import {
+    FileText,
+    Presentation,
+    Users,
+    Lightbulb,
+    ArrowUpRight,
+} from "lucide-react";
 
 const mockStats = [
     {
@@ -9,17 +15,17 @@ const mockStats = [
         title: "Papers Shared",
         value: 128,
         total: 200,
-        color: "bg-[#407BFF]",
-        iconBg: "bg-[#1C1D1D0D] shadow-[0_0_38px_0_#00000012]",
+        unit: "papers",
+        accent: "#5579A6",
         icon: FileText,
     },
     {
         id: 2,
-        title: "Weekly Presentations Archived",
+        title: "Weekly Presentations",
         value: 32,
         total: 40,
-        color: "bg-[#FFB200]",
-        iconBg: "bg-[#1C1D1D0D] shadow-[0_0_38px_0_#00000012]",
+        unit: "presentations",
+        accent: "#C58A3A",
         icon: Presentation,
     },
     {
@@ -27,8 +33,8 @@ const mockStats = [
         title: "Active Collaborations",
         value: 24,
         total: 30,
-        color: "bg-[#28A745]",
-        iconBg: "bg-[#1C1D1D0D] shadow-[0_0_38px_0_#00000012]",
+        unit: "collaborations",
+        accent: "#4F8A63",
         icon: Users,
     },
     {
@@ -36,45 +42,63 @@ const mockStats = [
         title: "Innovations In Progress",
         value: 15,
         total: 20,
-        color: "bg-[#FF7043]",
-        iconBg: "bg-[#1C1D1D0D] shadow-[0_0_38px_0_#00000012]",
+        unit: "innovations",
+        accent: "#B85C55",
         icon: Lightbulb,
     },
 ];
 
 export default function StateCards() {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
+        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {mockStats.map((item) => {
                 const percentage = (item.value / item.total) * 100;
+                const remaining = item.total - item.value;
                 const Icon = item.icon;
 
                 return (
                     <Card
                         key={item.id}
-                        className="p-4 rounded-2xl flex flex-col gap-4"
+                        className="group border border-white/60 bg-[#F4F3EE] rounded-[18px] transition-all duration-300 hover:-translate-y-0.5"
                     >
-                        <CardContent className="p-0 flex flex-col gap-4">
-                            <div className="flex flex-col gap-3">
-                                <div
-                                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.iconBg}`}
-                                >
-                                    <Icon size={24} className="w-6 h-6 text-gray-700" aria-hidden />
-                                </div>
-                                <span className="text-sm font-medium text-gray-700">
+                        <CardContent className="flex flex-col p-5">
+                            {/* Metric */}
+                            <div className="">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#85897F]">
                                     {item.title}
-                                </span>
+                                </p>
+
+                                <div className="mt-2 flex items-baseline gap-2">
+                                    <span className="text-[34px] font-semibold leading-none tracking-[-0.04em] text-[#1E2630]">
+                                        {item.value}
+                                    </span>
+
+                                    <span className="text-sm text-[#8A8E84]">
+                                        / {item.total}
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
-                                <div className="w-full h-2.75 bg-gray-200 rounded-full overflow-hidden">
+                            {/* Progress */}
+                            <div className="mt-6">
+                                <div className="h-1.25 w-full overflow-hidden rounded-full bg-[#DFE0DB]">
                                     <div
-                                        className={`h-full rounded-full ${item.color}`}
-                                        style={{ width: `${percentage}%` }}
-                                    ></div>
+                                        className="h-full rounded-full transition-all duration-500"
+                                        style={{
+                                            width: `${percentage}%`,
+                                            backgroundColor: item.accent,
+                                        }}
+                                    />
                                 </div>
-                                <div className="text-right text-xs text-gray-500">
-                                    {item.value}/{item.total}
+
+                                <div className="mt-2 flex items-center justify-between">
+                                    <span className="text-[11px] text-[#85897F]">
+                                        {Math.round(percentage)}% complete
+                                    </span>
+
+                                    <span className="text-[11px] text-[#85897F]">
+                                        {remaining} remaining
+                                    </span>
                                 </div>
                             </div>
                         </CardContent>

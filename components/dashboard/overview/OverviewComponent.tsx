@@ -1,110 +1,278 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Presentation, Lightbulb } from "lucide-react";
+import {
+    FileText,
+    Presentation,
+    Lightbulb,
+} from "lucide-react";
 
 const mockData = [
     {
         id: 1,
         title: "Papers Overview",
         icon: FileText,
-        color: "text-[#407BFF]",
+        accent: "#5579A6",
         stats: [
-            { label: "Published", value: 64, percent: 50, bar: "bg-[#0AA90F]", textColor: "text-[#0AA90F]" },
-            { label: "Under Review", value: 24, percent: 18.75, bar: "bg-[#FFA761]", textColor: "text-[#FFA761]" },
-            { label: "Drafts", value: 18, percent: 14.06, bar: "bg-[#7DB4EB]", textColor: "text-[#7DB4EB]" },
-            { label: "Access Requests Pending", value: 12, percent: 9.38, bar: "bg-[#FFC107]", textColor: "text-[#FFC107]" },
-            { label: "Rejected", value: 6, percent: 4.69, bar: "bg-[#E63946]", textColor: "text-[#E63946]" },
-            { label: "Archived", value: 4, percent: 3.12, bar: "bg-[#C62828]", textColor: "text-[#C62828]" },
+            {
+                label: "Published",
+                value: 64,
+                percent: 50,
+                color: "#4F8A63",
+            },
+            {
+                label: "Under Review",
+                value: 24,
+                percent: 18.75,
+                color: "#C58A3A",
+            },
+            {
+                label: "Drafts",
+                value: 18,
+                percent: 14.06,
+                color: "#5579A6",
+            },
+            {
+                label: "Access Requests Pending",
+                value: 12,
+                percent: 9.38,
+                color: "#C58A3A",
+            },
+            {
+                label: "Rejected",
+                value: 6,
+                percent: 4.69,
+                color: "#B85C55",
+            },
+            {
+                label: "Archived",
+                value: 4,
+                percent: 3.12,
+                color: "#8E625D",
+            },
         ],
     },
     {
         id: 2,
         title: "Weekly Presentations",
         icon: Presentation,
-        color: "text-[#FFB200]",
+        accent: "#C58A3A",
         stats: [
-            { label: "Archived", value: 32, percent: 80, bar: "bg-[#0AA90F]", textColor: "text-[#0AA90F]" },
-            { label: "Scheduled", value: 3, percent: 7.5, bar: "bg-[#7DB4EB]", textColor: "text-[#7DB4EB]" },
-            { label: "In Review", value: 2, percent: 5, bar: "bg-[#FFA761]", textColor: "text-[#FFA761]" },
-            { label: "Uploaded Pending Review", value: 1, percent: 2.5, bar: "bg-[#4A90E2]", textColor: "text-[#4A90E2]" },
-            { label: "Rescheduled", value: 1, percent: 2.5, bar: "bg-[#4CAF50]", textColor: "text-[#4CAF50]" },
-            { label: "Missed", value: 1, percent: 2.5, bar: "bg-[#FF0000]", textColor: "text-[#FF0000]" },
-        ]
+            {
+                label: "Archived",
+                value: 32,
+                percent: 80,
+                color: "#4F8A63",
+            },
+            {
+                label: "Scheduled",
+                value: 3,
+                percent: 7.5,
+                color: "#5579A6",
+            },
+            {
+                label: "In Review",
+                value: 2,
+                percent: 5,
+                color: "#C58A3A",
+            },
+            {
+                label: "Uploaded Pending Review",
+                value: 1,
+                percent: 2.5,
+                color: "#5579A6",
+            },
+            {
+                label: "Rescheduled",
+                value: 1,
+                percent: 2.5,
+                color: "#4F8A63",
+            },
+            {
+                label: "Missed",
+                value: 1,
+                percent: 2.5,
+                color: "#B85C55",
+            },
+        ],
     },
     {
         id: 3,
         title: "Collaborations & Innovations",
         icon: Lightbulb,
-        color: "text-[#8E24AA]",
+        accent: "#8A6A9C",
         stats: [
-            { label: "Active", value: 15, percent: 37.5, bar: "bg-[#0AA90F]", textColor: "text-[#0AA90F]" },
-            { label: "Prototyping", value: 6, percent: 15, bar: "bg-[#4A90E2]", textColor: "text-[#4A90E2]" },
-            { label: "In Review", value: 5, percent: 12.5, bar: "bg-[#FFA761]", textColor: "text-[#FFA761]" },
-            { label: "On Hold", value: 4, percent: 10, bar: "bg-[#FFC107]", textColor: "text-[#FFC107]" },
-            { label: "Completed", value: 8, percent: 20, bar: "bg-[#28A745]", textColor: "text-[#28A745]" },
-            { label: "Idea Stage", value: 2, percent: 5, bar: "bg-[#FF0000]", textColor: "text-[#FF0000]" },
-        ]
+            {
+                label: "Active",
+                value: 15,
+                percent: 37.5,
+                color: "#4F8A63",
+            },
+            {
+                label: "Prototyping",
+                value: 6,
+                percent: 15,
+                color: "#5579A6",
+            },
+            {
+                label: "In Review",
+                value: 5,
+                percent: 12.5,
+                color: "#C58A3A",
+            },
+            {
+                label: "On Hold",
+                value: 4,
+                percent: 10,
+                color: "#C58A3A",
+            },
+            {
+                label: "Completed",
+                value: 8,
+                percent: 20,
+                color: "#4F8A63",
+            },
+            {
+                label: "Idea Stage",
+                value: 2,
+                percent: 5,
+                color: "#B85C55",
+            },
+        ],
     },
 ];
 
 const summaryData = [
-    { title: "Papers Shared This Month", value: "18", color: "text-[#FFB200]" },
-    { title: "Presentations Archived", value: "32", color: "text-[#E53935]" },
-    { title: "Active Collaborations", value: "24", color: "text-[#4CAF50]" },
+    {
+        title: "Papers Shared This Month",
+        value: "18",
+        color: "#C58A3A",
+    },
+    {
+        title: "Presentations Archived",
+        value: "32",
+        color: "#5579A6",
+    },
+    {
+        title: "Active Collaborations",
+        value: "24",
+        color: "#4F8A63",
+    },
 ];
 
 export default function OverviewComponent() {
     return (
         <div className="w-full py-4">
-            <Card className="bg-white p-4 rounded-2xl shadow-sm">
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-                    {mockData.map((group) => (
-                        <div key={group.id}>
-                            <CardContent className="p-2 space-y-6">
-                                {/* Header */}
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-lg flex items-center justify-center">
-                                        <group.icon className={`w-5 h-5 ${group.color}`} aria-hidden />
-                                    </div>
-                                    <h2 className={`font-medium ${group.color}`}>{group.title}</h2>
-                                </div>
+            <Card className="overflow-hidden rounded-[20px] border border-white/60 bg-[#F4F3EE]/95 backdrop-blur-xl">
+                <CardContent className="p-5">
 
-                                {/* Stats */}
-                                <div className="space-y-4">
-                                    {group.stats.map((stat, idx) => (
-                                        <div key={idx} className="space-y-2">
-                                            <div className="flex justify-between items-center">
-                                                <span className={`text-sm font-medium ${stat.textColor}`}>
-                                                    {stat.value} {stat.label}
-                                                </span>
-                                                <span className="text-sm text-gray-500">
-                                                    {stat.percent.toFixed(2)}%
-                                                </span>
-                                            </div>
-                                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className={`h-full ${stat.bar} rounded-full transition-all duration-300`}
-                                                    style={{ width: `${stat.percent}%` }}
-                                                ></div>
-                                            </div>
+                    {/* =========================
+                        Statistics
+                    ========================= */}
+                    <div className="grid grid-cols-1 gap-8 xl:grid-cols-3 xl:gap-0">
+
+                        {mockData.map((group, groupIndex) => {
+                            const Icon = group.icon;
+
+                            return (
+                                <div
+                                    key={group.id}
+                                    className={`px-3
+                                        ${groupIndex !== mockData.length - 1
+                                            ? "xl:border-r xl:border-[#D9DAD3]"
+                                            : ""
+                                        }
+                                    `}
+                                >
+                                    {/* Header */}
+                                    <div className="flex items-center gap-3">
+                                        <div>
+                                            <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-[#27302A]">
+                                                {group.title}
+                                            </h2>
                                         </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </div>
-                    ))}
-                </div>
+                                    </div>
 
-                {/* Summary boxes */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 px-2 border-t border-[#C8CBD9]">
-                    {summaryData.map((summary, index) => (
-                        <div key={index} className="p-4 rounded-lg border border-[#C8CBD9]">
-                            <p className={`text-xs font-medium ${summary.color} mb-2`}>{summary.title}</p>
-                            <h3 className={`font-semibold text-lg text-[#5A5A5A]`}>{summary.value}</h3>
-                        </div>
-                    ))}
-                </div>
+                                    {/* Stats */}
+                                    <div className="mt-7 space-y-5">
+                                        {group.stats.map((stat) => (
+                                            <div
+                                                key={stat.label}
+                                                className="group/stat"
+                                            >
+                                                {/* Label + Percentage */}
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div className="flex min-w-0 items-center gap-2">
+                                                        
+
+                                                        <span className="truncate text-[13px] font-medium text-[#59605A]">
+                                                            {stat.label}
+                                                        </span>
+                                                    </div>
+
+                                                    <span className="shrink-0 text-[12px] tabular-nums text-[#85897F]">
+                                                        {stat.percent.toFixed(2)}%
+                                                    </span>
+                                                </div>
+
+                                                {/* Progress */}
+                                                <div className="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-[#DFE0DA]">
+                                                    <div 
+                                                        className="h-full rounded-full transition-all duration-500"
+                                                        style={{
+                                                            width: `${stat.percent}%`,
+                                                            backgroundColor:
+                                                                stat.color,
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                {/* Value */}
+                                                <div className="mt-1.5 text-[11px] text-[#92968D]">
+                                                    {stat.value}{" "}
+                                                    {stat.label.toLowerCase()}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* =========================
+                        Divider
+                    ========================= */}
+                    <div className="my-7 h-px bg-[#D8D9D2]" />
+
+                    {/* =========================
+                        Summary
+                    ========================= */}
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                        {summaryData.map((summary) => (
+                            <div
+                                key={summary.title}
+                                className="group rounded-[14px] border border-[#D9DAD3] bg-[#ECEBE4]/70 px-4 py-4 transition-all duration-300 hover:border-[#C9CAC1]hover:bg-[#E8E7DF]"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#85897F]">
+                                        {summary.title}
+                                    </p>
+                                </div>
+
+                                <div className="mt-3 flex items-end gap-2">
+                                    <span className="text-[26px] font-semibold leading-none tracking-[-0.04em] text-[#27302A]">
+                                        {summary.value}
+                                    </span>
+
+                                    <span className="mb-0.5 text-[11px] text-[#8A8E84]">
+                                        this period
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
             </Card>
         </div>
     );

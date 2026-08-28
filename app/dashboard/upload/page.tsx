@@ -57,28 +57,40 @@ export default function UploadPage() {
 
       {/* History Modal */}
       {historyOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs p-4">
-          <div
-            className="w-full max-w-3xl overflow-y-auto rounded-xl bg-white shadow-xl"
-            style={{ maxHeight: "85vh" }}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#30351f]/45 backdrop-blur-sm p-4"
+          onClick={() => setHistoryOpen(false)}
+        >
+          <div 
+            className="w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl border border-white/30 bg-[#F4F3EE] shadow-[0_20px_60px_rgba(35,40,22,0.25)]"
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-gray-100">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-[#D9D8CD]">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#1C1D1D0D]">
-                  <FileText className="w-5 h-5 text-[#716f49]" aria-hidden />
+                <div>
+                  <h2 className="text-lg font-semibold text-[#292D25]">
+                    Upload History
+                  </h2>
+                  <p className="text-xs text-[#7A7C70]">
+                    Manage your previously uploaded files
+                  </p>
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900">Upload History</h2>
               </div>
+
               <button
                 onClick={() => setHistoryOpen(false)}
-                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#77796C] transition-colors hover:bg-[#E3E2D8] hover:text-[#292D25]"
+                aria-label="Close upload history"
               >
-                ✕
+                <span className="text-lg leading-none">×</span>
               </button>
             </div>
 
-            <UploadHistory />
+            {/* History */}
+            <div className="max-h-[calc(85vh-82px)] overflow-y-auto">
+              <UploadHistory />
+            </div>
           </div>
         </div>
       )}

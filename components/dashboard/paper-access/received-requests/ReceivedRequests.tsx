@@ -93,11 +93,65 @@ const MOCK_REQUESTS: ReceivedRequest[] = [
 ];
 
 const STATUS_CONFIG = {
-    pending: { label: "Pending", icon: Clock, color: "bg-yellow-100 text-yellow-800", iconColor: "text-yellow-600" },
-    accepted: { label: "Accepted", icon: CheckCircle, color: "bg-green-100 text-green-800", iconColor: "text-green-600" },
-    declined: { label: "Declined", icon: XCircle, color: "bg-red-100 text-red-800", iconColor: "text-red-600" },
-    expired: { label: "Expired", icon: Clock, color: "bg-gray-100 text-gray-800", iconColor: "text-gray-600" },
+    pending: {
+        label: "Pending",
+        icon: Clock,
+        badgeClass: "bg-[#FBF3E4] text-[#8A6420] border border-[#EBD9AE]",
+        iconColor: "text-[#C58A3A]",
+    },
+    accepted: {
+        label: "Accepted",
+        icon: CheckCircle,
+        badgeClass: "bg-[#EAF0EA] text-[#4F8A63] border border-[#D8E2D9]",
+        iconColor: "text-[#4F8A63]",
+    },
+    declined: {
+        label: "Declined",
+        icon: XCircle,
+        badgeClass: "bg-[#FBF0EE] text-[#A45B4B] border border-[#E4C2BC]",
+        iconColor: "text-[#A45B4B]",
+    },
+    expired: {
+        label: "Expired",
+        icon: Clock,
+        badgeClass: "bg-[#F1F0EA] text-[#85897F] border border-[#DEDCD3]",
+        iconColor: "text-[#85897F]",
+    },
 } as const;
+
+interface SummaryStatProps {
+    title: string;
+    value: number;
+    icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+    accent: string;
+}
+
+function SummaryStat({ title, value, icon: Icon, accent }: SummaryStatProps) {
+    return (
+        <Card className="group rounded-[18px] border border-white/60 bg-[#F4F3EE]/95 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5">
+            <CardContent className="flex h-full flex-col p-5">
+                <div className="flex items-center gap-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-[#85897F]">
+                        {title}
+                    </p>
+                </div>
+
+                <h3 className="mt-3 text-[32px] font-semibold leading-none tracking-[-0.045em] text-[#1E2630]">
+                    {value}
+                </h3>
+
+                <div className="mt-auto pt-6">
+                    <div className="h-0.75 w-full overflow-hidden rounded-full bg-[#DFE0DA]">
+                        <div
+                            className="h-full rounded-full transition-all duration-500 group-hover:w-[85%]"
+                            style={{ width: "45%", backgroundColor: accent }}
+                        />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
 
 export default function ReceivedRequests() {
     const router = useRouter();
@@ -139,92 +193,73 @@ export default function ReceivedRequests() {
     };
 
     return (
-        <div className="space-y-6">
-            <div>
-                <div className="flex flex-col md:flex-row justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-white">Received Requests</h1>
-                        <p className="text-white/80 mt-1">Manage incoming paper access requests</p>
+        <div className="w-full space-y-7 pb-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 className="text-xl font-semibold tracking-tight text-white md:text-2xl">
+                        Received Requests
+                    </h1>
+                    <p className="mt-1 text-sm text-white/60">
+                        Manage incoming paper access requests.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <div
+                        className="flex gap-1 rounded-lg border border-white/10 bg-white/5 p-1 backdrop-blur-md"
+                        role="group"
+                        aria-label="Filter requests"
+                    >
+                        {(["all", "pending", "accepted", "declined"] as const).map((f) => (
+                            <button
+                                key={f}
+                                type="button"
+                                onClick={() => setFilter(f)}
+                                className={cn(
+                                    "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                                    filter === f
+                                        ? "bg-[#F4F3EE] text-[#716F49] shadow-sm"
+                                        : "text-white/70 hover:text-white"
+                                )}
+                            >
+                                {f.charAt(0).toUpperCase() + f.slice(1)}
+                            </button>
+                        ))}
                     </div>
 
-                    <div className="flex items-start gap-3">
-                        <div className="flex gap-1 bg-gray-100 rounded-lg p-1" role="group" aria-label="Filter requests">
-                            {(["all", "pending", "accepted", "declined"] as const).map((f) => (
-                                <button
-                                    key={f}
-                                    onClick={() => setFilter(f)}
-                                    className={cn(
-                                        "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
-                                        filter === f
-                                            ? "bg-white text-[#716f49] shadow-sm"
-                                            : "text-gray-600 hover:text-gray-900"
-                                    )}
-                                >
-                                    {f.charAt(0).toUpperCase() + f.slice(1)}
-                                </button>
-                            ))}
-                        </div>
-
-                        <Button
-                            variant="ghost"
-                            size="lg"
-                            className="gap-2 text-white/80 hover:text-white hover:bg-white/10 cursor-pointer"
-                            onClick={() => router.refresh()}
-                        >
-                            <RefreshCw className="w-4 h-4" aria-hidden />
-                            <p className='hidden md:block'>Reload</p>
-                        </Button>
-                    </div>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.refresh()}
+                        className="w-fit gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-white/80 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
+                    >
+                        <RefreshCw className="h-4 w-4" aria-hidden />
+                        <span className="hidden md:block">Reload</span>
+                    </Button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Card className="bg-white rounded-2xl shadow-sm p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-yellow-100">
-                            <Clock className="w-5 h-5 text-yellow-600" aria-hidden />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Pending Review</p>
-                            <p className="text-2xl font-bold text-gray-900">{pendingCount}</p>
-                        </div>
-                    </div>
-                </Card>
-                <Card className="bg-white rounded-2xl shadow-sm p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-green-100">
-                            <CheckCircle className="w-5 h-5 text-green-600" aria-hidden />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Accepted</p>
-                            <p className="text-2xl font-bold text-gray-900">{acceptedCount}</p>
-                        </div>
-                    </div>
-                </Card>
-                <Card className="bg-white rounded-2xl shadow-sm p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-red-100">
-                            <XCircle className="w-5 h-5 text-red-600" aria-hidden />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Declined</p>
-                            <p className="text-2xl font-bold text-gray-900">{declinedCount}</p>
-                        </div>
-                    </div>
-                </Card>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <SummaryStat title="Pending Review" value={pendingCount} icon={Clock} accent="#C58A3A" />
+                <SummaryStat title="Accepted" value={acceptedCount} icon={CheckCircle} accent="#4F8A63" />
+                <SummaryStat title="Declined" value={declinedCount} icon={XCircle} accent="#B85C55" />
             </div>
 
             {isLoading ? (
                 <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
-                        <Card key={i} className="bg-white rounded-2xl shadow-sm animate-pulse">
+                        <Card
+                            key={i}
+                            className="rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE]"
+                        >
                             <CardContent className="p-6">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-gray-200" />
+                                    <div className="h-12 w-12 animate-pulse rounded-full bg-[#DEDCD3]" />
                                     <div className="flex-1 space-y-2">
-                                        <div className="h-4 w-1/4 bg-gray-200 rounded" />
-                                        <div className="h-3 w-1/3 bg-gray-200 rounded" />
-                                        <div className="h-3 w-1/2 bg-gray-200 rounded" />
+                                        <div className="h-4 w-1/4 animate-pulse rounded bg-[#DEDCD3]" />
+                                        <div className="h-3 w-1/3 animate-pulse rounded bg-[#DEDCD3]" />
+                                        <div className="h-3 w-1/2 animate-pulse rounded bg-[#DEDCD3]" />
                                     </div>
                                 </div>
                             </CardContent>
@@ -232,10 +267,10 @@ export default function ReceivedRequests() {
                     ))}
                 </div>
             ) : filteredRequests.length === 0 ? (
-                <Card className="bg-white rounded-2xl shadow-sm p-12 text-center">
-                    <Mail className="w-16 h-16 mx-auto text-gray-300 mb-4" aria-hidden />
-                    <h3 className="text-lg font-medium text-gray-900 mb-1">No requests found</h3>
-                    <p className="text-gray-500">No access requests match your current filter.</p>
+                <Card className="rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE] p-12 text-center">
+                    <Mail className="mx-auto mb-4 h-16 w-16 text-[#B3B0A4]" aria-hidden />
+                    <h3 className="mb-1 text-lg font-medium text-[#25251F]">No requests found</h3>
+                    <p className="text-sm text-[#777568]">No access requests match your current filter.</p>
                 </Card>
             ) : (
                 <div className="space-y-4">
@@ -247,112 +282,122 @@ export default function ReceivedRequests() {
                         return (
                             <Card
                                 key={request.id}
-                                className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                                className="overflow-hidden rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE] transition-shadow hover:shadow-[0_12px_35px_rgba(30,31,20,0.08)]"
                             >
                                 <CardContent className="p-6">
-                                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                                        <div className="w-12 h-12 rounded-full bg-[#716f49]/10 flex items-center justify-center shrink-0">
-                                            <span className="text-[#716f49] font-medium text-sm">
+                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#716F49]/10">
+                                            <span className="text-sm font-medium text-[#716F49]">
                                                 {request.fromUser.name.split(" ").map((n) => n[0]).join("")}
                                             </span>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                                                <h4 className="font-semibold text-gray-900">{request.fromUser.name}</h4>
-                                                <span className="text-sm text-gray-500">{request.fromUser.email}</span>
-                                                <Badge className={cn("text-xs", statusConfig.color)}>
-                                                    <StatusIcon className={cn("w-3 h-3 mr-1", statusConfig.iconColor)} aria-hidden />
+
+                                        <div className="min-w-0 flex-1">
+                                            <div className="mb-2 flex flex-wrap items-center gap-2">
+                                                <h4 className="font-semibold text-[#25251F]">{request.fromUser.name}</h4>
+                                                <span className="text-sm text-[#777568]">{request.fromUser.email}</span>
+                                                <Badge className={cn("text-xs font-medium", statusConfig.badgeClass)}>
+                                                    <StatusIcon className={cn("mr-1 h-3 w-3", statusConfig.iconColor)} aria-hidden />
                                                     {statusConfig.label}
                                                 </Badge>
                                             </div>
-                                            <p className="text-xs text-gray-500 mb-2">
+
+                                            <p className="mb-2 text-xs text-[#89877B]">
                                                 {request.fromUser.role} · {request.fromUser.institution}
                                             </p>
+
                                             {request.message && (
-                                                <p className="text-sm text-gray-700 mb-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                                <p className="mb-3 rounded-lg border border-[#DEDCD3] bg-[#FBFAF7] p-3 text-sm text-[#5E5D50]">
                                                     &ldquo;{request.message}&rdquo;
                                                 </p>
                                             )}
-                                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+
+                                            <div className="flex flex-wrap items-center gap-4 text-sm text-[#89877B]">
                                                 <span className="flex items-center gap-1">
-                                                    <Eye className="w-3.5 h-3.5" aria-hidden />
+                                                    <Eye className="h-3.5 w-3.5" aria-hidden />
                                                     <a
                                                         href={request.shareLink}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-[#716f49] hover:underline"
+                                                        className="text-[#716F49] hover:underline"
                                                     >
                                                         View Link
                                                     </a>
                                                 </span>
+
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => setOpenQrId(openQrId === request.id ? null : request.id)}
-                                                    className="text-gray-500 hover:text-[#716f49] p-1.5"
+                                                    className="p-1.5 text-[#89877B] hover:bg-[#716F49]/10 hover:text-[#716F49]"
                                                     aria-label={openQrId === request.id ? "Hide QR code" : "Show QR code"}
                                                 >
-                                                    <QrCode className="w-4 h-4" aria-hidden />
+                                                    <QrCode className="h-4 w-4" aria-hidden />
                                                 </Button>
+
                                                 {request.expiresAt && (
-                                                    <span className={cn("flex items-center gap-1", expired && "text-red-500")}>
-                                                        <Clock className="w-3.5 h-3.5" aria-hidden />
+                                                    <span className={cn("flex items-center gap-1", expired && "text-[#A45B4B]")}>
+                                                        <Clock className="h-3.5 w-3.5" aria-hidden />
                                                         Expires: {formatDate(request.expiresAt)}
                                                         {expired && " (Expired)"}
                                                     </span>
                                                 )}
+
                                                 <span className="flex items-center gap-1">
-                                                    <Clock className="w-3.5 h-3.5" aria-hidden />
+                                                    <Clock className="h-3.5 w-3.5" aria-hidden />
                                                     Requested: {formatDate(request.createdAt)}
                                                 </span>
                                             </div>
+
+                                            {openQrId === request.id && (
+                                                <div className="mt-4 rounded-xl border border-[#DEDCD3] bg-[#FBFAF7] p-4 duration-200 animate-in fade-in slide-in-from-top-2">
+                                                    <div className="mb-3 flex items-center justify-between">
+                                                        <span className="text-sm font-medium text-[#25251F]">QR Code</span>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => setOpenQrId(null)}
+                                                            className="p-1 text-[#89877B] hover:text-[#5E5D50]"
+                                                            aria-label="Close QR code"
+                                                        >
+                                                            <XCircle className="h-4 w-4" aria-hidden />
+                                                        </Button>
+                                                    </div>
+                                                    <div className="flex justify-center">
+                                                        <QRCode
+                                                            value={request.shareLink}
+                                                            size={128}
+                                                            level="M"
+                                                            includeMargin={true}
+                                                            bgColor="#FBFAF7"
+                                                            fgColor="#25251F"
+                                                        />
+                                                    </div>
+                                                    <p className="mt-2 truncate text-center text-xs text-[#89877B]">{request.shareLink}</p>
+                                                </div>
+                                            )}
                                         </div>
-                                        {openQrId === request.id && (
-                                            <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <span className="text-sm font-medium text-gray-900">QR Code</span>
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => setOpenQrId(null)}
-                                                        className="text-gray-400 hover:text-gray-600 p-1"
-                                                        aria-label="Close QR code"
-                                                    >
-                                                        <XCircle className="w-4 h-4" aria-hidden />
-                                                    </Button>
-                                                </div>
-                                                <div className="flex justify-center">
-                                                    <QRCode
-                                                        value={request.shareLink}
-                                                        size={128}
-                                                        level="M"
-                                                        includeMargin={true}
-                                                        bgColor="#ffffff"
-                                                        fgColor="#1F321C"
-                                                    />
-                                                </div>
-                                                <p className="text-xs text-gray-500 text-center mt-2 truncate">{request.shareLink}</p>
-                                            </div>
-                                        )}
-                                        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+
+                                        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
                                             {request.status === "pending" && (
                                                 <>
                                                     <Button
-                                                        variant="outline"
+                                                        type="button"
                                                         size="sm"
-                                                        className="text-[#716f49] border-[#716f49] hover:bg-[#716f49]/5"
+                                                        className="rounded-lg bg-[#716F49] text-sm font-medium text-white shadow-[0_5px_15px_rgba(40,40,25,0.2)] hover:bg-[#625F3F]"
                                                     >
-                                                        <CheckCircle className="w-3.5 h-3.5 mr-1" aria-hidden />
+                                                        <CheckCircle className="mr-1 h-3.5 w-3.5" aria-hidden />
                                                         Accept
                                                     </Button>
                                                     <Button
+                                                        type="button"
                                                         variant="outline"
                                                         size="sm"
-                                                        className="text-red-600 border-red-200 hover:bg-red-50"
+                                                        className="rounded-lg border-[#E4C2BC] text-[#A45B4B] hover:bg-[#FBF0EE]"
                                                     >
-                                                        <XCircle className="w-3.5 h-3.5 mr-1" aria-hidden />
+                                                        <XCircle className="mr-1 h-3.5 w-3.5" aria-hidden />
                                                         Decline
                                                     </Button>
                                                 </>
@@ -362,9 +407,9 @@ export default function ReceivedRequests() {
                                                     href={request.shareLink}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex items-center justify-center gap-1 text-sm font-medium text-[#716f49] hover:underline px-3 py-2"
+                                                    className="flex items-center justify-center gap-1 rounded-lg border border-[#D7D4C9] bg-[#FBFAF7] px-3 py-2 text-sm font-medium text-[#716F49] hover:bg-[#ECEAE2]"
                                                 >
-                                                    <Download className="w-3.5 h-3.5" aria-hidden />
+                                                    <Download className="h-3.5 w-3.5" aria-hidden />
                                                     Access Paper
                                                 </a>
                                             )}

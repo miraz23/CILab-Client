@@ -37,15 +37,14 @@ export default function Page() {
 
         <StateCards />
 
-        <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 w-full">
-          <div className="col-span-1 lg:col-span-4 space-y-4">
+        <div className="gap-4 w-full">
+          <div className="space-y-4">
             <OverviewComponent />
-            <EventsComponent />
+            {/* <EventsComponent /> */}
           </div>
-          <div className="col-span-1 lg:col-span-2 space-y-4">
+          {/* <div className="col-span-1 lg:col-span-2 space-y-4">
           <PaperStats />
-            
-          </div>
+          </div> */}
           {/* <div className="col-span-1 lg:col-span-2 space-y-4">
             <TodoItems />
             <ActivityStats />

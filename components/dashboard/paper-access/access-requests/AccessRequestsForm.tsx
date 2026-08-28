@@ -1,13 +1,39 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Link as LinkIcon, UserCheck, UserX, Search, Loader2, Share2, Calendar, AlertCircle, CheckCircle, RefreshCw } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+    Link as LinkIcon,
+    UserCheck,
+    UserX,
+    Search,
+    Loader2,
+    Share2,
+    Calendar,
+    AlertCircle,
+    CheckCircle,
+    RefreshCw,
+} from "lucide-react";
+
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 import { fetchUsers } from "@/lib/api/paper-access/users";
-import type { User, AccessRequestFormData, AccessRequestFormErrors, AccessRequestApiResponse } from "@/lib/types/paper-access/access-request";
+
+import type {
+    User,
+    AccessRequestFormData,
+    AccessRequestFormErrors,
+    AccessRequestApiResponse,
+} from "@/lib/types/paper-access/access-request";
+
 import { useRouter } from "next/navigation";
 
 export default function AccessRequestsForm() {
@@ -16,23 +42,32 @@ export default function AccessRequestsForm() {
     const [users, setUsers] = useState<User[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+
+    const [submitStatus, setSubmitStatus] = useState<
+        "idle" | "success" | "error"
+    >("idle");
+
     const [errorMessage, setErrorMessage] = useState("");
 
-    const [formData, setFormData] = useState<AccessRequestFormData>({
-        shareLink: "",
-        userIds: [],
-        message: "",
-        expiresAt: "",
-    });
+    const [formData, setFormData] =
+        useState<AccessRequestFormData>({
+            shareLink: "",
+            userIds: [],
+            message: "",
+            expiresAt: "",
+        });
 
-    const [formErrors, setFormErrors] = useState<AccessRequestFormErrors>({});
+    const [formErrors, setFormErrors] =
+        useState<AccessRequestFormErrors>({});
 
     const loadUsers = async () => {
         setIsLoading(true);
+
         const fetchedUsers = await fetchUsers();
+
         setUsers(fetchedUsers);
         setIsLoading(false);
     };
@@ -42,51 +77,102 @@ export default function AccessRequestsForm() {
         loadUsers();
     }, []);
 
-    const handleShareLinkChange = useCallback((value: string) => {
-        setFormData((prev) => ({ ...prev, shareLink: value }));
-        if (formErrors.shareLink) {
-            setFormErrors((prev) => ({ ...prev, shareLink: undefined }));
-        }
-    }, [formErrors.shareLink]);
+    const handleShareLinkChange = useCallback(
+        (value: string) => {
+            setFormData((prev) => ({
+                ...prev,
+                shareLink: value,
+            }));
+
+            if (formErrors.shareLink) {
+                setFormErrors((prev) => ({
+                    ...prev,
+                    shareLink: undefined,
+                }));
+            }
+        },
+        [formErrors.shareLink]
+    );
 
     const handleMessageChange = useCallback((value: string) => {
-        setFormData((prev) => ({ ...prev, message: value }));
+        setFormData((prev) => ({
+            ...prev,
+            message: value,
+        }));
     }, []);
 
     const handleExpiresAtChange = useCallback((value: string) => {
-        setFormData((prev) => ({ ...prev, expiresAt: value }));
-    }, []);
-
-    const handleUserSelection = useCallback((userId: string, checked: boolean) => {
-        setSelectedUsers((prev) =>
-            checked ? [...prev, userId] : prev.filter((id) => id !== userId)
-        );
         setFormData((prev) => ({
             ...prev,
-            userIds: checked ? [...prev.userIds, userId] : prev.userIds.filter((id) => id !== userId),
+            expiresAt: value,
         }));
+    }, []);
 
-        if (formErrors.userIds) {
-            setFormErrors((prev) => ({ ...prev, userIds: undefined }));
-        }
-    }, [formErrors.userIds]);
+    const handleUserSelection = useCallback(
+        (userId: string, checked: boolean) => {
+            setSelectedUsers((prev) =>
+                checked
+                    ? [...prev, userId]
+                    : prev.filter((id) => id !== userId)
+            );
+
+            setFormData((prev) => ({
+                ...prev,
+                userIds: checked
+                    ? [...prev.userIds, userId]
+                    : prev.userIds.filter((id) => id !== userId),
+            }));
+
+            if (formErrors.userIds) {
+                setFormErrors((prev) => ({
+                    ...prev,
+                    userIds: undefined,
+                }));
+            }
+        },
+        [formErrors.userIds]
+    );
+
+    const filteredUsers = users.filter(
+        (user) =>
+            user.name
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            user.email
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase())
+    );
 
     const handleSelectAll = useCallback(() => {
-        const filteredUsers = users.filter((u) =>
-            u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            u.email.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        const allIds = filteredUsers.map((u) => u.id);
+        const allIds = filteredUsers.map((user) => user.id);
+
         setSelectedUsers(allIds);
-        setFormData((prev) => ({ ...prev, userIds: allIds }));
-    }, [users, searchQuery]);
+
+        setFormData((prev) => ({
+            ...prev,
+            userIds: allIds,
+        }));
+    }, [filteredUsers]);
 
     const handleDeselectAll = useCallback(() => {
         setSelectedUsers([]);
-        setFormData((prev) => ({ ...prev, userIds: [] }));
+
+        setFormData((prev) => ({
+            ...prev,
+            userIds: [],
+        }));
     }, []);
 
-    const validateForm = (): boolean => {
+    const isValidUrl = (value: string) => {
+        try {
+            new URL(value);
+            return true;
+        } catch {
+            return false;
+        }
+    };
+
+    const validateForm = () => {
         const errors: AccessRequestFormErrors = {};
 
         if (!formData.shareLink.trim()) {
@@ -96,20 +182,12 @@ export default function AccessRequestsForm() {
         }
 
         if (formData.userIds.length === 0) {
-            errors.userIds = "At least one user must be selected";
+            errors.userIds = "At least one recipient must be selected";
         }
 
         setFormErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
 
-    const isValidUrl = (string: string): boolean => {
-        try {
-            new URL(string);
-            return true;
-        } catch {
-            return false;
-        }
+        return Object.keys(errors).length === 0;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -123,7 +201,10 @@ export default function AccessRequestsForm() {
 
         try {
             const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
-            const endpoint = SERVER_URL ? `${SERVER_URL}/api/access-requests` : "/api/mock-access-request";
+
+            const endpoint = SERVER_URL
+                ? `${SERVER_URL}/api/access-requests`
+                : "/api/mock-access-request";
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -135,276 +216,541 @@ export default function AccessRequestsForm() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || "Failed to create access request");
+                const errorData = await response
+                    .json()
+                    .catch(() => ({}));
+
+                throw new Error(
+                    errorData.message ||
+                    "Failed to create access request"
+                );
             }
 
-            const data: AccessRequestApiResponse = await response.json();
+            const data: AccessRequestApiResponse =
+                await response.json();
+
+            console.log(data);
+
             setSubmitStatus("success");
-            setFormData({ shareLink: "", userIds: [], message: "", expiresAt: "" });
+
+            setFormData({
+                shareLink: "",
+                userIds: [],
+                message: "",
+                expiresAt: "",
+            });
+
             setSelectedUsers([]);
         } catch (error) {
             setSubmitStatus("error");
-            setErrorMessage(error instanceof Error ? error.message : "Failed to create access request. Please try again.");
+
+            setErrorMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to create access request. Please try again."
+            );
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const filteredUsers = users.filter((user) =>
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
     const selectedCount = selectedUsers.length;
 
     return (
-        <div className="space-y-6">
-            <div className="mb-6">
-                <div className='flex items-center justify-between'>
-                    <h1 className="text-2xl font-bold text-white">Create Access Request</h1>
+        <div className="w-full space-y-7 pb-8">
 
-                    <div className='flex gap-1'>
-                        <Button
-                            variant="ghost"
-                            size="lg"
-                            className="gap-2 text-white/80 hover:text-white hover:bg-white/10 cursor-pointer"
-                            onClick={() => router.refresh()}
-                        >
-                            <RefreshCw className="w-4 h-4" aria-hidden />
-                            <p className='hidden md:block'>Reload</p>
-                        </Button>
+            {/* =====================================================
+                PAGE HEADER
+            ====================================================== */}
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+
+                <div>
+                    <div className="flex items-center gap-3">
+                        <div>
+                            <h1 className="text-xl font-semibold tracking-tight text-white md:text-2xl">
+                                Create Access Request
+                            </h1>
+
+                            <p className="mt-1 text-sm text-white/60">
+                                Share research material securely with collaborators.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <p className="text-white/80 mt-1">Share paper access with collaborators</p>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.refresh()}
+                    className="w-fit gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-white/80 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
+                >
+                    <RefreshCw className="h-4 w-4" />
+                    <span className="hidden sm:block">Reload</span>
+                </Button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 space-y-6">
-                        <Card className="bg-white rounded-2xl shadow-sm">
-                            <CardHeader className="pb-4">
+            {/* =====================================================
+                FORM
+            ====================================================== */}
+
+            <form
+                onSubmit={handleSubmit}
+                className="space-y-5"
+            >
+                <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+
+                    {/* =================================================
+                        LEFT COLUMN
+                    ================================================== */}
+
+                    <div className="space-y-5">
+
+                        {/* SHARE DETAILS */}
+
+                        <Card
+                            className="overflow-hidden rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE]"
+                        >
+                            <CardHeader className="border-b border-[#DEDCD3] px-5 py-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#716f49]/10">
-                                        <LinkIcon className="w-5 h-5 text-[#716f49]" aria-hidden />
+
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-lgbg-[#716F49]/10"
+                                    >
+                                        <LinkIcon
+                                            className="h-4.5 w-4.5 text-[#716F49]"
+                                            strokeWidth={1.8}
+                                        />
                                     </div>
-                                    <CardTitle className="text-lg">Share Link</CardTitle>
+
+                                    <div>
+                                        <CardTitle className="text-base font-semibold text-[#25251F]">
+                                            Share Details
+                                        </CardTitle>
+
+                                        <p className="mt-0.5 text-xs text-[#777568]">
+                                            Define what you want to share.
+                                        </p>
+                                    </div>
                                 </div>
                             </CardHeader>
-                            <CardContent className="space-y-5">
+
+                            <CardContent className="space-y-5 p-5">
+
+                                {/* LINK */}
+
                                 <div>
-                                    <Label htmlFor="shareLink" className="text-sm font-medium text-gray-700">
-                                        Link to Share <span className="text-red-500">*</span>
+                                    <Label
+                                        htmlFor="shareLink"
+                                        className="text-xs font-semibold uppercase tracking-wide text-[#5E5D50]"
+                                    >
+                                        Link to Share
+                                        <span className="ml-1 text-[#A45B4B]">
+                                            *
+                                        </span>
                                     </Label>
-                                    <div className="relative mt-1">
-                                        <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden />
+
+                                    <div className="relative mt-2">
+
+                                        <LinkIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#969386]"/>
+
                                         <Input
                                             id="shareLink"
                                             type="url"
                                             value={formData.shareLink}
-                                            onChange={(e) => handleShareLinkChange(e.target.value)}
-                                            placeholder="https://example.com/paper-access-link"
-                                            className="pl-10 focus:ring-2 focus:ring-[#716f49] focus:border-transparent"
-                                            aria-invalid={!!formErrors.shareLink}
-                                            aria-describedby={formErrors.shareLink ? "shareLink-error" : undefined}
+                                            onChange={(e) =>
+                                                handleShareLinkChange(
+                                                    e.target.value
+                                                )
+                                            }
+                                            placeholder="https://example.com/paper"
+                                            className="h-11 rounded-lg border-[#D7D4C9] bg-[#FBFAF7] pl-10 text-sm text-[#2D2D27] shadow-none placeholder:text-[#A5A297] focus-visible:border-[#716F49] focus-visible:ring-1 focus-visible:ring-[#716F49]"
+                                            aria-invalid={
+                                                !!formErrors.shareLink
+                                            }
                                         />
                                     </div>
+
                                     {formErrors.shareLink && (
-                                        <p id="shareLink-error" className="text-sm text-red-500 flex items-center gap-1">
-                                            <AlertCircle className="w-4 h-4" aria-hidden />
+                                        <p className="mt-2 flex items-center gap-1.5 text-xs text-[#A45B4B]">
+                                            <AlertCircle className="h-3.5 w-3.5" />
                                             {formErrors.shareLink}
                                         </p>
                                     )}
-                                    <p className="text-xs text-gray-500">Enter the URL you want to share with selected users</p>
+
+                                    {!formErrors.shareLink && (
+                                        <p className="mt-2 text-xs text-[#89877B]">
+                                            Enter the URL you want to share with the selected recipients.
+                                        </p>
+                                    )}
                                 </div>
 
+                                {/* MESSAGE */}
+
                                 <div>
-                                    <Label htmlFor="message" className="text-sm font-medium text-gray-700">Message (Optional)</Label>
+                                    <Label
+                                        htmlFor="message"
+                                        className="text-xs font-semibold uppercase tracking-wide text-[#5E5D50]"
+                                    >
+                                        Message
+                                        <span className="ml-1 font-normal normal-case tracking-normal text-[#99978C]">
+                                            Optional
+                                        </span>
+                                    </Label>
+
                                     <textarea
                                         id="message"
                                         value={formData.message}
-                                        onChange={(e) => handleMessageChange(e.target.value)}
-                                        placeholder="Add a personal message for recipients..."
-                                        rows={3}
-                                        className="mt-1 w-full px-3 py-2 border border-[#E6E6E6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#716f49] focus:border-transparent text-sm resize-none"
+                                        onChange={(e) =>
+                                            handleMessageChange(
+                                                e.target.value
+                                            )
+                                        }
+                                        placeholder="Add a short message for the recipients..."
+                                        rows={4}
+                                        className="mt-2 w-full resize-none rounded-lg border border-[#D7D4C9] bg-[#FBFAF7] px-3 py-2.5 text-sm text-[#2D2D27] outline-none placeholder:text-[#A5A297] focus:border-[#716F49] focus:ring-1 focus:ring-[#716F49]"
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">This message will be included in the access request notification</p>
+
+                                    <p className="mt-2 text-xs text-[#89877B]">
+                                        This message will be included with the access request.
+                                    </p>
                                 </div>
 
+                                {/* EXPIRATION */}
+
                                 <div>
-                                    <Label htmlFor="expiresAt" className="text-sm font-medium text-gray-700">Expiration Date (Optional)</Label>
-                                    <div className="relative mt-1">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden />
+                                    <Label
+                                        htmlFor="expiresAt"
+                                        className="text-xs font-semibold uppercase tracking-wide text-[#5E5D50]"
+                                    >
+                                        Expiration Date
+                                        <span className="ml-1 font-normal normal-case tracking-normal text-[#99978C]">
+                                            Optional
+                                        </span>
+                                    </Label>
+
+                                    <div className="relative mt-2">
+
+                                        <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#969386]"/>
+
                                         <Input
                                             id="expiresAt"
                                             type="date"
                                             value={formData.expiresAt}
-                                            onChange={(e) => handleExpiresAtChange(e.target.value)}
-                                            className="pl-10 focus:ring-2 focus:ring-[#716f49] focus:border-transparent"
-                                            min={new Date().toISOString().split("T")[0]}
+                                            onChange={(e) =>
+                                                handleExpiresAtChange(
+                                                    e.target.value
+                                                )
+                                            }
+                                            min={
+                                                new Date()
+                                                    .toISOString()
+                                                    .split("T")[0]
+                                            }
+                                            className="h-11 rounded-lg border-[#D7D4C9] bg-[#FBFAF7] pl-10 text-sm text-[#2D2D27] shadow-none focus-visible:border-[#716F49] focus-visible:ring-1 focus-visible:ring-[#716F49]"
                                         />
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1">Access will expire on this date. Leave empty for no expiration.</p>
+
+                                    <p className="mt-2 text-xs text-[#89877B]">
+                                        Leave empty if the access should not expire.
+                                    </p>
                                 </div>
                             </CardContent>
                         </Card>
 
+                        {/* SUCCESS */}
+
                         {submitStatus === "success" && (
-                            <div className="rounded-xl bg-green-50 border border-green-200 p-4 flex items-center gap-3 animate-in fade-in">
-                                <CheckCircle className="w-6 h-6 text-green-600 shrink-0" aria-hidden />
+                            <div className="flex items-start gap-3 rounded-xl border border-[#BFD6C1] bg-[#EEF6EE] p-4">
+                                <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#397A40]" />
+
                                 <div>
-                                    <p className="font-medium text-green-800">Access request created successfully!</p>
-                                    <p className="text-sm text-green-700">Selected users have been notified with the share link.</p>
+                                    <p className="text-sm font-semibold text-[#285C2D]">
+                                        Access request created successfully.
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-[#4D7750]">
+                                        Selected users have been notified with the shared link.
+                                    </p>
                                 </div>
                             </div>
                         )}
 
+                        {/* ERROR */}
+
                         {submitStatus === "error" && (
-                            <div className="rounded-xl bg-red-50 border border-red-200 p-4 flex items-center gap-3 animate-in fade-in">
-                                <AlertCircle className="w-6 h-6 text-red-600 shrink-0" aria-hidden />
+                            <div className="flex items-start gap-3 rounded-xl border border-[#E4C2BC] bg-[#FBF0EE] p-4">
+                                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#A45B4B]" />
+
                                 <div>
-                                    <p className="font-medium text-red-800">Failed to create access request</p>
-                                    <p className="text-sm text-red-700">{errorMessage}</p>
+                                    <p className="text-sm font-semibold text-[#873F34]">
+                                        Unable to create access request.
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-[#9A5A50]">
+                                        {errorMessage}
+                                    </p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    <div className="lg:col-span-1">
-                        <Card className="bg-white rounded-2xl shadow-sm sticky top-24 h-fit">
-                            <CardHeader className="pb-4">
-                                <div className="flex items-center justify-between">
+                    {/* =================================================
+                        RIGHT COLUMN — RECIPIENTS
+                    ================================================== */}
+
+                    <div>
+                        <Card
+                            className="sticky top-24 overflow-hidden rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE] shadow-[0_12px_35px_rgba(30,31,20,0.08)]"
+                        >
+                            <CardHeader className="border-b border-[#DEDCD3] px-5 py-4">
+
+                                <div className="flex items-center justify-between gap-3">
+
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#716f49]/10">
-                                            <UserCheck className="w-5 h-5 text-[#716f49]" aria-hidden />
+
+                                        <div
+                                            className="
+                                                flex h-9 w-9
+                                                items-center justify-center
+                                                rounded-lg
+                                                bg-[#716F49]/10
+                                            "
+                                        >
+                                            <UserCheck
+                                                className="h-4.5 w-4.5 text-[#716F49]"
+                                                strokeWidth={1.8}
+                                            />
                                         </div>
-                                        <CardTitle className="text-lg">Recipients</CardTitle>
+
+                                        <div>
+                                            <CardTitle className="text-base font-semibold text-[#25251F]">
+                                                Recipients
+                                            </CardTitle>
+
+                                            <p className="mt-0.5 text-xs text-[#777568]">
+                                                Choose collaborators
+                                            </p>
+                                        </div>
                                     </div>
-                                    <span className="bg-[#716f49]/10 text-[#716f49] text-xs font-medium px-2.5 py-1 rounded-full">
+
+                                    <span 
+                                        className="whitespace-nowrap rounded-full border border-[#716F49]/15 bg-[#716F49]/8 px-2.5 py-1 text-[11px] font-semibold text-[#716F49]"
+                                    >
                                         {selectedCount} selected
                                     </span>
                                 </div>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+
+                            <CardContent className="space-y-4 p-4">
+
+                                {/* SEARCH */}
+
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden />
+
+                                    <Search
+                                        className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#969386]"
+                                    />
+
                                     <Input
                                         type="search"
                                         placeholder="Search users..."
                                         value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-9 focus:ring-2 focus:ring-[#716f49] focus:border-transparent"
+                                        onChange={(e) =>
+                                            setSearchQuery(e.target.value)
+                                        }
+                                        className="h-10 rounded-lg border-[#D7D4C9] bg-[#FBFAF7] pl-9 text-sm shadow-none placeholder:text-[#A5A297] focus-visible:border-[#716F49] focus-visible:ring-1 focus-visible:ring-[#716F49]"
                                     />
                                 </div>
 
+                                {/* CONTROLS */}
+
                                 <div className="flex gap-2">
+
                                     <Button
                                         type="button"
                                         variant="outline"
                                         size="sm"
                                         onClick={handleSelectAll}
-                                        disabled={filteredUsers.length === 0 || selectedCount === filteredUsers.length}
-                                        className="flex-1 text-xs"
+                                        disabled={
+                                            filteredUsers.length === 0 ||
+                                            selectedCount ===
+                                            filteredUsers.length
+                                        }
+                                        className="h-9 flex-1 rounded-lg border-[#D7D4C9] bg-[#FBFAF7] text-xs text-[#5E5D50] shadow-none hover:bg-[#ECEAE2]"
                                     >
-                                        Select All
+                                        Select all
                                     </Button>
+
                                     <Button
                                         type="button"
                                         variant="outline"
                                         size="sm"
                                         onClick={handleDeselectAll}
                                         disabled={selectedCount === 0}
-                                        className="flex-1 text-xs"
+                                        className="h-9 flex-1 rounded-lg border-[#D7D4C9] bg-[#FBFAF7] text-xs text-[#5E5D50] shadow-none hover:bg-[#ECEAE2] "
                                     >
-                                        Clear All
+                                        Clear
                                     </Button>
                                 </div>
 
+                                {/* USERS */}
+
                                 {isLoading ? (
-                                    <div className="space-y-3">
+                                    <div className="space-y-2">
+
                                         {[1, 2, 3, 4].map((i) => (
-                                            <div key={i} className="flex items-center gap-3 p-3 animate-pulse">
-                                                <div className="w-10 h-10 rounded-full bg-gray-200" />
-                                                <div className="flex-1 space-y-1">
-                                                    <div className="h-4 w-3/4 bg-gray-200 rounded" />
-                                                    <div className="h-3 w-1/2 bg-gray-200 rounded" />
+                                            <div
+                                                key={i}
+                                                className="flex items-center gap-3 rounded-xl border border-transparent p-3"
+                                            >
+                                                <div className="h-9 w-9 animate-pulse rounded-full bg-[#DEDCD3]" />
+
+                                                <div className="flex-1 space-y-2">
+                                                    <div className="h-3.5 w-3/4 animate-pulse rounded bg-[#DEDCD3]" />
+                                                    <div className="h-3 w-1/2 animate-pulse rounded bg-[#DEDCD3]" />
                                                 </div>
                                             </div>
                                         ))}
+
                                     </div>
                                 ) : filteredUsers.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500">
-                                        <UserX className="w-10 h-10 mx-auto mb-2 text-gray-300" aria-hidden />
-                                        <p className="text-sm">No users found matching your search</p>
+                                    <div className="py-10 text-center">
+
+                                        <UserX className="mx-auto mb-3 h-8 w-8 text-[#B3B0A4]" />
+
+                                        <p className="text-xs font-medium text-[#6D6B60]">
+                                            No users found
+                                        </p>
+
+                                        <p className="mt-1 text-[11px] text-[#99978C]">
+                                            Try another search term.
+                                        </p>
                                     </div>
                                 ) : (
-                                    <div className="max-h-96 overflow-y-auto space-y-2 pr-1">
+                                    <div className="max-h-97.5 space-y-1.5 overflow-y-auto pr-1 scrollbar-thin"
+                                    >
                                         {filteredUsers.map((user) => {
-                                            const isSelected = selectedUsers.includes(user.id);
+
+                                            const isSelected =
+                                                selectedUsers.includes(
+                                                    user.id
+                                                );
+
+                                            const initials = user.name
+                                                .split(" ")
+                                                .map((n) => n[0])
+                                                .join("")
+                                                .slice(0, 2)
+                                                .toUpperCase();
+
                                             return (
                                                 <label
                                                     key={user.id}
-                                                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${isSelected
-                                                        ? "bg-[#716f49]/5 border border-[#716f49]/20"
-                                                        : "bg-gray-50 hover:bg-gray-100 border border-transparent"
-                                                        }`}
+                                                    className={`group flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all duration-200
+                                                        ${isSelected
+                                                            ? "border-[#716F49]/25 bg-[#716F49]/[0.07]"
+                                                            : "border-transparent hover:border-[#DEDCD3] hover:bg-[#FBFAF7]"
+                                                        }
+                                                    `}
                                                 >
                                                     <input
                                                         type="checkbox"
                                                         checked={isSelected}
-                                                        onChange={(e) => handleUserSelection(user.id, e.target.checked)}
-                                                        className="w-4 h-4 text-[#716f49] border-gray-300 rounded focus:ring-2 focus:ring-[#716f49] focus:ring-offset-2"
+                                                        onChange={(e) =>
+                                                            handleUserSelection(
+                                                                user.id,
+                                                                e.target.checked
+                                                            )
+                                                        }
+                                                        className="h-4 w-4 shrink-0 cursor-pointer accent-[#716F49]"
                                                     />
-                                                    <div className="w-10 h-10 rounded-full bg-[#716f49]/10 flex items-center justify-center shrink-0">
-                                                        <span className="text-[#716f49] font-medium text-sm">
-                                                            {user.name.split(" ").map((n) => n[0]).join("")}
-                                                        </span>
+
+                                                    <div
+                                                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-colors
+                                                            ${isSelected
+                                                                ? "bg-[#716F49] text-white"
+                                                                : "bg-[#E4E1D7] text-[#716F49]"
+                                                            }
+                                                        `}
+                                                    >
+                                                        {initials}
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-medium text-gray-900 truncate">{user.name}</p>
-                                                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="truncate text-sm font-medium text-[#292923]">
+                                                            {user.name}
+                                                        </p>
+
+                                                        <p className="mt-0.5 truncate text-[11px] text-[#89877B]">
+                                                            {user.email}
+                                                        </p>
                                                     </div>
-                                                    <div className="text-xs text-gray-400 whitespace-nowrap hidden sm:block">
+
+                                                    <span
+                                                        className="hidden whitespace-nowrap text-[10px] font-medium text-[#99978C] sm:block"
+                                                    >
                                                         {user.role}
-                                                    </div>
+                                                    </span>
                                                 </label>
                                             );
                                         })}
                                     </div>
+                                )}
+
+                                {formErrors.userIds && (
+                                    <p className="flex items-center gap-1.5 text-xs text-[#A45B4B]">
+                                        <AlertCircle className="h-3.5 w-3.5" />
+                                        {formErrors.userIds}
+                                    </p>
                                 )}
                             </CardContent>
                         </Card>
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                {/* =====================================================
+                    ACTION BAR
+                ====================================================== */}
+
+                <div
+                    className="flex flex-col-reverse gap-3 border-t border-white/15 pt-5 sm:flex-row sm:items-center sm:justify-end"
+                >
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         onClick={() => {
-                            setFormData({ shareLink: "", userIds: [], message: "", expiresAt: "" });
+                            setFormData({
+                                shareLink: "",
+                                userIds: [],
+                                message: "",
+                                expiresAt: "",
+                            });
+
                             setSelectedUsers([]);
                             setFormErrors({});
                             setSubmitStatus("idle");
+                            setErrorMessage("");
                         }}
                         disabled={isSubmitting}
+                        className="rounded-lg border border-white/15 bg-white/5 px-5 text-sm text-white/80 backdrop-blur-md hover:bg-white/10 hover:text-white"
                     >
                         Reset
                     </Button>
+
                     <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-[#716f49] hover:bg-[#5d5b3d] text-white"
+                        className="rounded-lg bg-[#716F49] px-5 text-sm font-medium text-white shadow-[0_5px_15px_rgba(40,40,25,0.2)] transition-all hover:bg-[#625F3F] hover:shadow-[0_7px_18px_rgba(40,40,25,0.25)]"
                     >
                         {isSubmitting ? (
                             <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden />
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 Creating...
                             </>
                         ) : (
                             <>
-                                <Share2 className="w-4 h-4 mr-2" aria-hidden />
+                                <Share2 className="mr-2 h-4 w-4" />
                                 Create Access Request
                             </>
                         )}
