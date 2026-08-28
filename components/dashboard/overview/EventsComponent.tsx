@@ -67,7 +67,7 @@ const EventsComponent = () => {
                 <div className="flex gap-2 mb-6">
                     <button
                         onClick={() => setActiveTab('this-week')}
-                        className={`px-6 py-2.5 rounded-full font-medium transition-all text-xs md:text-base ${activeTab === 'this-week'
+                        className={`px-3 py-1.5 rounded-full font-medium transition-all text-xs ${activeTab === 'this-week'
                             ? 'bg-[#777777] text-white shadow-sm'
                             : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#E6E6E6]'
                             }`}
@@ -76,7 +76,7 @@ const EventsComponent = () => {
                     </button>
                     <button
                         onClick={() => setActiveTab('upcoming')}
-                        className={`px-6 py-2.5 rounded-full text-xs md:text-base font-medium transition-all ${activeTab === 'upcoming'
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === 'upcoming'
                             ? 'bg-[#777777] text-white shadow-sm'
                             : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#E6E6E6]'
                             }`}

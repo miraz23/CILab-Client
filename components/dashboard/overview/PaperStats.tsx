@@ -32,7 +32,7 @@ const PaperStats = () => {
     const topics = Object.keys(PaperTopicsData) as PaperTopic[];
 
     return (
-        <div className='pb-4'>
+        <div className='py-4'>
             <Card className="w-full bg-white rounded-lg shadow-sm p-6">
                 <div className="flex items-center gap-2">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#1C1D1D0D] shadow-[0_0_38px_0_#00000012]">

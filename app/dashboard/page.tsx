@@ -40,14 +40,17 @@ export default function Page() {
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 w-full">
           <div className="col-span-1 lg:col-span-4 space-y-4">
             <OverviewComponent />
-            <TaskManager />
             <EventsComponent />
           </div>
           <div className="col-span-1 lg:col-span-2 space-y-4">
+          <PaperStats />
+            
+          </div>
+          {/* <div className="col-span-1 lg:col-span-2 space-y-4">
             <TodoItems />
             <ActivityStats />
             <PaperStats />
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

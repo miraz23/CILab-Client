@@ -252,7 +252,7 @@ export default function AccessRequestsForm() {
 
                         {submitStatus === "success" && (
                             <div className="rounded-xl bg-green-50 border border-green-200 p-4 flex items-center gap-3 animate-in fade-in">
-                                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" aria-hidden />
+                                <CheckCircle className="w-6 h-6 text-green-600 shrink-0" aria-hidden />
                                 <div>
                                     <p className="font-medium text-green-800">Access request created successfully!</p>
                                     <p className="text-sm text-green-700">Selected users have been notified with the share link.</p>
@@ -262,7 +262,7 @@ export default function AccessRequestsForm() {
 
                         {submitStatus === "error" && (
                             <div className="rounded-xl bg-red-50 border border-red-200 p-4 flex items-center gap-3 animate-in fade-in">
-                                <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0" aria-hidden />
+                                <AlertCircle className="w-6 h-6 text-red-600 shrink-0" aria-hidden />
                                 <div>
                                     <p className="font-medium text-red-800">Failed to create access request</p>
                                     <p className="text-sm text-red-700">{errorMessage}</p>
@@ -356,7 +356,7 @@ export default function AccessRequestsForm() {
                                                         onChange={(e) => handleUserSelection(user.id, e.target.checked)}
                                                         className="w-4 h-4 text-[#716f49] border-gray-300 rounded focus:ring-2 focus:ring-[#716f49] focus:ring-offset-2"
                                                     />
-                                                    <div className="w-10 h-10 rounded-full bg-[#716f49]/10 flex items-center justify-center flex-shrink-0">
+                                                    <div className="w-10 h-10 rounded-full bg-[#716f49]/10 flex items-center justify-center shrink-0">
                                                         <span className="text-[#716f49] font-medium text-sm">
                                                             {user.name.split(" ").map((n) => n[0]).join("")}
                                                         </span>

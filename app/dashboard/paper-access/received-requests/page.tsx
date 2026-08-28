@@ -1,6 +1,6 @@
 "use client";
 
-import ReceivedRequests from "@/components/dashboard/paper-access/ReceivedRequests";
+import ReceivedRequests from "@/components/dashboard/paper-access/received-requests/ReceivedRequests";
 
 
 export default function AccessRequestsPage() {

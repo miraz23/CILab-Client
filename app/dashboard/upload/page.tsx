@@ -48,13 +48,10 @@ export default function UploadPage() {
 
       <UploadStats />
 
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 w-full mt-6">
-        <div className="col-span-1 lg:col-span-4 space-y-6">
+      <div className="gap-4 w-full mt-6">
+        <div className="space-y-6">
           <UploadPaperForm />
           <UploadPresentationForm />
-        </div>
-        <div className="col-span-1 lg:col-span-2 space-y-6">
-          <UploadCategories />
         </div>
       </div>
 

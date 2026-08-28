@@ -251,7 +251,7 @@ export default function ReceivedRequests() {
                             >
                                 <CardContent className="p-6">
                                     <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                                        <div className="w-12 h-12 rounded-full bg-[#716f49]/10 flex items-center justify-center flex-shrink-0">
+                                        <div className="w-12 h-12 rounded-full bg-[#716f49]/10 flex items-center justify-center shrink-0">
                                             <span className="text-[#716f49] font-medium text-sm">
                                                 {request.fromUser.name.split(" ").map((n) => n[0]).join("")}
                                             </span>
