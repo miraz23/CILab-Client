@@ -8,11 +8,14 @@ import UploadPaperForm from '@/components/dashboard/upload/UploadPaperForm';
 import UploadPresentationForm from '@/components/dashboard/upload/UploadPresentationForm';
 import UploadCategories from '@/components/dashboard/upload/UploadCategories';
 import UploadHistory from '@/components/dashboard/upload/UploadHistory';
-import { useRouter } from 'next/navigation';
+import { UploadSkeleton } from '@/components/dashboard/skeleton-loader/UploadSkeleton';
+import { UploadHistorySkeleton } from '@/components/dashboard/skeleton-loader/UploadHistorySkeleton';
+import { useDashboardRefresh } from '@/lib/hooks/use-dashboard-refresh';
+import { cn } from '@/lib/utils';
 
 export default function UploadPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
-  const router = useRouter();
+  const { isRefreshing, refresh } = useDashboardRefresh();
 
   return (
     <section className='w-[95%] mx-auto py-5'>
@@ -35,9 +38,11 @@ export default function UploadPage() {
               variant="ghost"
               size="lg"
               className="gap-2 text-white/80 hover:text-white hover:bg-white/10 cursor-pointer"
-              onClick={() => router.refresh()}
+              onClick={refresh}
+              disabled={isRefreshing}
+              aria-busy={isRefreshing}
             >
-              <RefreshCw className="w-4 h-4" aria-hidden />
+              <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} aria-hidden />
               <p className='hidden md:block'>Reload</p>
             </Button>
           </div>
@@ -46,7 +51,7 @@ export default function UploadPage() {
         <p className="text-white/80 mt-1">Manage your research papers and presentation uploads</p>
       </div>
 
-      <UploadStats />
+      {isRefreshing ? <UploadSkeleton /> : <UploadStats />}
 
       <div className="gap-4 w-full mt-6">
         <div className="space-y-6">
@@ -89,7 +94,7 @@ export default function UploadPage() {
 
             {/* History */}
             <div className="max-h-[calc(85vh-82px)] overflow-y-auto">
-              <UploadHistory />
+              {isRefreshing ? <UploadHistorySkeleton /> : <UploadHistory />}
             </div>
           </div>
         </div>

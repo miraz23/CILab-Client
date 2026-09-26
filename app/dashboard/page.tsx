@@ -2,12 +2,14 @@
 
 import OverviewComponent from '@/components/dashboard/overview/OverviewComponent'
 import StateCards from '@/components/dashboard/overview/StateCards'
+import { OverviewSkeleton } from '@/components/dashboard/skeleton-loader/OverviewSkeleton'
 import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useDashboardRefresh } from '@/lib/hooks/use-dashboard-refresh'
+import { cn } from '@/lib/utils'
 
 export default function Page() {
-  const router = useRouter()
+  const { isRefreshing, refresh } = useDashboardRefresh()
 
   return (
     <section className='w-[95%] mx-auto py-5'>
@@ -20,9 +22,11 @@ export default function Page() {
               variant="ghost"
               size="lg"
               className="gap-2 text-white/80 hover:text-white hover:bg-white/10 cursor-pointer"
-              onClick={() => router.refresh()}
+              onClick={refresh}
+              disabled={isRefreshing}
+              aria-busy={isRefreshing}
             >
-              <RefreshCw className="w-4 h-4" aria-hidden />
+              <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} aria-hidden />
               <p className='hidden md:block'>Reload</p>
             </Button>
           </div>
@@ -30,13 +34,19 @@ export default function Page() {
           <p className="text-white/80 mt-1">Manage your research papers and presentation uploads</p>
         </div>
 
-        <StateCards />
+        {isRefreshing ? (
+          <OverviewSkeleton />
+        ) : (
+          <>
+            <StateCards />
 
-        <div className="gap-4 w-full">
-          <div className="space-y-4">
-            <OverviewComponent />
-          </div>
-        </div>
+            <div className="gap-4 w-full">
+              <div className="space-y-4">
+                <OverviewComponent />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </section>
   )

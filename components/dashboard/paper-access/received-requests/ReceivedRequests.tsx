@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Mail, CheckCircle, Clock, XCircle, Eye, Download, QrCode, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ReceivedRequestsSkeleton } from "@/components/dashboard/skeleton-loader/ReceivedRequestsSkeleton";
 import { cn } from "@/lib/utils";
 import { QRCodeSVG as QRCode } from "qrcode.react";
 import { useRouter } from "next/navigation";
@@ -160,13 +161,30 @@ export default function ReceivedRequests() {
     const [isLoading, setIsLoading] = useState(true);
     const [filter, setFilter] = useState<"all" | "pending" | "accepted" | "declined">("all");
     const [openQrId, setOpenQrId] = useState<string | null>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    useEffect(() => {
-        setTimeout(() => {
+    const loadRequests = useCallback(() => {
+        timerRef.current = setTimeout(() => {
+            timerRef.current = null;
             setRequests(MOCK_REQUESTS);
             setIsLoading(false);
         }, 500);
     }, []);
+
+    useEffect(() => {
+        loadRequests();
+
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, [loadRequests]);
+
+    const handleRefresh = useCallback(() => {
+        router.refresh();
+
+        setIsLoading(true);
+        loadRequests();
+    }, [loadRequests, router]);
 
     const filteredRequests = requests.filter((req) => {
         if (filter === "all") return true;
@@ -231,41 +249,30 @@ export default function ReceivedRequests() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => router.refresh()}
+                        onClick={handleRefresh}
+                        disabled={isLoading}
+                        aria-busy={isLoading}
                         className="w-fit gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-white/80 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
                     >
-                        <RefreshCw className="h-4 w-4" aria-hidden />
+                        <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} aria-hidden />
                         <span className="hidden md:block">Reload</span>
                     </Button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div
+                className={cn(
+                    "grid grid-cols-1 gap-4 sm:grid-cols-3",
+                    isLoading && "hidden"
+                )}
+            >
                 <SummaryStat title="Pending Review" value={pendingCount} icon={Clock} accent="#C58A3A" />
                 <SummaryStat title="Accepted" value={acceptedCount} icon={CheckCircle} accent="#4F8A63" />
                 <SummaryStat title="Declined" value={declinedCount} icon={XCircle} accent="#B85C55" />
             </div>
 
             {isLoading ? (
-                <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                        <Card
-                            key={i}
-                            className="rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE]"
-                        >
-                            <CardContent className="p-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-12 w-12 animate-pulse rounded-full bg-[#DEDCD3]" />
-                                    <div className="flex-1 space-y-2">
-                                        <div className="h-4 w-1/4 animate-pulse rounded bg-[#DEDCD3]" />
-                                        <div className="h-3 w-1/3 animate-pulse rounded bg-[#DEDCD3]" />
-                                        <div className="h-3 w-1/2 animate-pulse rounded bg-[#DEDCD3]" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                <ReceivedRequestsSkeleton showStats={false} />
             ) : filteredRequests.length === 0 ? (
                 <Card className="rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE] p-12 text-center">
                     <Mail className="mx-auto mb-4 h-16 w-16 text-[#B3B0A4]" aria-hidden />
