@@ -10,12 +10,12 @@ import UploadCategories from '@/components/dashboard/upload/UploadCategories';
 import UploadHistory from '@/components/dashboard/upload/UploadHistory';
 import { UploadSkeleton } from '@/components/dashboard/skeleton-loader/UploadSkeleton';
 import { UploadHistorySkeleton } from '@/components/dashboard/skeleton-loader/UploadHistorySkeleton';
-import { useDashboardRefresh } from '@/lib/hooks/use-dashboard-refresh';
+import { useDashboardLoading } from '@/lib/hooks/use-dashboard-loading';
 import { cn } from '@/lib/utils';
 
 export default function UploadPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
-  const { isRefreshing, refresh } = useDashboardRefresh();
+  const { isLoading, refresh } = useDashboardLoading();
 
   return (
     <section className='w-[95%] mx-auto py-5'>
@@ -39,10 +39,10 @@ export default function UploadPage() {
               size="lg"
               className="gap-2 text-white/80 hover:text-white hover:bg-white/10 cursor-pointer"
               onClick={refresh}
-              disabled={isRefreshing}
-              aria-busy={isRefreshing}
+              disabled={isLoading}
+              aria-busy={isLoading}
             >
-              <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} aria-hidden />
+              <RefreshCw className={cn('w-4 h-4', isLoading && 'animate-spin')} aria-hidden />
               <p className='hidden md:block'>Reload</p>
             </Button>
           </div>
@@ -51,7 +51,7 @@ export default function UploadPage() {
         <p className="text-white/80 mt-1">Manage your research papers and presentation uploads</p>
       </div>
 
-      {isRefreshing ? <UploadSkeleton /> : <UploadStats />}
+      {isLoading ? <UploadSkeleton /> : <UploadStats />}
 
       <div className="gap-4 w-full mt-6">
         <div className="space-y-6">
@@ -94,7 +94,7 @@ export default function UploadPage() {
 
             {/* History */}
             <div className="max-h-[calc(85vh-82px)] overflow-y-auto">
-              {isRefreshing ? <UploadHistorySkeleton /> : <UploadHistory />}
+              {isLoading ? <UploadHistorySkeleton /> : <UploadHistory />}
             </div>
           </div>
         </div>

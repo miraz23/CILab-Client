@@ -1,30 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { fetchUserProfile, type UserProfile } from "@/lib/api/users/profile";
 import ProfileForm from "@/components/dashboard/profile/ProfileForm";
 import { ProfileSkeleton } from "@/components/dashboard/skeleton-loader/ProfileSkeleton";
+import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 
 export default function ProfilePage() {
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        async function loadProfile() {
-            try {
-                const profile = await fetchUserProfile();
+    const loadProfile = useCallback(async () => {
+        try {
+            const profile = await fetchUserProfile();
 
-                setUserProfile(profile);
-            } catch (error) {
-                console.error("Failed to load profile:", error);
-            } finally {
-                setIsLoading(false);
-            }
+            setUserProfile(profile);
+        } catch (error) {
+            console.error("Failed to load profile:", error);
         }
-
-        loadProfile();
     }, []);
+
+    const { isLoading } = useDashboardLoading(loadProfile);
 
     if (isLoading) {
         return (

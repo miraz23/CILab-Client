@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
     Link as LinkIcon,
     UserCheck,
@@ -29,6 +29,8 @@ import { AccessRequestsSkeleton } from "@/components/dashboard/skeleton-loader/A
 
 import { fetchUsers } from "@/lib/api/paper-access/users";
 
+import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
+
 import { cn } from "@/lib/utils";
 
 import type {
@@ -38,16 +40,11 @@ import type {
     AccessRequestApiResponse,
 } from "@/lib/types/paper-access/access-request";
 
-import { useRouter } from "next/navigation";
-
 export default function AccessRequestsForm() {
-    const router = useRouter();
-
     const [users, setUsers] = useState<User[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [submitStatus, setSubmitStatus] = useState<
@@ -68,28 +65,16 @@ export default function AccessRequestsForm() {
         useState<AccessRequestFormErrors>({});
 
     const loadUsers = useCallback(async () => {
-        setIsLoading(true);
-
         try {
             const fetchedUsers = await fetchUsers();
 
             setUsers(fetchedUsers);
         } catch (error) {
             console.error("Failed to load users:", error);
-        } finally {
-            setIsLoading(false);
         }
     }, []);
 
-    const handleRefresh = useCallback(() => {
-        router.refresh();
-        void loadUsers();
-    }, [loadUsers, router]);
-
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        void loadUsers();
-    }, [loadUsers]);
+    const { isLoading, refresh } = useDashboardLoading(loadUsers);
 
     const handleShareLinkChange = useCallback(
         (value: string) => {
@@ -297,7 +282,7 @@ export default function AccessRequestsForm() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={handleRefresh}
+                    onClick={refresh}
                     disabled={isLoading}
                     aria-busy={isLoading}
                     className="w-fit gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-white/80 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"

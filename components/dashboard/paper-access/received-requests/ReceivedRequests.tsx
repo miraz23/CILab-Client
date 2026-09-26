@@ -6,9 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ReceivedRequestsSkeleton } from "@/components/dashboard/skeleton-loader/ReceivedRequestsSkeleton";
+import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import { cn } from "@/lib/utils";
 import { QRCodeSVG as QRCode } from "qrcode.react";
-import { useRouter } from "next/navigation";
 
 interface ReceivedRequest {
     id: string;
@@ -155,36 +155,33 @@ function SummaryStat({ title, value, icon: Icon, accent }: SummaryStatProps) {
 }
 
 export default function ReceivedRequests() {
-    const router = useRouter();
-
     const [requests, setRequests] = useState<ReceivedRequest[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [filter, setFilter] = useState<"all" | "pending" | "accepted" | "declined">("all");
     const [openQrId, setOpenQrId] = useState<string | null>(null);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const loadRequests = useCallback(() => {
-        timerRef.current = setTimeout(() => {
-            timerRef.current = null;
-            setRequests(MOCK_REQUESTS);
-            setIsLoading(false);
-        }, 500);
-    }, []);
+    const loadRequests = useCallback(
+        () =>
+            new Promise<void>((resolve) => {
+                if (timerRef.current) clearTimeout(timerRef.current);
 
-    useEffect(() => {
-        loadRequests();
+                timerRef.current = setTimeout(() => {
+                    timerRef.current = null;
+                    setRequests(MOCK_REQUESTS);
+                    resolve();
+                }, 500);
+            }),
+        []
+    );
 
-        return () => {
+    const { isLoading, refresh } = useDashboardLoading(loadRequests);
+
+    useEffect(
+        () => () => {
             if (timerRef.current) clearTimeout(timerRef.current);
-        };
-    }, [loadRequests]);
-
-    const handleRefresh = useCallback(() => {
-        router.refresh();
-
-        setIsLoading(true);
-        loadRequests();
-    }, [loadRequests, router]);
+        },
+        []
+    );
 
     const filteredRequests = requests.filter((req) => {
         if (filter === "all") return true;
@@ -249,7 +246,7 @@ export default function ReceivedRequests() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={handleRefresh}
+                        onClick={refresh}
                         disabled={isLoading}
                         aria-busy={isLoading}
                         className="w-fit gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-white/80 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
