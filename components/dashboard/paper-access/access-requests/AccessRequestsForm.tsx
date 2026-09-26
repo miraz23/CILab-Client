@@ -314,15 +314,6 @@ export default function AccessRequestsForm() {
                         >
                             <CardHeader className="border-b border-[#DEDCD3] px-5 py-4">
                                 <div className="flex items-center gap-3">
-
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-lgbg-[#716F49]/10"
-                                    >
-                                        <LinkIcon
-                                            className="h-4.5 w-4.5 text-[#716F49]"
-                                            strokeWidth={1.8}
-                                        />
-                                    </div>
-
                                     <div>
                                         <CardTitle className="text-base font-semibold text-[#25251F]">
                                             Share Details
@@ -508,21 +499,6 @@ export default function AccessRequestsForm() {
                                 <div className="flex items-center justify-between gap-3">
 
                                     <div className="flex items-center gap-3">
-
-                                        <div
-                                            className="
-                                                flex h-9 w-9
-                                                items-center justify-center
-                                                rounded-lg
-                                                bg-[#716F49]/10
-                                            "
-                                        >
-                                            <UserCheck
-                                                className="h-4.5 w-4.5 text-[#716F49]"
-                                                strokeWidth={1.8}
-                                            />
-                                        </div>
-
                                         <div>
                                             <CardTitle className="text-base font-semibold text-[#25251F]">
                                                 Recipients

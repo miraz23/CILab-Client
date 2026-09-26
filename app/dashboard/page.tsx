@@ -1,12 +1,7 @@
 "use client"
 
-import ActivityStats from '@/components/dashboard/overview/ActivityStats'
-import EventsComponent from '@/components/dashboard/overview/EventsComponent'
 import OverviewComponent from '@/components/dashboard/overview/OverviewComponent'
-import PaperStats from '@/components/dashboard/overview/PaperStats'
 import StateCards from '@/components/dashboard/overview/StateCards'
-import TaskManager from '@/components/dashboard/overview/TaskManager'
-import TodoItems from '@/components/dashboard/overview/TodoList'
 import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -40,16 +35,7 @@ export default function Page() {
         <div className="gap-4 w-full">
           <div className="space-y-4">
             <OverviewComponent />
-            {/* <EventsComponent /> */}
           </div>
-          {/* <div className="col-span-1 lg:col-span-2 space-y-4">
-          <PaperStats />
-          </div> */}
-          {/* <div className="col-span-1 lg:col-span-2 space-y-4">
-            <TodoItems />
-            <ActivityStats />
-            <PaperStats />
-          </div> */}
         </div>
       </div>
     </section>
