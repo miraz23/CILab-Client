@@ -1,4 +1,4 @@
-import type { User } from "@/lib/types/paper-access/access-request";
+import type { User } from "@/lib/types/user/paper-access/access-request";
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 

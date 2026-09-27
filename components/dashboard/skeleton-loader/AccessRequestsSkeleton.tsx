@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton, SkeletonCircle } from "./Skeleton";
 
+
 function UserRowSkeleton() {
     return (
         <div className="flex items-center gap-3 rounded-xl border border-transparent p-3">

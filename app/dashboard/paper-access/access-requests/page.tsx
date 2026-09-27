@@ -1,6 +1,6 @@
 "use client";
 
-import AccessRequestsForm from "@/components/dashboard/paper-access/access-requests/AccessRequestsForm";
+import AccessRequestsForm from "@/components/dashboard/user/paper-access/access-requests/AccessRequestsForm";
 
 export default function AccessRequestsPage() {
     return (

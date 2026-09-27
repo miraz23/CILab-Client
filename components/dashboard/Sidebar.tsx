@@ -10,13 +10,13 @@ import {
     Upload,
     User,
     FolderOpen,
-    ChevronDown,
     PanelLeftClose,
     PanelLeftOpen,
     LogOut,
-    X,
+    ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CollapsibleNavGroup, MobileNavSheet } from "@/components/dashboard/SidebarNavParts";
 
 const NAV_ITEMS = [
     { label: "Home", href: "/", icon: Home, shortLabel: "Home" },
@@ -53,13 +53,28 @@ const PAPER_ACCESS_ITEMS = [
     { label: "Received Requests", href: "/dashboard/paper-access/received-requests" },
 ];
 
+const ADMIN_NAV_LABEL = "Admin";
+const ADMIN_NAV_SHORT_LABEL = "Admin";
+const ADMIN_NAV_ICON = ShieldCheck;
+
+const ADMIN_NAV_ITEMS = [
+    { label: "User Management", href: "/dashboard/admin/users" },
+    { label: "Content Moderation", href: "/dashboard/admin/moderation" },
+    { label: "Access Requests", href: "/dashboard/admin/access-requests" },
+    { label: "Schedule Manager", href: "/dashboard/admin/schedule" },
+    { label: "Announcements", href: "/dashboard/admin/announcements" },
+    { label: "Platform Analytics", href: "/dashboard/admin/analytics" },
+];
+
 export default function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
     const [paperAccessOpen, setPaperAccessOpen] = useState(true);
-    const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+    const [adminOpen, setAdminOpen] = useState(true);
+    const [mobileSheet, setMobileSheet] = useState<null | "paper-access" | "admin">(null);
 
     const isPaperAccessActive = PAPER_ACCESS_ITEMS.some((item) => pathname === item.href);
+    const isAdminActive = ADMIN_NAV_ITEMS.some((item) => pathname === item.href);
 
     const expandIfCollapsed = () => {
         if (collapsed) setCollapsed(false);
@@ -133,53 +148,31 @@ export default function Sidebar() {
                         );
                     })}
 
-                    <button
-                        type="button"
-                        onClick={() => {
+                    <CollapsibleNavGroup
+                        label={PAPER_ACCESS_LABEL}
+                        icon={FolderOpen}
+                        items={PAPER_ACCESS_ITEMS}
+                        open={paperAccessOpen}
+                        onOpenChange={(open) => {
                             expandIfCollapsed();
-                            setPaperAccessOpen((v) => !v);
+                            setPaperAccessOpen(open);
                         }}
-                        className={cn(
-                            "flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium text-white/80 transition-colors duration-150 hover:bg-white/10 hover:text-white",
-                            collapsed && "justify-center px-2",
-                            isPaperAccessActive && "bg-white/15 text-white"
-                        )}
-                        aria-expanded={paperAccessOpen}
-                        title={collapsed ? PAPER_ACCESS_LABEL : undefined}
-                    >
-                        <span className={cn("flex items-center gap-3", collapsed && "gap-0")}>
-                            <FolderOpen size={18} aria-hidden />
-                            {!collapsed && PAPER_ACCESS_LABEL}
-                        </span>
-                        {!collapsed && (
-                            <ChevronDown
-                                size={16}
-                                className={cn("transition-transform duration-200", paperAccessOpen && "rotate-180")}
-                                aria-hidden
-                            />
-                        )}
-                    </button>
+                        onNavigate={expandIfCollapsed}
+                        collapsed={collapsed}
+                    />
 
-                    {!collapsed && paperAccessOpen && (
-                        <div className="ml-6 flex flex-col gap-1 border-l border-white/20 pl-4">
-                            {PAPER_ACCESS_ITEMS.map((item) => {
-                                const isActive = pathname === item.href;
-
-                                return (
-                                    <Link
-                                        key={item.label}
-                                        href={item.href}
-                                        className={cn(
-                                            "rounded-lg px-3 py-2 text-sm text-white/70 transition-colors duration-150 hover:bg-white/10 hover:text-white",
-                                            isActive && "bg-white/15 text-white"
-                                        )}
-                                    >
-                                        {item.label}
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    )}
+                    <CollapsibleNavGroup
+                        label={ADMIN_NAV_LABEL}
+                        icon={ADMIN_NAV_ICON}
+                        items={ADMIN_NAV_ITEMS}
+                        open={adminOpen}
+                        onOpenChange={(open) => {
+                            expandIfCollapsed();
+                            setAdminOpen(open);
+                        }}
+                        onNavigate={expandIfCollapsed}
+                        collapsed={collapsed}
+                    />
 
                     <ProfileLink collapsed={collapsed} isActive={pathname === PROFILE_ITEM.href} />
                 </nav>
@@ -222,16 +215,30 @@ export default function Sidebar() {
 
                 <button
                     type="button"
-                    onClick={() => setMobileSheetOpen(true)}
+                    onClick={() => setMobileSheet("paper-access")}
                     className={cn(
                         "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-medium leading-none text-white/70 transition-colors duration-150 hover:bg-white/10 hover:text-white",
                         isPaperAccessActive && "bg-white/15 text-white"
                     )}
                     aria-haspopup="dialog"
-                    aria-expanded={mobileSheetOpen}
+                    aria-expanded={mobileSheet === "paper-access"}
                 >
                     <FolderOpen size={18} aria-hidden />
                     <span className="w-full text-center leading-tight">{PAPER_ACCESS_SHORT_LABEL}</span>
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => setMobileSheet("admin")}
+                    className={cn(
+                        "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-medium leading-none text-white/70 transition-colors duration-150 hover:bg-white/10 hover:text-white",
+                        isAdminActive && "bg-white/15 text-white"
+                    )}
+                    aria-haspopup="dialog"
+                    aria-expanded={mobileSheet === "admin"}
+                >
+                    <ADMIN_NAV_ICON size={18} aria-hidden />
+                    <span className="w-full text-center leading-tight">{ADMIN_NAV_SHORT_LABEL}</span>
                 </button>
 
                 <Link
@@ -255,46 +262,19 @@ export default function Sidebar() {
                 </button>
             </nav>
 
-            {mobileSheetOpen && (
-                <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
-                    <div
-                        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300"
-                        onClick={() => setMobileSheetOpen(false)}
-                    />
-                    <div className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-white p-6 shadow-2xl animate-in slide-in-from-bottom-12 duration-300 ease-out">
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-base font-semibold text-[#1f321c]">{PAPER_ACCESS_LABEL}</h2>
-                            <button
-                                type="button"
-                                onClick={() => setMobileSheetOpen(false)}
-                                className="rounded-lg p-1.5 text-[#1f321c] transition-colors hover:bg-[#716f49]/10"
-                                aria-label="Close menu"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            {PAPER_ACCESS_ITEMS.map((item) => {
-                                const isActive = pathname === item.href;
+            <MobileNavSheet
+                open={mobileSheet === "paper-access"}
+                title={PAPER_ACCESS_LABEL}
+                groups={[{ label: PAPER_ACCESS_LABEL, icon: FolderOpen, items: PAPER_ACCESS_ITEMS }]}
+                onClose={() => setMobileSheet(null)}
+            />
 
-                                return (
-                                    <Link
-                                        key={item.label}
-                                        href={item.href}
-                                        onClick={() => setMobileSheetOpen(false)}
-                                        className={cn(
-                                            "rounded-xl px-4 py-3 text-sm font-medium text-[#1f321c] transition-colors duration-150 hover:bg-[#716f49]/10",
-                                            isActive && "bg-[#716f49]/15 text-[#716f49]"
-                                        )}
-                                    >
-                                        {item.label}
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
+            <MobileNavSheet
+                open={mobileSheet === "admin"}
+                title={ADMIN_NAV_LABEL}
+                groups={[{ label: ADMIN_NAV_LABEL, icon: ADMIN_NAV_ICON, items: ADMIN_NAV_ITEMS }]}
+                onClose={() => setMobileSheet(null)}
+            />
         </>
     );
 }

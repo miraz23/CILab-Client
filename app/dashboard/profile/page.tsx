@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { fetchUserProfile, type UserProfile } from "@/lib/api/users/profile";
-import ProfileForm from "@/components/dashboard/profile/ProfileForm";
+import ProfileForm from "@/components/dashboard/user/profile/ProfileForm";
 import { ProfileSkeleton } from "@/components/dashboard/skeleton-loader/ProfileSkeleton";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 

@@ -3,11 +3,11 @@
 import { FileText, History, RefreshCw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import UploadStats from '@/components/dashboard/upload/UploadStats';
-import UploadPaperForm from '@/components/dashboard/upload/UploadPaperForm';
-import UploadPresentationForm from '@/components/dashboard/upload/UploadPresentationForm';
-import UploadCategories from '@/components/dashboard/upload/UploadCategories';
-import UploadHistory from '@/components/dashboard/upload/UploadHistory';
+import UploadStats from '@/components/dashboard/user/upload/UploadStats';
+import UploadPaperForm from '@/components/dashboard/user/upload/UploadPaperForm';
+import UploadPresentationForm from '@/components/dashboard/user/upload/UploadPresentationForm';
+import UploadCategories from '@/components/dashboard/user/upload/UploadCategories';
+import UploadHistory from '@/components/dashboard/user/upload/UploadHistory';
 import { UploadSkeleton } from '@/components/dashboard/skeleton-loader/UploadSkeleton';
 import { UploadHistorySkeleton } from '@/components/dashboard/skeleton-loader/UploadHistorySkeleton';
 import { useDashboardLoading } from '@/lib/hooks/use-dashboard-loading';

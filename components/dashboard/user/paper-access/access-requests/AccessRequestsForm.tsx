@@ -38,7 +38,7 @@ import type {
     AccessRequestFormData,
     AccessRequestFormErrors,
     AccessRequestApiResponse,
-} from "@/lib/types/paper-access/access-request";
+} from "@/lib/types/user/paper-access/access-request";
 
 export default function AccessRequestsForm() {
     const [users, setUsers] = useState<User[]>([]);

@@ -1,12 +1,13 @@
 "use client"
 
-import OverviewComponent from '@/components/dashboard/overview/OverviewComponent'
-import StateCards from '@/components/dashboard/overview/StateCards'
-import { OverviewSkeleton } from '@/components/dashboard/skeleton-loader/OverviewSkeleton'
+import OverviewComponent from '@/components/dashboard/user/overview/OverviewComponent'
+import StateCards from '@/components/dashboard/user/overview/StateCards'
+
 import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
 import { useDashboardLoading } from '@/lib/hooks/use-dashboard-loading'
 import { cn } from '@/lib/utils'
+import { OverviewSkeleton } from '@/components/dashboard/skeleton-loader/OverviewSkeleton'
 
 export default function Page() {
   const { isLoading, refresh } = useDashboardLoading()
