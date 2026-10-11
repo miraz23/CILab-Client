@@ -20,4 +20,14 @@ export interface LoginApiResponse {
     message: string;
     userId?: string;
     token?: string;
+    user?: {
+        id: string;
+        name: string;
+        email: string;
+        scholarId: string;
+        institution: string;
+        role: string;
+        appRole: "USER" | "ADMIN";
+        status: "active" | "pending" | "suspended";
+    };
 }

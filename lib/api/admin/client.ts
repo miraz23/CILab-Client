@@ -19,7 +19,6 @@ export function isAdminApiConfigured(): boolean {
 
 export function getAuthToken(): string | null {
     if (typeof window === "undefined") return null;
-
     return window.localStorage.getItem(AUTH_TOKEN_KEY);
 }
 
@@ -37,7 +36,6 @@ export async function adminRequest<T>(
 
     const { body, headers, ...rest } = options;
     const token = getAuthToken();
-
     let response: Response;
 
     try {
@@ -46,25 +44,18 @@ export async function adminRequest<T>(
             ...rest,
             headers: {
                 "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                ...(token ? { Authorization: "Bearer " + token } : {}),
                 ...headers,
             },
             ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         });
     } catch {
-        throw new AdminApiError(
-            "Network error. Check your connection and try again.",
-            0
-        );
+        throw new AdminApiError("Network error. Check your connection and try again.", 0);
     }
 
     let data: T & { success?: boolean; message?: string };
-
     try {
-        data = (await response.json()) as T & {
-            success?: boolean;
-            message?: string;
-        };
+        data = (await response.json()) as T & { success?: boolean; message?: string };
     } catch {
         throw new AdminApiError("Unexpected server response.", response.status);
     }
@@ -75,6 +66,5 @@ export async function adminRequest<T>(
             response.status
         );
     }
-
     return data;
 }

@@ -1,7 +1,19 @@
 import type { PlatformStats } from "@/lib/types/admin/analytics";
+import { adminRequest } from "@/lib/api/admin/client";
 
 export async function fetchPlatformStats(): Promise<PlatformStats> {
-    return getMockStats();
+    const response = await adminRequest<{ stats?: PlatformStats }>("/api/admin/analytics");
+    return response.stats ?? {
+        totalUsers: 0,
+        activeUsers: 0,
+        pendingUsers: 0,
+        suspendedUsers: 0,
+        metrics: [],
+        activity: [],
+        roleBreakdown: [],
+        moderation: { pending: 0, approvedThisWeek: 0, rejectedThisWeek: 0, averageReviewHours: 0 },
+        generatedAt: new Date().toISOString(),
+    };
 }
 
 function getMockStats(): PlatformStats {

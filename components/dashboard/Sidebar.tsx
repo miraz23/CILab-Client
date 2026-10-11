@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -71,10 +71,25 @@ export default function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const [paperAccessOpen, setPaperAccessOpen] = useState(true);
     const [adminOpen, setAdminOpen] = useState(true);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [mobileSheet, setMobileSheet] = useState<null | "paper-access" | "admin">(null);
 
     const isPaperAccessActive = PAPER_ACCESS_ITEMS.some((item) => pathname === item.href);
     const isAdminActive = ADMIN_NAV_ITEMS.some((item) => pathname === item.href);
+
+    useEffect(() => {
+        const syncRole = () => {
+            try {
+                const user = JSON.parse(localStorage.getItem("user") || "null");
+                setIsAdmin(user?.appRole === "ADMIN");
+            } catch {
+                setIsAdmin(false);
+            }
+        };
+        syncRole();
+        window.addEventListener("auth-changed", syncRole);
+        return () => window.removeEventListener("auth-changed", syncRole);
+    }, []);
 
     const expandIfCollapsed = () => {
         if (collapsed) setCollapsed(false);
@@ -161,18 +176,20 @@ export default function Sidebar() {
                         collapsed={collapsed}
                     />
 
-                    <CollapsibleNavGroup
-                        label={ADMIN_NAV_LABEL}
-                        icon={ADMIN_NAV_ICON}
-                        items={ADMIN_NAV_ITEMS}
-                        open={adminOpen}
-                        onOpenChange={(open) => {
-                            expandIfCollapsed();
-                            setAdminOpen(open);
-                        }}
-                        onNavigate={expandIfCollapsed}
-                        collapsed={collapsed}
-                    />
+                    {isAdmin && (
+                        <CollapsibleNavGroup
+                            label={ADMIN_NAV_LABEL}
+                            icon={ADMIN_NAV_ICON}
+                            items={ADMIN_NAV_ITEMS}
+                            open={adminOpen}
+                            onOpenChange={(open) => {
+                                expandIfCollapsed();
+                                setAdminOpen(open);
+                            }}
+                            onNavigate={expandIfCollapsed}
+                            collapsed={collapsed}
+                        />
+                    )}
 
                     <ProfileLink collapsed={collapsed} isActive={pathname === PROFILE_ITEM.href} />
                 </nav>

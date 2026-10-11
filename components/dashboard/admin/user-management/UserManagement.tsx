@@ -121,9 +121,17 @@ export default function UserManagement() {
     const [busyUserId, setBusyUserId] = useState<string | null>(null);
 
     const loadUsers = useCallback(async () => {
-        const fetchedUsers = await fetchManagedUsers();
-
-        setUsers(fetchedUsers);
+        try {
+            const fetchedUsers = await fetchManagedUsers();
+            setUsers(fetchedUsers);
+        } catch (error) {
+            setUsers([]);
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Unable to load users. Please try again."
+            );
+        }
     }, []);
 
     const { isLoading, refresh } = useDashboardLoading(loadUsers);
