@@ -134,12 +134,18 @@ export default function UploadPresentationForm() {
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/presentations/upload`,
         {
           method: "POST",
+          headers: {
+            ...(localStorage.getItem("token")
+              ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
+              : {}),
+          },
           body: formData,
         }
       );
 
       if (!response.ok) {
-        throw new Error("Upload failed");
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.message ?? "Upload failed");
       }
 
       setUploadStatus("success");
@@ -150,10 +156,10 @@ export default function UploadPresentationForm() {
       setType("");
       setDescription("");
       setFile(null);
-    } catch {
+    } catch (error) {
       setUploadStatus("error");
       setErrorMessage(
-        "Failed to upload presentation. Please try again."
+        error instanceof Error ? error.message : "Failed to upload presentation. Please try again."
       );
     } finally {
       setIsUploading(false);
