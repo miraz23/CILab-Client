@@ -143,6 +143,7 @@ export default function UploadPaperForm() {
       setCategory("");
       setTags("");
       setPdfFile(null);
+      window.dispatchEvent(new Event("uploads:changed"));
     } catch (error) {
       setUploadStatus("error");
       setErrorMessage(

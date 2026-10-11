@@ -156,6 +156,7 @@ export default function UploadPresentationForm() {
       setType("");
       setDescription("");
       setFile(null);
+      window.dispatchEvent(new Event("uploads:changed"));
     } catch (error) {
       setUploadStatus("error");
       setErrorMessage(

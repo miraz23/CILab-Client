@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   FileText,
   Presentation,
@@ -103,64 +103,77 @@ function StatCard({
 }
 
 export default function UploadStats() {
+  const [counts, setCounts] = useState({
+    papers: 0,
+    presentations: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    totalDownloads: 0,
+  });
+
+  const loadStats = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/uploads/stats`,
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }
+    );
+
+    if (!response.ok) return;
+    const data = await response.json();
+    if (data.stats) setCounts(data.stats);
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+    window.addEventListener("uploads:changed", loadStats);
+    return () => window.removeEventListener("uploads:changed", loadStats);
+  }, [loadStats]);
+
   const stats = [
     {
       title: "Total Papers",
-      value: "24",
-      subtitle: "8 uploaded this month",
+      value: counts.papers,
+      subtitle: "Uploaded research papers",
       icon: FileText,
       accent: "#5579A6",
-      trend: {
-        value: 12,
-        label: "vs last month",
-      },
     },
     {
       title: "Total Presentations",
-      value: "18",
-      subtitle: "5 uploaded this month",
+      value: counts.presentations,
+      subtitle: "Uploaded presentations",
       icon: Presentation,
       accent: "#C58A3A",
-      trend: {
-        value: 8,
-        label: "vs last month",
-      },
     },
     {
       title: "Pending Review",
-      value: "7",
-      subtitle: "3 papers · 4 presentations",
+      value: counts.pending,
+      subtitle: "Awaiting review",
       icon: Clock,
       accent: "#C58A3A",
     },
     {
       title: "Approved",
-      value: "31",
-      subtitle: "22 papers · 9 presentations",
+      value: counts.approved,
+      subtitle: "Approved uploads",
       icon: CheckCircle,
       accent: "#4F8A63",
-      trend: {
-        value: 15,
-        label: "this quarter",
-      },
     },
     {
       title: "Rejected",
-      value: "4",
-      subtitle: "2 papers · 2 presentations",
+      value: counts.rejected,
+      subtitle: "Rejected uploads",
       icon: XCircle,
       accent: "#B85C55",
     },
     {
       title: "Total Downloads",
-      value: "1,247",
-      subtitle: "342 downloads this week",
+      value: counts.totalDownloads,
+      subtitle: "Downloads of your uploads",
       icon: Download,
       accent: "#5579A6",
-      trend: {
-        value: 23,
-        label: "vs last week",
-      },
     },
   ];
 
