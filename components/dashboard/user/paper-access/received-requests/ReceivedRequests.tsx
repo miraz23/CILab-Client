@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Mail, CheckCircle, Clock, XCircle, Eye, Download, QrCode, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,89 +9,7 @@ import { ReceivedRequestsSkeleton } from "@/components/dashboard/skeleton-loader
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import { cn } from "@/lib/utils";
 import { QRCodeSVG as QRCode } from "qrcode.react";
-
-interface ReceivedRequest {
-    id: string;
-    fromUser: {
-        id: string;
-        name: string;
-        email: string;
-        role: string;
-        institution: string;
-    };
-    shareLink: string;
-    message?: string;
-    expiresAt?: string;
-    status: "pending" | "accepted" | "declined" | "expired";
-    createdAt: string;
-    updatedAt: string;
-}
-
-const MOCK_REQUESTS: ReceivedRequest[] = [
-    {
-        id: "1",
-        fromUser: {
-            id: "1",
-            name: "Dr. Sarah Chen",
-            email: "sarah.chen@university.edu",
-            role: "Professor",
-            institution: "Stanford University",
-        },
-        shareLink: "https://drive.google.com/file/d/1abc123/view",
-        message: "Hi, I'm sharing my latest research paper on Graph Neural Networks. Would love your feedback!",
-        expiresAt: "2026-09-15",
-        status: "pending",
-        createdAt: "2026-08-20T10:30:00Z",
-        updatedAt: "2026-08-20T10:30:00Z",
-    },
-    {
-        id: "2",
-        fromUser: {
-            id: "2",
-            name: "Alex Rivera",
-            email: "alex.rivera@lab.org",
-            role: "PhD Student",
-            institution: "MIT",
-        },
-        shareLink: "https://arxiv.org/abs/2026.12345",
-        message: "Sharing the preprint of our Computer Vision paper.",
-        expiresAt: "2026-09-01",
-        status: "accepted",
-        createdAt: "2026-08-18T14:20:00Z",
-        updatedAt: "2026-08-19T09:15:00Z",
-    },
-    {
-        id: "3",
-        fromUser: {
-            id: "3",
-            name: "Priya Sharma",
-            email: "priya.sharma@research.institute",
-            role: "Research Scientist",
-            institution: "Google Research",
-        },
-        shareLink: "https://example.com/paper/ml-optimization",
-        message: "Here's the optimization techniques paper we discussed.",
-        expiresAt: "2026-08-25",
-        status: "declined",
-        createdAt: "2026-08-15T11:00:00Z",
-        updatedAt: "2026-08-16T16:30:00Z",
-    },
-    {
-        id: "4",
-        fromUser: {
-            id: "4",
-            name: "Marcus Johnson",
-            email: "marcus.j@company.com",
-            role: "AI/ML Engineer",
-            institution: "OpenAI",
-        },
-        shareLink: "https://github.com/user/rl-paper",
-        message: "Reinforcement Learning research paper with code.",
-        status: "pending",
-        createdAt: "2026-08-22T09:45:00Z",
-        updatedAt: "2026-08-22T09:45:00Z",
-    },
-];
+import { fetchReceivedRequests, updateAccessRequest, type ReceivedRequest } from "@/lib/api/paper-access/access-requests";
 
 const STATUS_CONFIG = {
     pending: {
@@ -158,30 +76,22 @@ export default function ReceivedRequests() {
     const [requests, setRequests] = useState<ReceivedRequest[]>([]);
     const [filter, setFilter] = useState<"all" | "pending" | "accepted" | "declined">("all");
     const [openQrId, setOpenQrId] = useState<string | null>(null);
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const loadRequests = useCallback(
-        () =>
-            new Promise<void>((resolve) => {
-                if (timerRef.current) clearTimeout(timerRef.current);
-
-                timerRef.current = setTimeout(() => {
-                    timerRef.current = null;
-                    setRequests(MOCK_REQUESTS);
-                    resolve();
-                }, 500);
-            }),
+        async () => {
+            setErrorMessage("");
+            try {
+                setRequests(await fetchReceivedRequests());
+            } catch (error) {
+                setRequests([]);
+                setErrorMessage(error instanceof Error ? error.message : "Unable to load requests.");
+            }
+        },
         []
     );
 
     const { isLoading, refresh } = useDashboardLoading(loadRequests);
-
-    useEffect(
-        () => () => {
-            if (timerRef.current) clearTimeout(timerRef.current);
-        },
-        []
-    );
 
     const filteredRequests = requests.filter((req) => {
         if (filter === "all") return true;
@@ -205,6 +115,21 @@ export default function ReceivedRequests() {
     const isExpired = (expiresAt?: string) => {
         if (!expiresAt) return false;
         return new Date(expiresAt) < new Date();
+    };
+
+    const handleDecision = async (requestId: string, status: "accepted" | "declined") => {
+        try {
+            await updateAccessRequest(requestId, status);
+            setRequests((current) =>
+                current.map((request) =>
+                    request.id === requestId
+                        ? { ...request, status, updatedAt: new Date().toISOString() }
+                        : request
+                )
+            );
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : "Unable to update request.");
+        }
     };
 
     return (
@@ -270,6 +195,12 @@ export default function ReceivedRequests() {
 
             {isLoading ? (
                 <ReceivedRequestsSkeleton showStats={false} />
+            ) : errorMessage ? (
+                <Card className="rounded-2xl border border-[#E4C2BC] bg-[#FBF0EE] p-12 text-center">
+                    <XCircle className="mx-auto mb-4 h-12 w-12 text-[#A45B4B]" aria-hidden />
+                    <h3 className="mb-1 text-lg font-medium text-[#873F34]">Unable to load requests</h3>
+                    <p className="text-sm text-[#9A5A50]">{errorMessage}</p>
+                </Card>
             ) : filteredRequests.length === 0 ? (
                 <Card className="rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE] p-12 text-center">
                     <Mail className="mx-auto mb-4 h-16 w-16 text-[#B3B0A4]" aria-hidden />
@@ -390,6 +321,7 @@ export default function ReceivedRequests() {
                                                     <Button
                                                         type="button"
                                                         size="sm"
+                                                        onClick={() => handleDecision(request.id, "accepted")}
                                                         className="rounded-lg bg-[#716F49] text-sm font-medium text-white shadow-[0_5px_15px_rgba(40,40,25,0.2)] hover:bg-[#625F3F]"
                                                     >
                                                         <CheckCircle className="mr-1 h-3.5 w-3.5" aria-hidden />
@@ -399,6 +331,7 @@ export default function ReceivedRequests() {
                                                         type="button"
                                                         variant="outline"
                                                         size="sm"
+                                                        onClick={() => handleDecision(request.id, "declined")}
                                                         className="rounded-lg border-[#E4C2BC] text-[#A45B4B] hover:bg-[#FBF0EE]"
                                                     >
                                                         <XCircle className="mr-1 h-3.5 w-3.5" aria-hidden />

@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { AccessRequestsSkeleton } from "@/components/dashboard/skeleton-loader/AccessRequestsSkeleton";
 
 import { fetchUsers } from "@/lib/api/paper-access/users";
+import { createAccessRequest } from "@/lib/api/paper-access/access-requests";
 
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 
@@ -37,11 +38,11 @@ import type {
     User,
     AccessRequestFormData,
     AccessRequestFormErrors,
-    AccessRequestApiResponse,
 } from "@/lib/types/user/paper-access/access-request";
 
 export default function AccessRequestsForm() {
     const [users, setUsers] = useState<User[]>([]);
+    const [usersError, setUsersError] = useState("");
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -66,11 +67,17 @@ export default function AccessRequestsForm() {
 
     const loadUsers = useCallback(async () => {
         try {
+            setUsersError("");
             const fetchedUsers = await fetchUsers();
 
             setUsers(fetchedUsers);
         } catch (error) {
-            console.error("Failed to load users:", error);
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Unable to load collaborators.";
+            setUsersError(message);
+            setUsers([]);
         }
     }, []);
 
@@ -199,36 +206,7 @@ export default function AccessRequestsForm() {
         setErrorMessage("");
 
         try {
-            const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
-
-            const endpoint = SERVER_URL
-                ? `${SERVER_URL}/api/access-requests`
-                : "/api/mock-access-request";
-
-            const response = await fetch(endpoint, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) {
-                const errorData = await response
-                    .json()
-                    .catch(() => ({}));
-
-                throw new Error(
-                    errorData.message ||
-                    "Failed to create access request"
-                );
-            }
-
-            const data: AccessRequestApiResponse =
-                await response.json();
-
-            console.log(data);
+            await createAccessRequest(formData);
 
             setSubmitStatus("success");
 
@@ -572,7 +550,17 @@ export default function AccessRequestsForm() {
 
                                     {/* USERS */}
 
-                                    {filteredUsers.length === 0 ? (
+                                    {usersError ? (
+                                        <div className="py-10 text-center">
+                                            <UserX className="mx-auto mb-3 h-8 w-8 text-[#A45B4B]" />
+                                            <p className="text-xs font-medium text-[#873F34]">
+                                                Unable to load collaborators
+                                            </p>
+                                            <p className="mt-1 text-[11px] text-[#9A5A50]">
+                                                {usersError}
+                                            </p>
+                                        </div>
+                                    ) : filteredUsers.length === 0 ? (
                                         <div className="py-10 text-center">
 
                                             <UserX className="mx-auto mb-3 h-8 w-8 text-[#B3B0A4]" />
