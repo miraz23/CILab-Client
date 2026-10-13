@@ -49,7 +49,7 @@ const SERIES = [
     { key: "uploads", label: "Uploads", color: "#5579A6" },
     { key: "approvals", label: "Approvals", color: "#4F8A63" },
     { key: "accessRequests", label: "Access requests", color: "#C58A3A" },
-    { key: "meetings", label: "Supervisor sessions", color: "#8A6A9C" },
+    { key: "meetings", label: "Availability slots", color: "#8A6A9C" },
 ] as const;
 
 const ROLE_COLORS = ["#716F49", "#5579A6", "#C58A3A", "#4F8A63", "#8A6A9C", "#B85C55", "#8E625D", "#85897F"];
