@@ -62,6 +62,7 @@ export interface AnnouncementsResponse {
     message: string;
     announcements?: Announcement[];
     total?: number;
+    announcement?: Announcement;
 }
 
 export interface AnnouncementMutationPayload extends AnnouncementFormData {

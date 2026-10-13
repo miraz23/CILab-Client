@@ -254,7 +254,7 @@ export default function AnnouncementManager() {
         setIsSaving(true);
 
         try {
-            await upsertAnnouncement({
+            const response = await upsertAnnouncement({
                 ...formData,
                 title: formData.title.trim(),
                 body: formData.body.trim(),
@@ -264,11 +264,12 @@ export default function AnnouncementManager() {
 
             setAnnouncements((current) => {
                 const nextStatus: AnnouncementStatus = intent;
+                const savedAnnouncement = response.announcement;
 
                 if (editingId) {
                     return current.map((item) =>
                         item.id === editingId
-                            ? {
+                            ? savedAnnouncement ?? {
                                 ...item,
                                 ...formData,
                                 status: nextStatus,
@@ -279,7 +280,7 @@ export default function AnnouncementManager() {
                 }
 
                 return [
-                    {
+                    savedAnnouncement ?? {
                         id: `local-announcement-${Date.now()}`,
                         ...formData,
                         status: nextStatus,
