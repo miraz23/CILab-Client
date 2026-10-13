@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AlertCircle, CalendarClock, CheckCircle, XCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 import { DAY_OF_WEEK_LABELS } from "@/lib/types/admin/schedule";
 import type {
@@ -9,7 +9,6 @@ import type {
     AvailabilitySlotFormData,
     AvailabilitySlotFormErrors,
     DayOfWeek,
-    MeetingStatus,
 } from "@/lib/types/admin/schedule";
 
 export const FIELD_LABEL_CLASS = "text-xs font-semibold uppercase tracking-wide text-[#5E5D50]";
@@ -30,37 +29,6 @@ export const DAY_OPTIONS = (Object.keys(
     value: String(day),
     label: DAY_OF_WEEK_LABELS[day],
 }));
-
-export const MEETING_STATUS_CONFIG: Record<
-    MeetingStatus,
-    { label: string; icon: React.ComponentType<{ className?: string }>; badgeClass: string }
-> = {
-    pending: {
-        label: "Pending",
-        icon: CalendarClock,
-        badgeClass: "bg-[#FBF3E4] text-[#8A6420] border border-[#EBD9AE]",
-    },
-    confirmed: {
-        label: "Confirmed",
-        icon: CheckCircle,
-        badgeClass: "bg-[#EAF0EA] text-[#4F8A63] border border-[#D8E2D9]",
-    },
-    declined: {
-        label: "Declined",
-        icon: XCircle,
-        badgeClass: "bg-[#FBF0EE] text-[#A45B4B] border border-[#E4C2BC]",
-    },
-    completed: {
-        label: "Completed",
-        icon: CheckCircle,
-        badgeClass: "bg-[#ECEBE4] text-[#5E5D50] border border-[#DEDCD3]",
-    },
-    cancelled: {
-        label: "Cancelled",
-        icon: XCircle,
-        badgeClass: "bg-[#F1F0EA] text-[#85897F] border border-[#DEDCD3]",
-    },
-};
 
 export function FieldError({ id, message }: { id: string; message?: string }) {
     if (!message) return null;
@@ -152,10 +120,6 @@ export function validateSlotForm(
 ): AvailabilitySlotFormErrors {
     const errors: AvailabilitySlotFormErrors = {};
 
-    if (!formData.supervisorId) {
-        errors.supervisorId = "Choose the supervisor this slot belongs to.";
-    }
-
     if (!formData.startTime) {
         errors.startTime = "Start time is required.";
     }
@@ -174,12 +138,6 @@ export function validateSlotForm(
 
     if (!formData.place.trim()) {
         errors.place = "Add a room or a meeting link.";
-    }
-
-    const capacity = Number(formData.capacity);
-
-    if (!Number.isInteger(capacity) || capacity < 1) {
-        errors.capacity = "Capacity must be a whole number of at least 1.";
     }
 
     return errors;
