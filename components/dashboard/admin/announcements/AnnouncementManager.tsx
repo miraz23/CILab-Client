@@ -3,12 +3,16 @@
 import { useCallback, useMemo, useState } from "react";
 import {
     Archive,
-    BellRing,
+    CalendarClock,
     FileEdit,
+    Inbox,
+    MapPin,
     Megaphone,
+    Mic,
     Pencil,
     Pin,
     Plus,
+    Presentation,
     Save,
     Search,
     Send,
@@ -44,7 +48,11 @@ import {
 } from "@/lib/api/admin/announcements";
 import { confirmAction } from "@/lib/confirm";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
-import { ANNOUNCEMENT_AUDIENCES, ANNOUNCEMENT_PRIORITIES } from "@/lib/types/admin/announcement";
+import {
+    ANNOUNCEMENT_AUDIENCES,
+    ANNOUNCEMENT_KINDS,
+    ANNOUNCEMENT_PRIORITIES,
+} from "@/lib/types/admin/announcement";
 import type {
     Announcement,
     AnnouncementAudience,
@@ -94,30 +102,13 @@ const PRIORITY_BADGE_CLASS: Record<AnnouncementPriority, string> = {
     urgent: "bg-[#FBF0EE] text-[#A45B4B] border border-[#E4C2BC]",
 };
 
-const EMPTY_FORMS: Record<AnnouncementKind, AnnouncementFormData> = {
-    announcement: {
-        kind: "announcement",
-        title: "",
-        body: "",
-        audience: "all",
-        priority: "normal",
-        pinned: false,
-        publishAt: "",
-    },
-    notice: {
-        kind: "notice",
-        title: "",
-        body: "",
-        audience: "all",
-        priority: "normal",
-        pinned: false,
-        publishAt: "",
-    },
-};
-
 interface KindCopy {
     label: string;
+    plural: string;
     noun: string;
+    icon: typeof Megaphone;
+    badgeClass: string;
+    iconClass: string;
     composeTitle: string;
     editTitle: string;
     composeHint: string;
@@ -128,16 +119,17 @@ interface KindCopy {
     pinLabel: string;
     publishLabel: string;
     updatePublishLabel: string;
-    listTitle: string;
-    listHint: string;
-    emptyTitle: string;
-    emptyDescription: string;
+    publishedToast: string;
 }
 
 const KIND_COPY: Record<AnnouncementKind, KindCopy> = {
     announcement: {
         label: "Announcement",
+        plural: "Announcements",
         noun: "announcement",
+        icon: Megaphone,
+        badgeClass: "bg-[#E4E6DC] text-[#5C6446] border border-[#CFD3C0]",
+        iconClass: "bg-[#E4E6DC] text-[#5C6446]",
         composeTitle: "Compose announcement",
         editTitle: "Edit announcement",
         composeHint: "Draft it, then publish to the selected audience when you are ready.",
@@ -149,14 +141,15 @@ const KIND_COPY: Record<AnnouncementKind, KindCopy> = {
         pinLabel: "Pin to the top of the notice board",
         publishLabel: "Publish now",
         updatePublishLabel: "Update & publish",
-        listTitle: "Announcements",
-        listHint: "Everything you have drafted, published, or archived.",
-        emptyTitle: "No announcements yet",
-        emptyDescription: "Compose an announcement above. Drafts stay private until you publish them.",
+        publishedToast: "Announcement published to the lab.",
     },
     notice: {
         label: "Notice",
+        plural: "Notices",
         noun: "notice",
+        icon: StickyNote,
+        badgeClass: "bg-[#ECE7DA] text-[#8A6420] border border-[#E3D6B4]",
+        iconClass: "bg-[#ECE7DA] text-[#8A6420]",
         composeTitle: "Post a notice",
         editTitle: "Edit notice",
         composeHint: "Keep it short - notices are for quick, at-a-glance updates.",
@@ -167,10 +160,66 @@ const KIND_COPY: Record<AnnouncementKind, KindCopy> = {
         pinLabel: "Pin this notice to the top of the board",
         publishLabel: "Post notice",
         updatePublishLabel: "Update notice",
-        listTitle: "Notices",
-        listHint: "Short updates posted to the lab board.",
-        emptyTitle: "No notices yet",
-        emptyDescription: "Post a notice above. It appears here as soon as you publish it.",
+        publishedToast: "Notice posted to the board.",
+    },
+    seminar: {
+        label: "Seminar",
+        plural: "Seminar Schedules",
+        noun: "seminar",
+        icon: Presentation,
+        badgeClass: "bg-[#E3E8F0] text-[#5579A6] border border-[#CDD7E6]",
+        iconClass: "bg-[#E3E8F0] text-[#5579A6]",
+        composeTitle: "Schedule a seminar",
+        editTitle: "Edit seminar",
+        composeHint: "Add the session details so everyone knows when and where to attend.",
+        titleLabel: "Seminar title",
+        titlePlaceholder: "e.g. Graph Neural Networks for Materials Discovery",
+        bodyLabel: "Abstract / details",
+        bodyPlaceholder:
+            "Summarize the talk, who it is for, and what attendees will take away…",
+        pinLabel: "Pin this seminar to the top of the board",
+        publishLabel: "Publish schedule",
+        updatePublishLabel: "Update & publish",
+        publishedToast: "Seminar scheduled.",
+    },
+};
+
+const EMPTY_FORMS: Record<AnnouncementKind, AnnouncementFormData> = {
+    announcement: {
+        kind: "announcement",
+        title: "",
+        body: "",
+        audience: "all",
+        priority: "normal",
+        pinned: false,
+        publishAt: "",
+        eventAt: "",
+        speaker: "",
+        venue: "",
+    },
+    notice: {
+        kind: "notice",
+        title: "",
+        body: "",
+        audience: "all",
+        priority: "normal",
+        pinned: false,
+        publishAt: "",
+        eventAt: "",
+        speaker: "",
+        venue: "",
+    },
+    seminar: {
+        kind: "seminar",
+        title: "",
+        body: "",
+        audience: "all",
+        priority: "normal",
+        pinned: false,
+        publishAt: "",
+        eventAt: "",
+        speaker: "",
+        venue: "",
     },
 };
 
@@ -194,6 +243,20 @@ function formatDate(value: string) {
     });
 }
 
+function formatDateTime(value: string) {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return value;
+
+    return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+    });
+}
+
 function toFormData(item: Announcement): AnnouncementFormData {
     return {
         kind: item.kind,
@@ -203,6 +266,9 @@ function toFormData(item: Announcement): AnnouncementFormData {
         priority: item.priority,
         pinned: item.pinned,
         publishAt: item.publishAt?.slice(0, 16) ?? "",
+        eventAt: item.eventAt?.slice(0, 16) ?? "",
+        speaker: item.speaker ?? "",
+        venue: item.venue ?? "",
     };
 }
 
@@ -225,16 +291,32 @@ function validateForm(
         errors.body = "Add a little more detail (at least 20 characters).";
     }
 
-    if (!formData.audience) {
-        errors.audience = "Choose who should see this.";
+    if (kind !== "notice") {
+        if (!formData.audience) {
+            errors.audience = "Choose who should see this.";
+        }
+
+        if (!formData.priority) {
+            errors.priority = "Choose a priority.";
+        }
     }
 
-    if (!formData.priority) {
-        errors.priority = "Choose a priority.";
+    if (kind === "announcement" && formData.publishAt) {
+        if (new Date(formData.publishAt) < new Date()) {
+            errors.publishAt = "Scheduled posts must be in the future.";
+        }
     }
 
-    if (formData.publishAt && new Date(formData.publishAt) < new Date()) {
-        errors.publishAt = "Scheduled posts must be in the future.";
+    if (kind === "seminar") {
+        if (!formData.eventAt) {
+            errors.eventAt = "Pick the date and time for this seminar.";
+        } else if (new Date(formData.eventAt) < new Date()) {
+            errors.eventAt = "Pick a date and time in the future.";
+        }
+
+        if (!formData.speaker.trim()) {
+            errors.speaker = "Add the speaker or host for this seminar.";
+        }
     }
 
     return errors;
@@ -242,6 +324,7 @@ function validateForm(
 
 interface ComposerCardProps {
     kind: AnnouncementKind;
+    onKindChange: (kind: AnnouncementKind) => void;
     editing: Announcement | null;
     onCancelEdit: () => void;
     onSaved: (
@@ -251,21 +334,44 @@ interface ComposerCardProps {
     ) => void;
 }
 
-function ComposerCard({ kind, editing, onCancelEdit, onSaved }: ComposerCardProps) {
+function ComposerCard({
+    kind,
+    onKindChange,
+    editing,
+    onCancelEdit,
+    onSaved,
+}: ComposerCardProps) {
     const copy = KIND_COPY[kind];
-    const isAnnouncement = kind === "announcement";
+    const isEditing = Boolean(editing);
 
-    const [formData, setFormData] = useState<AnnouncementFormData>(() =>
-        editing ? toFormData(editing) : EMPTY_FORMS[kind]
-    );
+    const [forms, setForms] = useState<Record<AnnouncementKind, AnnouncementFormData>>(() => {
+        const initial = {
+            announcement: { ...EMPTY_FORMS.announcement },
+            notice: { ...EMPTY_FORMS.notice },
+            seminar: { ...EMPTY_FORMS.seminar },
+        };
+
+        if (editing) {
+            initial[editing.kind] = toFormData(editing);
+        }
+
+        return initial;
+    });
+
     const [errors, setErrors] = useState<AnnouncementFormErrors>({});
     const [isSaving, setIsSaving] = useState(false);
+
+    const formData = forms[kind];
+    const showDistribution = kind !== "notice";
 
     const handleChange = <K extends keyof AnnouncementFormData>(
         key: K,
         value: AnnouncementFormData[K]
     ) => {
-        setFormData((current) => ({ ...current, [key]: value }));
+        setForms((current) => ({
+            ...current,
+            [kind]: { ...current[kind], [key]: value } as AnnouncementFormData,
+        }));
         setErrors((current) => ({ ...current, [key]: undefined }));
     };
 
@@ -286,6 +392,8 @@ function ComposerCard({ kind, editing, onCancelEdit, onSaved }: ComposerCardProp
                 ...formData,
                 title,
                 body,
+                speaker: formData.speaker.trim(),
+                venue: formData.venue.trim(),
                 announcementId: editing?.id,
                 intent,
             });
@@ -300,12 +408,18 @@ function ComposerCard({ kind, editing, onCancelEdit, onSaved }: ComposerCardProp
                 status: intent,
                 pinned: formData.pinned,
                 publishAt: formData.publishAt || undefined,
+                eventAt: formData.eventAt || undefined,
+                speaker: formData.speaker || undefined,
+                venue: formData.venue || undefined,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 author: { id: "current-admin", name: "You" },
             };
 
-            setFormData(EMPTY_FORMS[kind]);
+            setForms((current) => ({
+                ...current,
+                [kind]: { ...EMPTY_FORMS[kind] },
+            }));
             setErrors({});
 
             onSaved({ ...saved, kind: saved.kind ?? kind }, intent, editing?.id ?? null);
@@ -314,9 +428,7 @@ function ComposerCard({ kind, editing, onCancelEdit, onSaved }: ComposerCardProp
                 editing
                     ? `${copy.label} updated.`
                     : intent === "published"
-                        ? isAnnouncement
-                            ? "Announcement published to the lab."
-                            : "Notice posted to the board."
+                        ? copy.publishedToast
                         : `${copy.label} draft saved.`
             );
         } catch (error) {
@@ -356,6 +468,55 @@ function ComposerCard({ kind, editing, onCancelEdit, onSaved }: ComposerCardProp
 
             <CardContent className="space-y-4 p-5">
                 <div>
+                    <span className={FIELD_LABEL_CLASS}>Type</span>
+
+                    <div
+                        role="group"
+                        aria-label="Choose what you are publishing"
+                        className="mt-2 grid grid-cols-3 gap-1 rounded-lg border border-[#D9D8CD] bg-[#E8E7DD] p-1"
+                    >
+                        {ANNOUNCEMENT_KINDS.map((option) => {
+                            const optionCopy = KIND_COPY[option];
+                            const Icon = optionCopy.icon;
+                            const isActive = option === kind;
+                            const isLocked = isEditing && !isActive;
+
+                            return (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    disabled={isLocked}
+                                    aria-pressed={isActive}
+                                    onClick={() => {
+                                        if (option === kind) return;
+
+                                        onKindChange(option);
+                                        setErrors({});
+                                    }}
+                                    className={cn(
+                                        "flex flex-col items-center gap-1 rounded-md px-2 py-2 text-xs font-medium transition-colors",
+                                        isActive
+                                            ? "bg-[#656748] text-white shadow-sm"
+                                            : "text-[#737568] hover:text-[#41482D]",
+                                        isLocked && "cursor-not-allowed opacity-40 hover:text-[#737568]"
+                                    )}
+                                >
+                                    <Icon className="h-4 w-4" aria-hidden />
+
+                                    {optionCopy.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {isEditing && (
+                        <p className="mt-2 text-xs text-[#89877B]">
+                            Type is locked while editing this post.
+                        </p>
+                    )}
+                </div>
+
+                <div>
                     <Label htmlFor={`${kind}-title`} className={FIELD_LABEL_CLASS}>
                         {copy.titleLabel}
                     </Label>
@@ -382,7 +543,7 @@ function ComposerCard({ kind, editing, onCancelEdit, onSaved }: ComposerCardProp
 
                     <textarea
                         id={`${kind}-body`}
-                        rows={isAnnouncement ? 6 : 4}
+                        rows={kind === "notice" ? 4 : 6}
                         value={formData.body}
                         onChange={(event) => handleChange("body", event.target.value)}
                         placeholder={copy.bodyPlaceholder}
@@ -395,103 +556,173 @@ function ComposerCard({ kind, editing, onCancelEdit, onSaved }: ComposerCardProp
                     )}
                 </div>
 
-                {isAnnouncement && (
+                {kind === "seminar" && (
                     <>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <Label htmlFor="announcement-audience" className={FIELD_LABEL_CLASS}>
-                                    Audience
+                                <Label htmlFor="seminar-event-at" className={FIELD_LABEL_CLASS}>
+                                    Date &amp; time
                                 </Label>
 
-                                <Select
-                                    value={formData.audience}
-                                    onValueChange={(value) =>
-                                        handleChange("audience", value as AnnouncementAudience)
+                                <Input
+                                    id="seminar-event-at"
+                                    type="datetime-local"
+                                    value={formData.eventAt}
+                                    onChange={(event) =>
+                                        handleChange("eventAt", event.target.value)
                                     }
-                                >
-                                    <SelectTrigger
-                                        id="announcement-audience"
-                                        className={cn(TRIGGER_CLASS, "mt-2")}
-                                    >
-                                        <SelectValue />
-                                    </SelectTrigger>
+                                    className={cn(FIELD_CLASS, "mt-2")}
+                                    aria-invalid={Boolean(errors.eventAt)}
+                                />
 
-                                    <SelectContent className="border-[#D8D5C9] bg-[#F4F3EE]">
-                                        <SelectGroup>
-                                            {ANNOUNCEMENT_AUDIENCES.map((audience) => (
-                                                <SelectItem
-                                                    key={audience}
-                                                    value={audience}
-                                                    className={SELECT_ITEM_CLASS}
-                                                >
-                                                    {AUDIENCE_LABELS[audience]}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                {errors.eventAt && (
+                                    <p className="mt-2 text-xs text-[#A45B4B]">
+                                        {errors.eventAt}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
-                                <Label htmlFor="announcement-priority" className={FIELD_LABEL_CLASS}>
-                                    Priority
+                                <Label htmlFor="seminar-speaker" className={FIELD_LABEL_CLASS}>
+                                    Speaker / host
                                 </Label>
 
-                                <Select
-                                    value={formData.priority}
-                                    onValueChange={(value) =>
-                                        handleChange("priority", value as AnnouncementPriority)
+                                <Input
+                                    id="seminar-speaker"
+                                    type="text"
+                                    placeholder="e.g. Dr. Ayesha Rahman"
+                                    value={formData.speaker}
+                                    onChange={(event) =>
+                                        handleChange("speaker", event.target.value)
                                     }
-                                >
-                                    <SelectTrigger
-                                        id="announcement-priority"
-                                        className={cn(TRIGGER_CLASS, "mt-2")}
-                                    >
-                                        <SelectValue />
-                                    </SelectTrigger>
+                                    className={cn(FIELD_CLASS, "mt-2")}
+                                    aria-invalid={Boolean(errors.speaker)}
+                                />
 
-                                    <SelectContent className="border-[#D8D5C9] bg-[#F4F3EE]">
-                                        <SelectGroup>
-                                            {ANNOUNCEMENT_PRIORITIES.map((priority) => (
-                                                <SelectItem
-                                                    key={priority}
-                                                    value={priority}
-                                                    className={SELECT_ITEM_CLASS}
-                                                >
-                                                    {PRIORITY_LABELS[priority]}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                {errors.speaker && (
+                                    <p className="mt-2 text-xs text-[#A45B4B]">
+                                        {errors.speaker}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
                         <div>
-                            <Label htmlFor="announcement-publish-at" className={FIELD_LABEL_CLASS}>
-                                Schedule for
+                            <Label htmlFor="seminar-venue" className={FIELD_LABEL_CLASS}>
+                                Venue / location
                             </Label>
 
                             <Input
-                                id="announcement-publish-at"
-                                type="datetime-local"
-                                value={formData.publishAt}
-                                onChange={(event) =>
-                                    handleChange("publishAt", event.target.value)
-                                }
+                                id="seminar-venue"
+                                type="text"
+                                placeholder="e.g. CILab Seminar Room, Block B"
+                                value={formData.venue}
+                                onChange={(event) => handleChange("venue", event.target.value)}
                                 className={cn(FIELD_CLASS, "mt-2")}
-                                aria-invalid={Boolean(errors.publishAt)}
                             />
 
-                            {errors.publishAt && (
-                                <p className="mt-2 text-xs text-[#A45B4B]">{errors.publishAt}</p>
-                            )}
-
                             <p className="mt-2 text-xs text-[#89877B]">
-                                Leave empty to publish as soon as you save.
+                                Leave empty if the seminar is online.
                             </p>
                         </div>
                     </>
+                )}
+
+                {showDistribution && (
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor={`${kind}-audience`} className={FIELD_LABEL_CLASS}>
+                                Audience
+                            </Label>
+
+                            <Select
+                                value={formData.audience}
+                                onValueChange={(value) =>
+                                    handleChange("audience", value as AnnouncementAudience)
+                                }
+                            >
+                                <SelectTrigger
+                                    id={`${kind}-audience`}
+                                    className={cn(TRIGGER_CLASS, "mt-2")}
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+
+                                <SelectContent className="border-[#D8D5C9] bg-[#F4F3EE]">
+                                    <SelectGroup>
+                                        {ANNOUNCEMENT_AUDIENCES.map((audience) => (
+                                            <SelectItem
+                                                key={audience}
+                                                value={audience}
+                                                className={SELECT_ITEM_CLASS}
+                                            >
+                                                {AUDIENCE_LABELS[audience]}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div>
+                            <Label htmlFor={`${kind}-priority`} className={FIELD_LABEL_CLASS}>
+                                Priority
+                            </Label>
+
+                            <Select
+                                value={formData.priority}
+                                onValueChange={(value) =>
+                                    handleChange("priority", value as AnnouncementPriority)
+                                }
+                            >
+                                <SelectTrigger
+                                    id={`${kind}-priority`}
+                                    className={cn(TRIGGER_CLASS, "mt-2")}
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+
+                                <SelectContent className="border-[#D8D5C9] bg-[#F4F3EE]">
+                                    <SelectGroup>
+                                        {ANNOUNCEMENT_PRIORITIES.map((priority) => (
+                                            <SelectItem
+                                                key={priority}
+                                                value={priority}
+                                                className={SELECT_ITEM_CLASS}
+                                            >
+                                                {PRIORITY_LABELS[priority]}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                )}
+
+                {kind === "announcement" && (
+                    <div>
+                        <Label htmlFor="announcement-publish-at" className={FIELD_LABEL_CLASS}>
+                            Schedule for
+                        </Label>
+
+                        <Input
+                            id="announcement-publish-at"
+                            type="datetime-local"
+                            value={formData.publishAt}
+                            onChange={(event) => handleChange("publishAt", event.target.value)}
+                            className={cn(FIELD_CLASS, "mt-2")}
+                            aria-invalid={Boolean(errors.publishAt)}
+                        />
+
+                        {errors.publishAt && (
+                            <p className="mt-2 text-xs text-[#A45B4B]">{errors.publishAt}</p>
+                        )}
+
+                        <p className="mt-2 text-xs text-[#89877B]">
+                            Leave empty to publish as soon as you save.
+                        </p>
+                    </div>
                 )}
 
                 <label className="flex cursor-pointer items-center gap-2.5 text-sm text-[#2D2D27]">
@@ -534,12 +765,38 @@ function ComposerCard({ kind, editing, onCancelEdit, onSaved }: ComposerCardProp
     );
 }
 
+function ScheduleDetail({
+    icon: Icon,
+    label,
+    value,
+}: {
+    icon: typeof Megaphone;
+    label: string;
+    value: string;
+}) {
+    return (
+        <div className="flex items-start gap-2">
+            <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#969386]" aria-hidden />
+
+            <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-[#969386]">
+                    {label}
+                </p>
+
+                <p className="truncate text-xs font-medium text-[#41423B]">{value}</p>
+            </div>
+        </div>
+    );
+}
+
 interface ListPanelProps {
-    kind: AnnouncementKind;
     items: Announcement[];
-    counts: { all: number; published: number; draft: number; archived: number };
-    status: AnnouncementStatus | "all";
-    onFilterChange: (status: AnnouncementStatus | "all") => void;
+    kindCounts: { all: number; announcement: number; notice: number; seminar: number };
+    kindFilter: AnnouncementKind | "all";
+    onKindFilterChange: (kind: AnnouncementKind | "all") => void;
+    statusCounts: { all: number; published: number; draft: number; archived: number };
+    statusFilter: AnnouncementStatus | "all";
+    onStatusFilterChange: (status: AnnouncementStatus | "all") => void;
     search: string;
     onSearchChange: (value: string) => void;
     busyId: string | null;
@@ -549,11 +806,13 @@ interface ListPanelProps {
 }
 
 function ListPanel({
-    kind,
     items,
-    counts,
-    status,
-    onFilterChange,
+    kindCounts,
+    kindFilter,
+    onKindFilterChange,
+    statusCounts,
+    statusFilter,
+    onStatusFilterChange,
     search,
     onSearchChange,
     busyId,
@@ -561,81 +820,67 @@ function ListPanel({
     onItemStatusChange,
     onDeleteItem,
 }: ListPanelProps) {
-    const copy = KIND_COPY[kind];
-    const isAnnouncement = kind === "announcement";
+    const emptyCopy =
+        kindFilter === "all"
+            ? {
+                title: "Nothing published yet",
+                description:
+                    "Use the form to publish an announcement, post a notice, or schedule a seminar.",
+            }
+            : {
+                title: `No ${KIND_COPY[kindFilter].plural.toLowerCase()} here`,
+                description: `Try a different filter or create a new ${KIND_COPY[kindFilter].noun}.`,
+            };
 
     return (
         <div className="space-y-5">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <span
-                        className={cn(
-                            "flex size-9 shrink-0 items-center justify-center rounded-xl",
-                            isAnnouncement
-                                ? "bg-[#E4E6DC] text-[#5C6446]"
-                                : "bg-[#ECE7DA] text-[#8A6420]"
-                        )}
-                    >
-                        {isAnnouncement ? (
-                            <Megaphone className="h-4 w-4" aria-hidden />
-                        ) : (
-                            <StickyNote className="h-4 w-4" aria-hidden />
-                        )}
-                    </span>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-3">
+                    <AdminFilterChips
+                        label="Filter posts by type"
+                        value={kindFilter}
+                        onValueChange={onKindFilterChange}
+                        options={[
+                            { value: "all", label: "All", count: kindCounts.all },
+                            {
+                                value: "announcement",
+                                label: "Announcements",
+                                count: kindCounts.announcement,
+                            },
+                            { value: "notice", label: "Notices", count: kindCounts.notice },
+                            { value: "seminar", label: "Seminars", count: kindCounts.seminar },
+                        ]}
+                    />
 
-                    <div>
-                        <h3 className="text-sm font-semibold text-[#25251F]">
-                            {copy.listTitle}
-                        </h3>
+                    <div className="relative lg:w-80">
+                        <Search
+                            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#969386]"
+                            aria-hidden
+                        />
 
-                        <p className="mt-0.5 text-xs text-[#777568]">{copy.listHint}</p>
+                        <Input
+                            type="search"
+                            placeholder="Search posts…"
+                            value={search}
+                            onChange={(event) => onSearchChange(event.target.value)}
+                            aria-label="Search posts"
+                            className={cn(FIELD_CLASS, "pl-10")}
+                        />
                     </div>
-                </div>
-
-                <span className="rounded-lg border border-[#DEDCD3] bg-[#ECEBE4] px-2.5 py-1 text-xs font-medium text-[#5E5D50]">
-                    {counts.all} {counts.all === 1 ? copy.noun : `${copy.noun}s`}
-                </span>
-            </div>
-
-            <div className="flex flex-col gap-4 lg:items-end lg:justify-between">
-                <AdminFilterChips
-                    label={`Filter ${copy.noun}s by status`}
-                    value={status}
-                    onValueChange={onFilterChange}
-                    options={[
-                        { value: "all", label: "All", count: counts.all },
-                        { value: "published", label: "Published", count: counts.published },
-                        { value: "draft", label: "Drafts", count: counts.draft },
-                        { value: "archived", label: "Archived", count: counts.archived },
-                    ]}
-                />
-
-                <div className="relative lg:w-80">
-                    <Search
-                        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#969386]"
-                        aria-hidden
-                    />
-
-                    <Input
-                        type="search"
-                        placeholder={`Search ${copy.noun}s…`}
-                        value={search}
-                        onChange={(event) => onSearchChange(event.target.value)}
-                        aria-label={`Search ${copy.noun}s`}
-                        className={cn(FIELD_CLASS, "pl-10")}
-                    />
                 </div>
             </div>
 
             {items.length === 0 ? (
                 <AdminEmptyState
                     icon={Plus}
-                    title={copy.emptyTitle}
-                    description={copy.emptyDescription}
+                    title={emptyCopy.title}
+                    description={emptyCopy.description}
                 />
             ) : (
                 <div className="space-y-4">
                     {items.map((item) => {
+                        const kindCopy = KIND_COPY[item.kind];
+                        const KindIcon = kindCopy.icon;
                         const statusConfig = STATUS_CONFIG[item.status];
                         const isBusy = busyId === item.id;
 
@@ -646,6 +891,17 @@ function ListPanel({
                             >
                                 <CardContent className="p-6">
                                     <div className="flex flex-wrap items-center gap-2">
+                                        <Badge
+                                            className={cn(
+                                                "text-xs font-medium",
+                                                kindCopy.badgeClass
+                                            )}
+                                        >
+                                            <KindIcon className="mr-1 h-3 w-3" aria-hidden />
+
+                                            {kindCopy.label}
+                                        </Badge>
+
                                         {item.pinned && (
                                             <Badge className="border border-[#D9D8CD] bg-[#41482D] text-[#F4F3EE]">
                                                 <Pin className="mr-1 h-3 w-3" aria-hidden />
@@ -684,6 +940,33 @@ function ListPanel({
                                     <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-[#5E5D50]">
                                         {item.body}
                                     </p>
+
+                                    {item.kind === "seminar" &&
+                                        (item.eventAt || item.speaker || item.venue) && (
+                                            <div className="mt-4 grid grid-cols-1 gap-3 rounded-xl border border-[#DEDCD3] bg-[#FBFAF7] p-4 sm:grid-cols-3">
+                                                <ScheduleDetail
+                                                    icon={CalendarClock}
+                                                    label="When"
+                                                    value={
+                                                        item.eventAt
+                                                            ? formatDateTime(item.eventAt)
+                                                            : "Not set"
+                                                    }
+                                                />
+
+                                                <ScheduleDetail
+                                                    icon={Mic}
+                                                    label="Speaker"
+                                                    value={item.speaker || "Not set"}
+                                                />
+
+                                                <ScheduleDetail
+                                                    icon={MapPin}
+                                                    label="Venue"
+                                                    value={item.venue || "Online / TBD"}
+                                                />
+                                            </div>
+                                        )}
 
                                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-[#85897F]">
                                         <span>
@@ -767,13 +1050,12 @@ function ListPanel({
 
 export default function AnnouncementManager() {
     const [items, setItems] = useState<Announcement[]>([]);
-    const [announcementEditing, setAnnouncementEditing] = useState<Announcement | null>(null);
-    const [noticeEditing, setNoticeEditing] = useState<Announcement | null>(null);
+    const [editing, setEditing] = useState<Announcement | null>(null);
+    const [formKind, setFormKind] = useState<AnnouncementKind>("announcement");
+    const [kindFilter, setKindFilter] = useState<AnnouncementKind | "all">("all");
+    const [statusFilter, setStatusFilter] = useState<AnnouncementStatus | "all">("all");
+    const [search, setSearch] = useState("");
     const [busyId, setBusyId] = useState<string | null>(null);
-    const [announcementStatus, setAnnouncementStatus] = useState<AnnouncementStatus | "all">("all");
-    const [announcementSearch, setAnnouncementSearch] = useState("");
-    const [noticeStatus, setNoticeStatus] = useState<AnnouncementStatus | "all">("all");
-    const [noticeSearch, setNoticeSearch] = useState("");
 
     const loadItems = useCallback(async () => {
         const fetched = await fetchAnnouncements();
@@ -785,74 +1067,73 @@ export default function AnnouncementManager() {
 
     const { isLoading, refresh } = useDashboardLoading(loadItems);
 
-    const announcements = useMemo(
-        () => items.filter((item) => item.kind === "announcement"),
+    const kindCounts = useMemo(
+        () => ({
+            all: items.length,
+            announcement: items.filter((item) => item.kind === "announcement").length,
+            notice: items.filter((item) => item.kind === "notice").length,
+            seminar: items.filter((item) => item.kind === "seminar").length,
+        }),
         [items]
     );
 
-    const notices = useMemo(
-        () => items.filter((item) => item.kind === "notice"),
-        [items]
+    const scopedItems = useMemo(
+        () => (kindFilter === "all" ? items : items.filter((item) => item.kind === kindFilter)),
+        [items, kindFilter]
     );
 
-    const announcementCounts = useMemo(() => countByStatus(announcements), [announcements]);
-    const noticeCounts = useMemo(() => countByStatus(notices), [notices]);
+    const statusCounts = useMemo(() => countByStatus(scopedItems), [scopedItems]);
 
-    const stats: AdminStat[] = [
-        {
-            id: "published",
-            label: "Published",
-            value: items.filter((item) => item.status === "published").length,
-            hint: "Live announcements and notices",
-            accent: "#4F8A63",
-            icon: Megaphone,
-        },
-        {
-            id: "drafts",
-            label: "Drafts",
-            value: items.filter((item) => item.status === "draft").length,
-            hint: "Not visible to anyone yet",
-            accent: "#85897F",
-            icon: FileEdit,
-        },
-        {
-            id: "urgent",
-            label: "Urgent",
-            value: items.filter(
-                (item) => item.status === "published" && item.priority === "urgent"
-            ).length,
-            hint: "Published and flagged urgent",
-            accent: "#B85C55",
-            icon: BellRing,
-        },
-        {
-            id: "archived",
-            label: "Archived",
-            value: items.filter((item) => item.status === "archived").length,
-            hint: "Kept for the record",
-            accent: "#5579A6",
-            icon: Archive,
-        },
-    ];
-
-    const filteredAnnouncements = useMemo(
-        () => filterItems(announcements, announcementStatus, announcementSearch),
-        [announcements, announcementStatus, announcementSearch]
+    const visibleItems = useMemo(
+        () => filterItems(scopedItems, statusFilter, search),
+        [scopedItems, statusFilter, search]
     );
 
-    const filteredNotices = useMemo(
-        () => filterItems(notices, noticeStatus, noticeSearch),
-        [notices, noticeStatus, noticeSearch]
+    const stats: AdminStat[] = useMemo(
+        () => [
+            {
+                id: "published",
+                label: "Published",
+                value: items.filter((item) => item.status === "published").length,
+                hint: "Live announcements, notices & seminars",
+                accent: "#4F8A63",
+                icon: Megaphone,
+            },
+            {
+                id: "drafts",
+                label: "Drafts",
+                value: items.filter((item) => item.status === "draft").length,
+                hint: "Not visible to anyone yet",
+                accent: "#85897F",
+                icon: FileEdit,
+            },
+            {
+                id: "seminars",
+                label: "Seminars",
+                value: kindCounts.seminar,
+                hint: "Scheduled talks and sessions",
+                accent: "#5579A6",
+                icon: Presentation,
+            },
+            {
+                id: "archived",
+                label: "Archived",
+                value: items.filter((item) => item.status === "archived").length,
+                hint: "Kept for the record",
+                accent: "#B85C55",
+                icon: Archive,
+            },
+        ],
+        [items, kindCounts]
     );
 
     const handleSaved = (
-        kind: AnnouncementKind,
         saved: Announcement,
         intent: AnnouncementSubmitIntent,
         previousId: string | null
     ) => {
         setItems((current) => {
-            const next: Announcement = { ...saved, kind: saved.kind ?? kind, status: intent };
+            const next: Announcement = { ...saved, status: intent };
 
             if (previousId) {
                 return current.map((item) => (item.id === previousId ? next : item));
@@ -861,19 +1142,12 @@ export default function AnnouncementManager() {
             return [next, ...current];
         });
 
-        if (kind === "announcement") {
-            setAnnouncementEditing(null);
-        } else {
-            setNoticeEditing(null);
-        }
+        setEditing(null);
     };
 
     const handleEdit = (item: Announcement) => {
-        if (item.kind === "notice") {
-            setNoticeEditing(item);
-        } else {
-            setAnnouncementEditing(item);
-        }
+        setEditing(item);
+        setFormKind(item.kind);
     };
 
     const handleStatusChange = async (
@@ -892,6 +1166,9 @@ export default function AnnouncementManager() {
                 priority: item.priority,
                 pinned: item.pinned,
                 publishAt: item.publishAt ?? "",
+                eventAt: item.eventAt ?? "",
+                speaker: item.speaker ?? "",
+                venue: item.venue ?? "",
                 intent: nextStatus,
             });
 
@@ -903,10 +1180,10 @@ export default function AnnouncementManager() {
                 )
             );
 
-            const noun = item.kind === "notice" ? "Notice" : "Announcement";
-
             toast.success(
-                nextStatus === "published" ? `${noun} published.` : `${noun} archived.`
+                nextStatus === "published"
+                    ? `${KIND_COPY[item.kind].label} published.`
+                    : `${KIND_COPY[item.kind].label} archived.`
             );
         } catch (error) {
             toast.error(
@@ -919,7 +1196,7 @@ export default function AnnouncementManager() {
 
     const handleDelete = async (item: Announcement) => {
         const confirmed = await confirmAction({
-            title: `Delete ${item.kind === "notice" ? "notice" : "announcement"}?`,
+            title: `Delete ${KIND_COPY[item.kind].noun}?`,
             text: `Delete "${item.title}"?`,
             icon: "warning",
             confirmText: "Delete",
@@ -935,10 +1212,9 @@ export default function AnnouncementManager() {
 
             setItems((current) => current.filter((entry) => entry.id !== item.id));
 
-            if (announcementEditing?.id === item.id) setAnnouncementEditing(null);
-            if (noticeEditing?.id === item.id) setNoticeEditing(null);
+            if (editing?.id === item.id) setEditing(null);
 
-            toast.success(`${item.kind === "notice" ? "Notice" : "Announcement"} deleted.`);
+            toast.success(`${KIND_COPY[item.kind].label} deleted.`);
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : `Unable to delete this ${item.kind}.`
@@ -951,8 +1227,8 @@ export default function AnnouncementManager() {
     return (
         <div className="w-full space-y-6 pb-8">
             <AdminSectionHeader
-                title="Announcements & Notices"
-                description="Publish announcements for a specific audience and post quick notices to the lab board."
+                title="Announcements, Notices & Seminars"
+                description="Pick a type, publish it to the right audience, and manage everything you have posted in one place."
                 isLoading={isLoading}
                 onRefresh={refresh}
             />
@@ -964,51 +1240,28 @@ export default function AnnouncementManager() {
                     <AdminStatCards stats={stats} />
 
                     <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-                        <div className="space-y-6">
+                        <div>
                             <ComposerCard
-                                key={announcementEditing?.id ?? "new-announcement"}
-                                kind="announcement"
-                                editing={announcementEditing}
-                                onCancelEdit={() => setAnnouncementEditing(null)}
-                                onSaved={(saved, intent, previousId) =>
-                                    handleSaved("announcement", saved, intent, previousId)
-                                }
-                            />
-
-                            <ListPanel
-                                kind="announcement"
-                                items={filteredAnnouncements}
-                                counts={announcementCounts}
-                                status={announcementStatus}
-                                onFilterChange={setAnnouncementStatus}
-                                search={announcementSearch}
-                                onSearchChange={setAnnouncementSearch}
-                                busyId={busyId}
-                                onEditItem={handleEdit}
-                                onItemStatusChange={handleStatusChange}
-                                onDeleteItem={handleDelete}
+                                key={editing?.id ?? "new"}
+                                kind={formKind}
+                                onKindChange={setFormKind}
+                                editing={editing}
+                                onCancelEdit={() => setEditing(null)}
+                                onSaved={handleSaved}
                             />
                         </div>
 
-                        <div className="space-y-6">
-                            <ComposerCard
-                                key={noticeEditing?.id ?? "new-notice"}
-                                kind="notice"
-                                editing={noticeEditing}
-                                onCancelEdit={() => setNoticeEditing(null)}
-                                onSaved={(saved, intent, previousId) =>
-                                    handleSaved("notice", saved, intent, previousId)
-                                }
-                            />
-
+                        <div>
                             <ListPanel
-                                kind="notice"
-                                items={filteredNotices}
-                                counts={noticeCounts}
-                                status={noticeStatus}
-                                onFilterChange={setNoticeStatus}
-                                search={noticeSearch}
-                                onSearchChange={setNoticeSearch}
+                                items={visibleItems}
+                                kindCounts={kindCounts}
+                                kindFilter={kindFilter}
+                                onKindFilterChange={setKindFilter}
+                                statusCounts={statusCounts}
+                                statusFilter={statusFilter}
+                                onStatusFilterChange={setStatusFilter}
+                                search={search}
+                                onSearchChange={setSearch}
                                 busyId={busyId}
                                 onEditItem={handleEdit}
                                 onItemStatusChange={handleStatusChange}

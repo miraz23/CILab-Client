@@ -1,4 +1,4 @@
-export const ANNOUNCEMENT_KINDS = ["announcement", "notice"] as const;
+export const ANNOUNCEMENT_KINDS = ["announcement", "notice", "seminar"] as const;
 
 export type AnnouncementKind = (typeof ANNOUNCEMENT_KINDS)[number];
 
@@ -34,6 +34,9 @@ export interface Announcement {
     status: AnnouncementStatus;
     pinned: boolean;
     publishAt?: string;
+    eventAt?: string;
+    speaker?: string;
+    venue?: string;
     createdAt: string;
     updatedAt: string;
     author: AnnouncementAuthor;
@@ -47,6 +50,9 @@ export interface AnnouncementFormData {
     priority: AnnouncementPriority;
     pinned: boolean;
     publishAt: string;
+    eventAt: string;
+    speaker: string;
+    venue: string;
 }
 
 export interface AnnouncementFormErrors {
@@ -55,6 +61,9 @@ export interface AnnouncementFormErrors {
     audience?: string;
     priority?: string;
     publishAt?: string;
+    eventAt?: string;
+    speaker?: string;
+    venue?: string;
 }
 
 export interface AnnouncementFilters {

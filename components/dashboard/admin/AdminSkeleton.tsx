@@ -391,27 +391,31 @@ function AdminUsersSkeleton() {
     );
 }
 
-function AdminComposerSkeleton({ full = false }: { full?: boolean }) {
+function AdminComposerSkeleton() {
     return (
         <AdminCardSkeleton title subtitle withIcon>
             <div className="space-y-4">
+                <div>
+                    <Skeleton className="h-3 w-12 rounded" />
+
+                    <div className="mt-2 grid grid-cols-3 gap-1 rounded-lg border border-[#D9D8CD] bg-[#E8E7DD] p-1">
+                        {Array.from({ length: 3 }).map((_, index) => (
+                            <Skeleton key={index} className="h-12 rounded-md" />
+                        ))}
+                    </div>
+                </div>
+
                 <AdminFieldSkeleton labelWidth="w-28" />
 
-                <AdminFieldSkeleton
-                    labelWidth="w-32"
-                    controlHeight={full ? "h-32" : "h-24"}
-                />
+                <AdminFieldSkeleton labelWidth="w-32" controlHeight="h-32" />
 
-                {full && (
-                    <>
-                        <div className="grid grid-cols-2 gap-4">
-                            <AdminFieldSkeleton labelWidth="w-16" />
-                            <AdminFieldSkeleton labelWidth="w-16" />
-                        </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <AdminFieldSkeleton labelWidth="w-16" />
 
-                        <AdminFieldSkeleton labelWidth="w-24" />
-                    </>
-                )}
+                    <AdminFieldSkeleton labelWidth="w-16" />
+                </div>
+
+                <AdminFieldSkeleton labelWidth="w-24" />
 
                 <div className="flex items-center gap-2.5">
                     <Skeleton className="size-4 shrink-0 rounded" />
@@ -432,21 +436,13 @@ function AdminComposerSkeleton({ full = false }: { full?: boolean }) {
 function AdminListPanelSkeleton({ rows = 3 }: { rows?: number }) {
     return (
         <div className="space-y-5">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Skeleton className="size-9 shrink-0 rounded-xl" />
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-3">
+                    <AdminChipsSkeleton items={4} />
 
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-32 rounded" />
-
-                        <Skeleton className="h-3 w-52 max-w-full rounded" />
-                    </div>
+                    <AdminSearchFieldSkeleton className="lg:w-80" />
                 </div>
-
-                <Skeleton className="h-7 w-24 rounded-lg" />
             </div>
-
-            <AdminFilterBarSkeleton />
 
             <div className="space-y-4">
                 {Array.from({ length: rows }).map((_, index) => (
@@ -454,7 +450,7 @@ function AdminListPanelSkeleton({ rows = 3 }: { rows?: number }) {
                         key={index}
                         className="rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE] p-6"
                     >
-                        <AdminBadgeRowSkeleton count={3} />
+                        <AdminBadgeRowSkeleton count={4} />
 
                         <Skeleton className="mt-3 h-5 w-2/3 rounded" />
 
@@ -481,15 +477,11 @@ function AdminListPanelSkeleton({ rows = 3 }: { rows?: number }) {
 function AdminAnnouncementsSkeleton({ rows = 3 }: { rows?: number }) {
     return (
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-            <div className="space-y-6">
-                <AdminComposerSkeleton full />
-
-                <AdminListPanelSkeleton rows={rows} />
+            <div>
+                <AdminComposerSkeleton />
             </div>
 
-            <div className="space-y-6">
-                <AdminComposerSkeleton />
-
+            <div>
                 <AdminListPanelSkeleton rows={rows} />
             </div>
         </div>
