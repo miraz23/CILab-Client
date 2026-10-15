@@ -1,6 +1,6 @@
 "use client";
 
-import PlatformAnalytics from "@/components/dashboard/admin/PlatformAnalytics";
+import PlatformAnalytics from "@/components/dashboard/admin/platform-analytics/PlatformAnalytics";
 
 export default function AdminAnalyticsPage() {
     return (

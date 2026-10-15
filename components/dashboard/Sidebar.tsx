@@ -5,10 +5,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
+    CalendarClock,
+    FileText,
+    Gauge,
     Home,
+    Inbox,
     LayoutDashboard,
+    Megaphone,
     Upload,
     User,
+    Users,
     FolderOpen,
     PanelLeftClose,
     PanelLeftOpen,
@@ -58,19 +64,18 @@ const ADMIN_NAV_SHORT_LABEL = "Admin";
 const ADMIN_NAV_ICON = ShieldCheck;
 
 const ADMIN_NAV_ITEMS = [
-    { label: "User Management", href: "/dashboard/admin/users" },
-    { label: "Content Moderation", href: "/dashboard/admin/moderation" },
-    { label: "Access Requests", href: "/dashboard/admin/access-requests" },
-    { label: "Schedule Manager", href: "/dashboard/admin/schedule" },
-    { label: "Announcements", href: "/dashboard/admin/announcements" },
-    { label: "Platform Analytics", href: "/dashboard/admin/analytics" },
+    { label: "User Management", href: "/dashboard/admin/users", icon: Users },
+    { label: "Content Moderation", href: "/dashboard/admin/moderation", icon: FileText },
+    // { label: "Access Requests", href: "/dashboard/admin/access-requests", icon: Inbox },
+    { label: "Schedule Manager", href: "/dashboard/admin/schedule", icon: CalendarClock },
+    { label: "Announcements", href: "/dashboard/admin/announcements", icon: Megaphone },
+    { label: "Platform Analytics", href: "/dashboard/admin/analytics", icon: Gauge },
 ];
 
 export default function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
     const [paperAccessOpen, setPaperAccessOpen] = useState(true);
-    const [adminOpen, setAdminOpen] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
     const [mobileSheet, setMobileSheet] = useState<null | "paper-access" | "admin">(null);
 
@@ -141,7 +146,7 @@ export default function Sidebar() {
                     )}
                 </div>
 
-                <nav className="flex w-full flex-col gap-1.5 overflow-y-auto">
+                <nav className="thin-scrollbar-light flex w-full flex-col gap-1.5 overflow-y-auto">
                     {NAV_ITEMS.map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
@@ -176,20 +181,27 @@ export default function Sidebar() {
                         collapsed={collapsed}
                     />
 
-                    {isAdmin && (
-                        <CollapsibleNavGroup
-                            label={ADMIN_NAV_LABEL}
-                            icon={ADMIN_NAV_ICON}
-                            items={ADMIN_NAV_ITEMS}
-                            open={adminOpen}
-                            onOpenChange={(open) => {
-                                expandIfCollapsed();
-                                setAdminOpen(open);
-                            }}
-                            onNavigate={expandIfCollapsed}
-                            collapsed={collapsed}
-                        />
-                    )}
+                    {isAdmin &&
+                        ADMIN_NAV_ITEMS.map((item) => {
+                            const Icon = item.icon;
+                            const isActive = pathname === item.href;
+
+                            return (
+                                <Link
+                                    key={item.label}
+                                    href={item.href}
+                                    className={cn(
+                                        "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-white/80 transition-colors duration-150 hover:bg-white/10 hover:text-white",
+                                        collapsed && "justify-center px-2",
+                                        isActive && "bg-white/15 text-white shadow-inner"
+                                    )}
+                                    title={collapsed ? item.label : undefined}
+                                >
+                                    <Icon size={18} aria-hidden />
+                                    {!collapsed && item.label}
+                                </Link>
+                            );
+                        })}
 
                     <ProfileLink collapsed={collapsed} isActive={pathname === PROFILE_ITEM.href} />
                 </nav>
@@ -244,19 +256,21 @@ export default function Sidebar() {
                     <span className="w-full text-center leading-tight">{PAPER_ACCESS_SHORT_LABEL}</span>
                 </button>
 
-                <button
-                    type="button"
-                    onClick={() => setMobileSheet("admin")}
-                    className={cn(
-                        "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-medium leading-none text-white/70 transition-colors duration-150 hover:bg-white/10 hover:text-white",
-                        isAdminActive && "bg-white/15 text-white"
-                    )}
-                    aria-haspopup="dialog"
-                    aria-expanded={mobileSheet === "admin"}
-                >
-                    <ADMIN_NAV_ICON size={18} aria-hidden />
-                    <span className="w-full text-center leading-tight">{ADMIN_NAV_SHORT_LABEL}</span>
-                </button>
+                {isAdmin && (
+                    <button
+                        type="button"
+                        onClick={() => setMobileSheet("admin")}
+                        className={cn(
+                            "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-medium leading-none text-white/70 transition-colors duration-150 hover:bg-white/10 hover:text-white",
+                            isAdminActive && "bg-white/15 text-white"
+                        )}
+                        aria-haspopup="dialog"
+                        aria-expanded={mobileSheet === "admin"}
+                    >
+                        <ADMIN_NAV_ICON size={18} aria-hidden />
+                        <span className="w-full text-center leading-tight">{ADMIN_NAV_SHORT_LABEL}</span>
+                    </button>
+                )}
 
                 <Link
                     href={PROFILE_ITEM.href}

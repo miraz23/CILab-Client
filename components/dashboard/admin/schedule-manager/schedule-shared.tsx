@@ -43,13 +43,11 @@ export function FieldError({ id, message }: { id: string; message?: string }) {
 }
 
 export function SectionCard({
-    icon: Icon,
     title,
     subtitle,
     actions,
     children,
 }: {
-    icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
     title: string;
     subtitle: string;
     actions?: ReactNode;
@@ -59,10 +57,6 @@ export function SectionCard({
         <div className="overflow-hidden rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE]">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DEDCD3] px-5 py-4">
                 <div className="flex min-w-0 items-center gap-3">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#ECEBE4]">
-                        <Icon className="h-4 w-4 text-[#716F49]" strokeWidth={1.8} aria-hidden />
-                    </span>
-
                     <div className="min-w-0">
                         <h2 className="text-base font-semibold text-[#25251F]">{title}</h2>
 

@@ -10,6 +10,7 @@ export async function fetchAnnouncements(
     filters: AnnouncementFilters = {}
 ): Promise<Announcement[]> {
     const params = new URLSearchParams();
+    if (filters.kind && filters.kind !== "all") params.set("kind", filters.kind);
     if (filters.status && filters.status !== "all") params.set("status", filters.status);
     if (filters.audience && filters.audience !== "all") params.set("audience", filters.audience);
     if (filters.search?.trim()) params.set("search", filters.search.trim());

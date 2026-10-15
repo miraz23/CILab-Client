@@ -391,69 +391,106 @@ function AdminUsersSkeleton() {
     );
 }
 
+function AdminComposerSkeleton({ full = false }: { full?: boolean }) {
+    return (
+        <AdminCardSkeleton title subtitle withIcon>
+            <div className="space-y-4">
+                <AdminFieldSkeleton labelWidth="w-28" />
+
+                <AdminFieldSkeleton
+                    labelWidth="w-32"
+                    controlHeight={full ? "h-32" : "h-24"}
+                />
+
+                {full && (
+                    <>
+                        <div className="grid grid-cols-2 gap-4">
+                            <AdminFieldSkeleton labelWidth="w-16" />
+                            <AdminFieldSkeleton labelWidth="w-16" />
+                        </div>
+
+                        <AdminFieldSkeleton labelWidth="w-24" />
+                    </>
+                )}
+
+                <div className="flex items-center gap-2.5">
+                    <Skeleton className="size-4 shrink-0 rounded" />
+
+                    <Skeleton className="h-3.5 w-48 max-w-full rounded" />
+                </div>
+
+                <div className="flex gap-2 sm:flex-row">
+                    <Skeleton className="h-11 flex-1 rounded-lg" />
+
+                    <Skeleton className="h-11 flex-1 rounded-lg" />
+                </div>
+            </div>
+        </AdminCardSkeleton>
+    );
+}
+
+function AdminListPanelSkeleton({ rows = 3 }: { rows?: number }) {
+    return (
+        <div className="space-y-5">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                    <Skeleton className="size-9 shrink-0 rounded-xl" />
+
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-32 rounded" />
+
+                        <Skeleton className="h-3 w-52 max-w-full rounded" />
+                    </div>
+                </div>
+
+                <Skeleton className="h-7 w-24 rounded-lg" />
+            </div>
+
+            <AdminFilterBarSkeleton />
+
+            <div className="space-y-4">
+                {Array.from({ length: rows }).map((_, index) => (
+                    <div
+                        key={index}
+                        className="rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE] p-6"
+                    >
+                        <AdminBadgeRowSkeleton count={3} />
+
+                        <Skeleton className="mt-3 h-5 w-2/3 rounded" />
+
+                        <div className="mt-2 space-y-2">
+                            <Skeleton className="h-3.5 w-full rounded" />
+
+                            <Skeleton className="h-3.5 w-full rounded" />
+
+                            <Skeleton className="h-3.5 w-3/4 rounded" />
+                        </div>
+
+                        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                            <Skeleton className="h-3 w-52 max-w-full rounded" />
+
+                            <AdminButtonRowSkeleton count={3} />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function AdminAnnouncementsSkeleton({ rows = 3 }: { rows?: number }) {
     return (
-        <div className={FORM_LAYOUT_CLASS}>
-            <AdminCardSkeleton title subtitle>
-                <div className="space-y-4">
-                    <AdminFieldSkeleton labelWidth="w-16" />
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+            <div className="space-y-6">
+                <AdminComposerSkeleton full />
 
-                    <AdminFieldSkeleton labelWidth="w-16" controlHeight="h-32" />
+                <AdminListPanelSkeleton rows={rows} />
+            </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <AdminFieldSkeleton labelWidth="w-20" />
-                        <AdminFieldSkeleton labelWidth="w-20" />
-                    </div>
+            <div className="space-y-6">
+                <AdminComposerSkeleton />
 
-                    <AdminFieldSkeleton labelWidth="w-24" />
-
-                    <div className="flex items-center gap-2.5">
-                        <Skeleton className="size-4 shrink-0 rounded" />
-
-                        <Skeleton className="h-3.5 w-56 max-w-full rounded" />
-                    </div>
-
-                    <div className="flex gap-2 sm:flex-row">
-                        <Skeleton className="h-11 flex-1 rounded-lg" />
-
-                        <Skeleton className="h-11 flex-1 rounded-lg" />
-                    </div>
-                </div>
-            </AdminCardSkeleton>
-
-            <div className="space-y-5">
-                <div className="flex flex-col gap-4 lg:items-end lg:justify-between">
-                    <AdminChipsSkeleton items={4} />
-
-                    <AdminSearchFieldSkeleton className="lg:w-80" />
-                </div>
-
-                <div className="space-y-4">
-                    {Array.from({ length: rows }).map((_, index) => (
-                        <div
-                            key={index}
-                            className="rounded-2xl border border-[#D8D5C9] bg-[#F4F3EE] p-6"
-                        >
-                            <AdminBadgeRowSkeleton count={3} />
-
-                            <Skeleton className="mt-3 h-5 w-2/3 rounded" />
-
-                            <div className="mt-2 space-y-2">
-                                <Skeleton className="h-3.5 w-full rounded" />
-
-                                <Skeleton className="h-3.5 w-full rounded" />
-
-                                <Skeleton className="h-3.5 w-3/4 rounded" />
-                            </div>
-
-                            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                                <Skeleton className="h-3 w-52 max-w-full rounded" />
-
-                                <AdminButtonRowSkeleton count={3} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <AdminListPanelSkeleton rows={rows} />
             </div>
         </div>
     );
@@ -533,48 +570,55 @@ function AdminAccessRequestsSkeleton() {
 
 function AdminScheduleSkeleton() {
     return (
-        <div className="w-full">
-            <AdminChipsSkeleton items={3} />
+        <div className={FORM_LAYOUT_CLASS}>
+            <AdminCardSkeleton title subtitle>
+                <div className="space-y-4">
+                    <AdminFieldSkeleton labelWidth="w-32" />
 
-            <div className={cn("mt-6", FORM_LAYOUT_CLASS)}>
-                <AdminFormSkeleton />
+                    <div className="grid grid-cols-2 gap-4">
+                        <AdminFieldSkeleton labelWidth="w-14" />
+                        <AdminFieldSkeleton labelWidth="w-12" />
+                    </div>
 
-                <AdminCardSkeleton title subtitle>
-                    <div className="space-y-3">
-                        {Array.from({ length: 4 }).map((_, index) => (
-                            <div
-                                key={index}
-                                className="rounded-xl border border-[#D9D8CD] bg-[#FBFAF7] px-4 py-4"
-                            >
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                    <div className="min-w-0 space-y-2.5">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <Skeleton className="h-4 w-40 rounded" />
+                    <AdminFieldSkeleton labelWidth="w-14" />
 
-                                            <Skeleton className="h-5 w-20 rounded-full" />
+                    <AdminFieldSkeleton labelWidth="w-36" />
 
-                                            <Skeleton className="h-5 w-16 rounded-full" />
-                                        </div>
+                    <Skeleton className="h-11 w-full rounded-lg" />
+                </div>
+            </AdminCardSkeleton>
 
-                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                                            <Skeleton className="h-3 w-44 rounded" />
+            <AdminCardSkeleton title subtitle>
+                <div className="space-y-3">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                        <div
+                            key={index}
+                            className="rounded-xl border border-[#D9D8CD] bg-[#FBFAF7] px-4 py-4"
+                        >
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0 space-y-2.5">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <Skeleton className="h-4 w-40 rounded" />
 
-                                            <Skeleton className="h-3 w-32 rounded" />
-
-                                            <Skeleton className="h-3 w-20 rounded" />
-                                        </div>
+                                        <Skeleton className="h-5 w-16 rounded-md" />
                                     </div>
 
-                                    <AdminButtonRowSkeleton
-                                        count={2}
-                                        className="shrink-0"
-                                    />
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                                        <Skeleton className="h-3 w-44 rounded" />
+
+                                        <Skeleton className="h-3 w-32 rounded" />
+                                    </div>
                                 </div>
+
+                                <AdminButtonRowSkeleton
+                                    count={2}
+                                    className="shrink-0"
+                                />
                             </div>
-                        ))}
-                    </div>
-                </AdminCardSkeleton>
-            </div>
+                        </div>
+                    ))}
+                </div>
+            </AdminCardSkeleton>
         </div>
     );
 }

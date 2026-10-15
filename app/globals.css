@@ -132,4 +132,57 @@
   html {
     @apply font-sans;
   }
+
+  /* Thin, premium scrollbars everywhere */
+  * {
+    @apply thin-scrollbar;
+  }
+}
+
+/* Thin scrollbar on light surfaces */
+@utility thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(0 0 0 / 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(0 0 0 / 0.2);
+    border-radius: 9999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(0 0 0 / 0.35);
+  }
+}
+
+/* Thin scrollbar on dark-glass surfaces (e.g. sidebar) */
+@utility thin-scrollbar-light {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.25) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.25);
+    border-radius: 9999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(255 255 255 / 0.4);
+  }
 }

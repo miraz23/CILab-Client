@@ -1,6 +1,6 @@
 "use client";
 
-import AnnouncementManager from "@/components/dashboard/admin/AnnouncementManager";
+import AnnouncementManager from "@/components/dashboard/admin/announcements/AnnouncementManager";
 
 export default function AdminAnnouncementsPage() {
     return (

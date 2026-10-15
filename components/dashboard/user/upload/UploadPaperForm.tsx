@@ -3,7 +3,6 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import {
-  FileText,
   Upload,
   CheckCircle,
   AlertCircle,
@@ -40,6 +39,7 @@ export default function UploadPaperForm() {
   const [abstract, setAbstract] = useState("");
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState("");
+  const [publicationLink, setPublicationLink] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -103,6 +103,19 @@ export default function UploadPaperForm() {
       return;
     }
 
+    const trimmedPublicationLink = publicationLink.trim();
+
+    if (trimmedPublicationLink) {
+      try {
+        new URL(trimmedPublicationLink);
+      } catch {
+        setErrorMessage(
+          "Please enter a valid publication link, e.g. https://doi.org/10.1000/xyz123."
+        );
+        return;
+      }
+    }
+
     setIsUploading(true);
     setUploadStatus("idle");
     setErrorMessage("");
@@ -116,6 +129,7 @@ export default function UploadPaperForm() {
       formData.append("abstract", abstract);
       formData.append("category", category);
       formData.append("tags", tags);
+      formData.append("publicationLink", trimmedPublicationLink);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/papers/upload`,
@@ -142,6 +156,7 @@ export default function UploadPaperForm() {
       setAbstract("");
       setCategory("");
       setTags("");
+      setPublicationLink("");
       setPdfFile(null);
       window.dispatchEvent(new Event("uploads:changed"));
     } catch (error) {
@@ -282,6 +297,27 @@ export default function UploadPaperForm() {
                   setTags(e.target.value)
                 }
                 placeholder="e.g. deep learning, transformers, computer vision"
+                className="h-10 rounded-[10px] border-[#D7D8D0] bg-[#EBEAE3] text-sm text-[#252C26] placeholder:text-[#969A91] shadow-none focus-visible:border-[#858A69] focus-visible:ring-2 focus-visible:ring-[#858A69]/15"
+              />
+            </div>
+
+            {/* Publication Link */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="publicationLink"
+                className="text-xs font-semibold text-[#565D54]"
+              >
+                Publication Link
+              </Label>
+
+              <Input
+                id="publicationLink"
+                type="url"
+                value={publicationLink}
+                onChange={(e) =>
+                  setPublicationLink(e.target.value)
+                }
+                placeholder="e.g. https://doi.org/10.1000/xyz123 or publisher page"
                 className="h-10 rounded-[10px] border-[#D7D8D0] bg-[#EBEAE3] text-sm text-[#252C26] placeholder:text-[#969A91] shadow-none focus-visible:border-[#858A69] focus-visible:ring-2 focus-visible:ring-[#858A69]/15"
               />
             </div>

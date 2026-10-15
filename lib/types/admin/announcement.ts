@@ -1,3 +1,7 @@
+export const ANNOUNCEMENT_KINDS = ["announcement", "notice"] as const;
+
+export type AnnouncementKind = (typeof ANNOUNCEMENT_KINDS)[number];
+
 export const ANNOUNCEMENT_AUDIENCES = ["all", "students", "faculty", "admins"] as const;
 
 export type AnnouncementAudience = (typeof ANNOUNCEMENT_AUDIENCES)[number];
@@ -22,6 +26,7 @@ export interface AnnouncementAuthor {
 
 export interface Announcement {
     id: string;
+    kind: AnnouncementKind;
     title: string;
     body: string;
     audience: AnnouncementAudience;
@@ -35,6 +40,7 @@ export interface Announcement {
 }
 
 export interface AnnouncementFormData {
+    kind: AnnouncementKind;
     title: string;
     body: string;
     audience: AnnouncementAudience;
@@ -52,6 +58,7 @@ export interface AnnouncementFormErrors {
 }
 
 export interface AnnouncementFilters {
+    kind?: AnnouncementKind | "all";
     status?: AnnouncementStatus | "all";
     audience?: AnnouncementAudience | "all";
     search?: string;

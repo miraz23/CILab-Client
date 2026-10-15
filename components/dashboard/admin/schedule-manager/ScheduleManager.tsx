@@ -138,7 +138,7 @@ export default function ScheduleManager() {
             />
 
             {isLoading ? (
-                <AdminSkeleton variant="schedule" />
+                <AdminSkeleton variant="schedule" showStats={false} />
             ) : (
                 <AvailabilityPanel
                     slots={slots}
