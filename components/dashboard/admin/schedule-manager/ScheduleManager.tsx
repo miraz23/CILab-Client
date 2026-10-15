@@ -13,6 +13,7 @@ import {
     fetchScheduleBoard,
     updateAvailabilitySlot,
 } from "@/lib/api/admin/schedule";
+import { confirmAction } from "@/lib/confirm";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import { DAY_OF_WEEK_LABELS } from "@/lib/types/admin/schedule";
 import type {
@@ -111,9 +112,15 @@ export default function ScheduleManager() {
     };
 
     const handleDeleteSlot = async (slot: AvailabilitySlot) => {
-        if (!window.confirm(`Remove the ${DAY_OF_WEEK_LABELS[slot.dayOfWeek]} availability?`)) {
-            return;
-        }
+        const confirmed = await confirmAction({
+            title: "Remove availability?",
+            text: `Remove the ${DAY_OF_WEEK_LABELS[slot.dayOfWeek]} availability?`,
+            icon: "warning",
+            confirmText: "Remove",
+            tone: "danger",
+        });
+
+        if (!confirmed) return;
 
         setBusySlotId(slot.id);
 

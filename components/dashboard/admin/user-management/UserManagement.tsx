@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 
 import { fetchManagedUsers, updateUserAccess } from "@/lib/api/admin/users";
+import { confirmAction, type ConfirmOptions } from "@/lib/confirm";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import { ACADEMIC_ROLES } from "@/lib/types/auth/register";
 import { APP_ROLES } from "@/lib/types/admin/role";
@@ -216,9 +217,9 @@ export default function UserManagement() {
     const patchUser = async (
         user: ManagedUser,
         changes: { appRole?: AppRole; status?: UserStatus },
-        confirmMessage: string
+        confirm: ConfirmOptions
     ) => {
-        if (!window.confirm(confirmMessage)) return;
+        if (!(await confirmAction(confirm))) return;
 
         setBusyUserId(user.id);
 
@@ -567,7 +568,7 @@ export default function UserManagement() {
                                                                     patchUser(
                                                                         user,
                                                                         { status: "active" },
-                                                                        `Approve ${user.name}?`
+                                                                        { title: `Approve ${user.name}?`, confirmText: "Approve", icon: "question" }
                                                                     )
                                                                 }
                                                                 className="rounded-lg bg-[#716F49] text-white shadow-[0_5px_15px_rgba(40,40,25,0.2)] hover:bg-[#625F3F]"
@@ -591,7 +592,7 @@ export default function UserManagement() {
                                                                     patchUser(
                                                                         user,
                                                                         { status: "active" },
-                                                                        `Reinstate ${user.name}?`
+                                                                        { title: `Reinstate ${user.name}?`, confirmText: "Reinstate", icon: "question" }
                                                                     )
                                                                 }
                                                                 className="rounded-lg border-[#D7D4C9] bg-[#FBFAF7] text-[#4F8A63] hover:bg-[#EEF4EE]"
@@ -613,7 +614,7 @@ export default function UserManagement() {
                                                                     patchUser(
                                                                         user,
                                                                         { status: "suspended" },
-                                                                        `Suspend ${user.name}? They will lose access immediately.`
+                                                                        { title: "Suspend user?", text: `Suspend ${user.name}? They will lose access immediately.`, confirmText: "Suspend", icon: "warning", tone: "danger" }
                                                                     )
                                                                 }
                                                                 className="rounded-lg border-[#E4C2BC] text-[#A45B4B] hover:bg-[#FBF0EE]"
@@ -637,7 +638,7 @@ export default function UserManagement() {
                                                                     patchUser(
                                                                         user,
                                                                         { appRole: "USER" },
-                                                                        `Remove admin rights from ${user.name}?`
+                                                                        { title: "Remove admin rights?", text: `Remove admin rights from ${user.name}?`, confirmText: "Remove admin", icon: "warning", tone: "danger" }
                                                                     )
                                                                 }
                                                                 className="rounded-lg text-[#6B4E86] hover:bg-[#F0EAF3]"
@@ -659,7 +660,7 @@ export default function UserManagement() {
                                                                     patchUser(
                                                                         user,
                                                                         { appRole: "ADMIN" },
-                                                                        `Grant admin rights to ${user.name}?`
+                                                                        { title: "Grant admin rights?", text: `Grant admin rights to ${user.name}?`, confirmText: "Grant admin", icon: "question" }
                                                                     )
                                                                 }
                                                                 className="rounded-lg text-[#5E5D50] hover:bg-[#ECEBE4]"

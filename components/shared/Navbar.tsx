@@ -45,8 +45,7 @@ const NAV_ITEMS: NavItem[] = [
         children: [
             { label: "Class description", href: "/lectures/class-description" },
             { label: "Schedule", href: "/lectures/schedule" },
-            { label: "Reference seminar schedule", href: "/lectures/reference-seminar-schedule" },
-            { label: "Reference seminar archive", href: "/lectures/reference-seminar-archive" },
+            { label: "Reference seminar schedule", href: "/lectures/reference-seminar-schedule" }
         ],
     },
     { label: "Board", href: "/board" },

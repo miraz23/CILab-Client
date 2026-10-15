@@ -29,6 +29,7 @@ import {
     fetchOversightAccessRequests,
     submitOversightDecision,
 } from "@/lib/api/admin/access-requests";
+import { confirmAction } from "@/lib/confirm";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import type {
     OversightAccessRequest,
@@ -196,7 +197,25 @@ export default function AccessRequestOversight() {
                 ? `Revoke ${request.requester.name}'s access to ${request.owner.name}'s material?`
                 : `Mark this request as ${decision} on behalf of ${request.owner.name}?`;
 
-        if (!window.confirm(confirmMessage)) return;
+        const confirmed = await confirmAction({
+            title:
+                decision === "revoked"
+                    ? "Revoke access?"
+                    : decision === "declined"
+                        ? "Decline request?"
+                        : "Accept request?",
+            text: confirmMessage,
+            icon: decision === "revoked" ? "warning" : "question",
+            confirmText:
+                decision === "revoked"
+                    ? "Revoke"
+                    : decision === "declined"
+                        ? "Decline"
+                        : "Accept",
+            tone: decision === "revoked" ? "danger" : "default",
+        });
+
+        if (!confirmed) return;
 
         setBusyId(request.id);
 

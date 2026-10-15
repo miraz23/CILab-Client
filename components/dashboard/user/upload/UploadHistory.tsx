@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { confirmAction } from "@/lib/confirm";
 
 interface UploadItem {
   id: string;
@@ -142,12 +143,18 @@ export default function UploadHistory() {
     }
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this upload?")) {
-      setUploads((current) =>
-        current.filter((upload) => upload.id !== id)
-      );
-    }
+  const handleDelete = async (id: string) => {
+    const confirmed = await confirmAction({
+      title: "Delete this upload?",
+      text: "Are you sure you want to delete this upload?",
+      icon: "warning",
+      confirmText: "Delete",
+      tone: "danger",
+    });
+
+    if (!confirmed) return;
+
+    setUploads((current) => current.filter((upload) => upload.id !== id));
   };
 
   return (

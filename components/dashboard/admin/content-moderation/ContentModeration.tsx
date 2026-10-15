@@ -26,6 +26,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import { fetchModerationQueue, submitModerationDecision } from "@/lib/api/admin/moderation";
+import { confirmAction } from "@/lib/confirm";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import type {
     ModerationContentType,
@@ -154,8 +155,16 @@ export default function ContentModeration() {
     ];
 
     const decide = async (submission: ModerationSubmission, decision: ModerationDecision) => {
-        if (decision === "rejected" && !window.confirm(`Reject "${submission.title}"?`)) {
-            return;
+        if (decision === "rejected") {
+            const confirmed = await confirmAction({
+                title: "Reject submission?",
+                text: `Reject "${submission.title}"?`,
+                icon: "warning",
+                confirmText: "Reject",
+                tone: "danger",
+            });
+
+            if (!confirmed) return;
         }
 
         setBusyId(submission.id);

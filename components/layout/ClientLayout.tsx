@@ -1,6 +1,7 @@
 "use client";
 
 import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
 import { usePathname } from "next/navigation";
 import { ToastContainer, Bounce } from "react-toastify";
 
@@ -11,7 +12,7 @@ export default function ClientLayout({
 }) {
     const pathname = usePathname();
 
-    const hideNavbar = pathname.startsWith("/dashboard");
+    const hideChrome = pathname.startsWith("/dashboard");
 
     return (
         <>
@@ -30,12 +31,14 @@ export default function ClientLayout({
             />
 
             <header>
-                {!hideNavbar && <Navbar />}
+                {!hideChrome && <Navbar />}
             </header>
 
             <main>
                 {children}
             </main>
+
+            {!hideChrome && <Footer />}
         </>
     );
 }

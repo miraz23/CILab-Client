@@ -27,7 +27,7 @@ interface BinaryBit {
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const PARTICLE_COLOR = "rgba(113, 111, 73,";   // slate-500 — visible on white
+const PARTICLE_COLOR = "rgba(113, 111, 73,";   // slate-500 - visible on white
 const LINK_COLOR = "rgba(113, 111, 73,";   // slate-400
 const BG_COLOR = "#f8fafc";               // slate-50
 
@@ -85,7 +85,7 @@ function getParticleConfig(width: number): ParticleConfig {
     radiusMax: 4,
     speed: 0.5,
     repulseRadius: 120,
-    bitCount: 0, // no binary bits — cleaner academic look
+    bitCount: 0, // no binary bits - cleaner academic look
   };
 }
 

@@ -465,7 +465,7 @@ export default function AccessRequestsForm() {
                         </div>
 
                         {/* =================================================
-                            RIGHT COLUMN — RECIPIENTS
+                            RIGHT COLUMN - RECIPIENTS
                         ================================================== */}
 
                         <div>

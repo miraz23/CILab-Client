@@ -42,6 +42,7 @@ import {
     fetchAnnouncements,
     upsertAnnouncement,
 } from "@/lib/api/admin/announcements";
+import { confirmAction } from "@/lib/confirm";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import { ANNOUNCEMENT_AUDIENCES, ANNOUNCEMENT_PRIORITIES } from "@/lib/types/admin/announcement";
 import type {
@@ -127,6 +128,8 @@ interface KindCopy {
     pinLabel: string;
     publishLabel: string;
     updatePublishLabel: string;
+    listTitle: string;
+    listHint: string;
     emptyTitle: string;
     emptyDescription: string;
 }
@@ -146,6 +149,8 @@ const KIND_COPY: Record<AnnouncementKind, KindCopy> = {
         pinLabel: "Pin to the top of the notice board",
         publishLabel: "Publish now",
         updatePublishLabel: "Update & publish",
+        listTitle: "Announcements",
+        listHint: "Everything you have drafted, published, or archived.",
         emptyTitle: "No announcements yet",
         emptyDescription: "Compose an announcement above. Drafts stay private until you publish them.",
     },
@@ -154,14 +159,16 @@ const KIND_COPY: Record<AnnouncementKind, KindCopy> = {
         noun: "notice",
         composeTitle: "Post a notice",
         editTitle: "Edit notice",
-        composeHint: "Keep it short — notices are for quick, at-a-glance updates.",
+        composeHint: "Keep it short - notices are for quick, at-a-glance updates.",
         titleLabel: "Notice title",
         titlePlaceholder: "e.g. Lab door code changed to 4821",
         bodyLabel: "Notice details",
-        bodyPlaceholder: "One or two lines is plenty — e.g. The lab closes at 6 PM today.",
+        bodyPlaceholder: "One or two lines is plenty - e.g. The lab closes at 6 PM today.",
         pinLabel: "Pin this notice to the top of the board",
         publishLabel: "Post notice",
         updatePublishLabel: "Update notice",
+        listTitle: "Notices",
+        listHint: "Short updates posted to the lab board.",
         emptyTitle: "No notices yet",
         emptyDescription: "Post a notice above. It appears here as soon as you publish it.",
     },
@@ -559,6 +566,37 @@ function ListPanel({
 
     return (
         <div className="space-y-5">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                    <span
+                        className={cn(
+                            "flex size-9 shrink-0 items-center justify-center rounded-xl",
+                            isAnnouncement
+                                ? "bg-[#E4E6DC] text-[#5C6446]"
+                                : "bg-[#ECE7DA] text-[#8A6420]"
+                        )}
+                    >
+                        {isAnnouncement ? (
+                            <Megaphone className="h-4 w-4" aria-hidden />
+                        ) : (
+                            <StickyNote className="h-4 w-4" aria-hidden />
+                        )}
+                    </span>
+
+                    <div>
+                        <h3 className="text-sm font-semibold text-[#25251F]">
+                            {copy.listTitle}
+                        </h3>
+
+                        <p className="mt-0.5 text-xs text-[#777568]">{copy.listHint}</p>
+                    </div>
+                </div>
+
+                <span className="rounded-lg border border-[#DEDCD3] bg-[#ECEBE4] px-2.5 py-1 text-xs font-medium text-[#5E5D50]">
+                    {counts.all} {counts.all === 1 ? copy.noun : `${copy.noun}s`}
+                </span>
+            </div>
+
             <div className="flex flex-col gap-4 lg:items-end lg:justify-between">
                 <AdminFilterChips
                     label={`Filter ${copy.noun}s by status`}
@@ -880,7 +918,15 @@ export default function AnnouncementManager() {
     };
 
     const handleDelete = async (item: Announcement) => {
-        if (!window.confirm(`Delete "${item.title}"?`)) return;
+        const confirmed = await confirmAction({
+            title: `Delete ${item.kind === "notice" ? "notice" : "announcement"}?`,
+            text: `Delete "${item.title}"?`,
+            icon: "warning",
+            confirmText: "Delete",
+            tone: "danger",
+        });
+
+        if (!confirmed) return;
 
         setBusyId(item.id);
 

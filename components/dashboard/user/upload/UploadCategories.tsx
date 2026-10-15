@@ -5,6 +5,7 @@ import { FileText, Presentation, Plus, Trash2, Edit2, Check, Tag, BookOpen, User
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { confirmAction } from '@/lib/confirm';
 
 interface Category {
   id: string;
@@ -119,10 +120,17 @@ export default function UploadCategories() {
     setEditValue('');
   };
 
-  const handleDelete = (id: string, setCategories: React.Dispatch<React.SetStateAction<Category[]>>) => {
-    if (confirm('Delete this category?')) {
-      setCategories((prev) => prev.filter((cat) => cat.id !== id));
-    }
+  const handleDelete = async (id: string, setCategories: React.Dispatch<React.SetStateAction<Category[]>>) => {
+    const confirmed = await confirmAction({
+      title: 'Delete this category?',
+      icon: 'warning',
+      confirmText: 'Delete',
+      tone: 'danger',
+    });
+
+    if (!confirmed) return;
+
+    setCategories((prev) => prev.filter((cat) => cat.id !== id));
   };
 
   const handleAddCategory = (
