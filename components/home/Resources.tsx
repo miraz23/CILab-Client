@@ -269,10 +269,9 @@ function PaperCard({
                 </div>
                 <button
                     onClick={() => onOpen(paper)}
-                    className="flex shrink-0 items-center gap-1.5 rounded-2xl bg-neutral-900 px-3.5 py-2.5 text-xs font-medium text-white transition hover:bg-neutral-700"
+                    className="flex shrink-0 items-center gap-1.5 rounded-md bg-neutral-900 px-3.5 py-2.5 text-xs font-medium text-white transition hover:bg-neutral-700"
                 >
                     <BookOpen className="size-3.5" />
-                    View paper
                 </button>
             </div>
         </motion.article>
@@ -394,7 +393,7 @@ export default function Resources() {
     const bottom = papers.slice(half).concat(papers.slice(0, 2)); // keep rows from being too short
 
     return (
-        <section id="research-papers" className="relative overflow-hidden bg-[#F8FAFC] py-24">
+        <section id="research-papers" className="relative overflow-hidden bg-[#F8FAFC] py-28">
             {/* marquee keyframes: top row left → right, bottom row right → left, seamless, respects reduced motion */}
             <style>{`
         @keyframes rp-ltr { from { transform: translateX(-50%); } to { transform: translateX(0); } }

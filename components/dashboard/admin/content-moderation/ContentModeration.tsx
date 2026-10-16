@@ -447,7 +447,7 @@ export default function ContentModeration() {
                                                                 Review
                                                             </Button>
 
-                                                            <Button
+                                                            {/* <Button
                                                                 type="button"
                                                                 variant="ghost"
                                                                 size="sm"
@@ -459,7 +459,7 @@ export default function ContentModeration() {
                                                                 className="rounded-lg text-[#89877B] hover:bg-[#ECEBE4]"
                                                             >
                                                                 Add note
-                                                            </Button>
+                                                            </Button> */}
                                                         </>
                                                     )}
                                                 </div>
