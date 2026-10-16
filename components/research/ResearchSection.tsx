@@ -904,19 +904,6 @@ export default function Researchs() {
                                 shareText={p.title}
                                 openLabel={`View details: ${p.title}`}
                                 onOpen={() => setModal(paperModal(p))}
-                                badge={
-                                    <span className={pill}>
-                                        {p.access === "open" ? (
-                                            <>
-                                                <Unlock className="size-3" /> Open access
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Lock className="size-3" /> Subscription
-                                            </>
-                                        )}
-                                    </span>
-                                }
                             />
                         )}
                     />
