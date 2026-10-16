@@ -24,19 +24,30 @@ export interface AnnouncementAuthor {
     name: string;
 }
 
+export interface AnnouncementSpeaker {
+    name: string;
+    affiliation?: string;
+    bio?: string;
+    image?: string; // base64 data URL or URL
+}
+
+export interface AnnouncementExtraField {
+    key: string;
+    value: string;
+}
+
 export interface Announcement {
     id: string;
     kind: AnnouncementKind;
     title: string;
     body: string;
-    audience: AnnouncementAudience;
-    priority: AnnouncementPriority;
     status: AnnouncementStatus;
     pinned: boolean;
     publishAt?: string;
     eventAt?: string;
-    speaker?: string;
     venue?: string;
+    poster?: string; // poster image
+    extraFields?: AnnouncementExtraField[];
     createdAt: string;
     updatedAt: string;
     author: AnnouncementAuthor;
@@ -46,23 +57,19 @@ export interface AnnouncementFormData {
     kind: AnnouncementKind;
     title: string;
     body: string;
-    audience: AnnouncementAudience;
-    priority: AnnouncementPriority;
     pinned: boolean;
     publishAt: string;
     eventAt: string;
-    speaker: string;
     venue: string;
+    poster: string;
+    extraFields: AnnouncementExtraField[];
 }
 
 export interface AnnouncementFormErrors {
     title?: string;
     body?: string;
-    audience?: string;
-    priority?: string;
     publishAt?: string;
     eventAt?: string;
-    speaker?: string;
     venue?: string;
 }
 

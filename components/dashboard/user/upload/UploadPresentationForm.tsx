@@ -42,6 +42,7 @@ export default function UploadPresentationForm() {
   const [date, setDate] = useState("");
   const [type, setType] = useState("");
   const [description, setDescription] = useState("");
+  const [publicationLink, setPublicationLink] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -116,6 +117,19 @@ export default function UploadPresentationForm() {
       return;
     }
 
+    const trimmedPublicationLink = publicationLink.trim();
+
+    if (trimmedPublicationLink) {
+      try {
+        new URL(trimmedPublicationLink);
+      } catch {
+        setErrorMessage(
+          "Please enter a valid publication link, e.g. https://doi.org/10.1000/xyz123."
+        );
+        return;
+      }
+    }
+
     setIsUploading(true);
     setUploadStatus("idle");
     setErrorMessage("");
@@ -128,6 +142,7 @@ export default function UploadPresentationForm() {
       formData.append("event", event);
       formData.append("date", date);
       formData.append("type", type);
+      formData.append("publicationLink", trimmedPublicationLink);
       formData.append("description", description);
 
       const response = await fetch(
@@ -297,6 +312,27 @@ export default function UploadPresentationForm() {
                   className="h-10 rounded-[10px] border-[#D7D8D0] bg-[#EBEAE3] text-sm text-[#252C26] shadow-none focus-visible:border-[#B77C29] focus-visible:ring-2 focus-visible:ring-[#B77C29]/15"
                 />
               </div>
+            </div>
+
+            {/* Publication Link */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="publicationLink"
+                className="text-xs font-semibold text-[#565D54]"
+              >
+                Publication Link
+              </Label>
+
+              <Input
+                id="publicationLink"
+                type="url"
+                value={publicationLink}
+                onChange={(e) =>
+                  setPublicationLink(e.target.value)
+                }
+                placeholder="e.g. https://doi.org/10.1000/xyz123 or publisher page"
+                className="h-10 rounded-[10px] border-[#D7D8D0] bg-[#EBEAE3] text-sm text-[#252C26] placeholder:text-[#969A91] shadow-none focus-visible:border-[#858A69] focus-visible:ring-2 focus-visible:ring-[#858A69]/15"
+              />
             </div>
 
             {/* Description */}

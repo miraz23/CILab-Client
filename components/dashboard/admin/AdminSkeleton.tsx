@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 type AdminSkeletonVariant =
     | "list"
     | "users"
-    | "announcements"
+    | "news"
     | "moderation"
     | "access-requests"
     | "analytics"
@@ -436,8 +436,8 @@ function AdminComposerSkeleton() {
 function AdminListPanelSkeleton({ rows = 3 }: { rows?: number }) {
     return (
         <div className="space-y-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-3">
+            <div className="flex flex-col gap-4">
+                <div className="space-y-3 flex flex-col items-end">
                     <AdminChipsSkeleton items={4} />
 
                     <AdminSearchFieldSkeleton className="lg:w-80" />
@@ -619,7 +619,7 @@ function AdminSkeletonBody({ variant, rows }: { variant: AdminSkeletonVariant; r
     switch (variant) {
         case "users":
             return <AdminUsersSkeleton />;
-        case "announcements":
+        case "news":
             return <AdminAnnouncementsSkeleton rows={rows} />;
         case "moderation":
             return <AdminModerationSkeleton />;

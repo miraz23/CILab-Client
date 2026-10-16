@@ -33,22 +33,11 @@ const NAV_ITEMS: NavItem[] = [
         ],
     },
     {
-        label: "Research",
-        children: [
-            { label: "Research area", href: "/research/research-area" },
-            { label: "Projects", href: "/research/projects" },
-            { label: "Papers", href: "/research/papers" },
-        ],
+        label: "Research", href: "/research"
     },
     {
-        label: "Lectures",
-        children: [
-            { label: "Class description", href: "/lectures/class-description" },
-            { label: "Schedule", href: "/lectures/schedule" },
-            { label: "Reference seminar schedule", href: "/lectures/reference-seminar-schedule" }
-        ],
+        label: "Schedule", href: "/schedule"
     },
-    { label: "Board", href: "/board" },
 ];
 
 // ─── Dropdown Menu ────────────────────────────────────────────────────────────

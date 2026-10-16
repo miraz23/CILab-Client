@@ -68,7 +68,7 @@ const ADMIN_NAV_ITEMS = [
     { label: "Content Moderation", href: "/dashboard/admin/moderation", icon: FileText },
     // { label: "Access Requests", href: "/dashboard/admin/access-requests", icon: Inbox },
     { label: "Schedule Manager", href: "/dashboard/admin/schedule", icon: CalendarClock },
-    { label: "Announcements", href: "/dashboard/admin/announcements", icon: Megaphone },
+    { label: "News", href: "/dashboard/admin/news", icon: Megaphone },
     { label: "Platform Analytics", href: "/dashboard/admin/analytics", icon: Gauge },
 ];
 

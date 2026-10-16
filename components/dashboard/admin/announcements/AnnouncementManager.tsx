@@ -18,6 +18,8 @@ import {
     Send,
     StickyNote,
     Trash2,
+    Upload,
+    X,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -124,24 +126,25 @@ interface KindCopy {
 
 const KIND_COPY: Record<AnnouncementKind, KindCopy> = {
     announcement: {
-        label: "Announcement",
-        plural: "Announcements",
-        noun: "announcement",
+        label: "Conference",
+        plural: "Conferences",
+        noun: "conference",
         icon: Megaphone,
         badgeClass: "bg-[#E4E6DC] text-[#5C6446] border border-[#CFD3C0]",
         iconClass: "bg-[#E4E6DC] text-[#5C6446]",
-        composeTitle: "Compose announcement",
-        editTitle: "Edit announcement",
-        composeHint: "Draft it, then publish to the selected audience when you are ready.",
-        titleLabel: "Announcement title",
-        titlePlaceholder: "e.g. Research symposium rescheduled to March 14",
-        bodyLabel: "Announcement body",
+        composeTitle: "Compose conference",
+        editTitle: "Edit conference",
+        composeHint:
+            "Add the conference details, then publish to the selected audience when you are ready.",
+        titleLabel: "Conference title",
+        titlePlaceholder: "e.g. International Conference on Machine Learning 2026",
+        bodyLabel: "Conference details",
         bodyPlaceholder:
-            "Explain what changed, who it affects, and what people should do next…",
-        pinLabel: "Pin to the top of the notice board",
+            "Describe the conference, its focus, and what attendees should know next…",
+        pinLabel: "Pin this conference to the top of the notice board",
         publishLabel: "Publish now",
         updatePublishLabel: "Update & publish",
-        publishedToast: "Announcement published to the lab.",
+        publishedToast: "Conference published to the lab.",
     },
     notice: {
         label: "Notice",
@@ -189,37 +192,34 @@ const EMPTY_FORMS: Record<AnnouncementKind, AnnouncementFormData> = {
         kind: "announcement",
         title: "",
         body: "",
-        audience: "all",
-        priority: "normal",
         pinned: false,
         publishAt: "",
         eventAt: "",
-        speaker: "",
         venue: "",
+        poster: "",
+        extraFields: [],
     },
     notice: {
         kind: "notice",
         title: "",
         body: "",
-        audience: "all",
-        priority: "normal",
         pinned: false,
         publishAt: "",
         eventAt: "",
-        speaker: "",
         venue: "",
+        poster: "",
+        extraFields: [],
     },
     seminar: {
         kind: "seminar",
         title: "",
         body: "",
-        audience: "all",
-        priority: "normal",
         pinned: false,
         publishAt: "",
         eventAt: "",
-        speaker: "",
         venue: "",
+        poster: "",
+        extraFields: [],
     },
 };
 
@@ -262,13 +262,12 @@ function toFormData(item: Announcement): AnnouncementFormData {
         kind: item.kind,
         title: item.title,
         body: item.body,
-        audience: item.audience,
-        priority: item.priority,
         pinned: item.pinned,
         publishAt: item.publishAt?.slice(0, 16) ?? "",
         eventAt: item.eventAt?.slice(0, 16) ?? "",
-        speaker: item.speaker ?? "",
         venue: item.venue ?? "",
+        poster: item.poster ?? "",
+        extraFields: item.extraFields ?? [],
     };
 }
 
@@ -291,16 +290,6 @@ function validateForm(
         errors.body = "Add a little more detail (at least 20 characters).";
     }
 
-    if (kind !== "notice") {
-        if (!formData.audience) {
-            errors.audience = "Choose who should see this.";
-        }
-
-        if (!formData.priority) {
-            errors.priority = "Choose a priority.";
-        }
-    }
-
     if (kind === "announcement" && formData.publishAt) {
         if (new Date(formData.publishAt) < new Date()) {
             errors.publishAt = "Scheduled posts must be in the future.";
@@ -312,10 +301,6 @@ function validateForm(
             errors.eventAt = "Pick the date and time for this seminar.";
         } else if (new Date(formData.eventAt) < new Date()) {
             errors.eventAt = "Pick a date and time in the future.";
-        }
-
-        if (!formData.speaker.trim()) {
-            errors.speaker = "Add the speaker or host for this seminar.";
         }
     }
 
@@ -375,6 +360,97 @@ function ComposerCard({
         setErrors((current) => ({ ...current, [key]: undefined }));
     };
 
+    const isValidImage = (file: File) => {
+        if (!file.type.startsWith("image/")) {
+            toast.error("Choose an image file (PNG, JPG or WebP).");
+            return false;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error("That image is over 2MB. Choose a smaller one.");
+            return false;
+        }
+
+        return true;
+    };
+
+    const handlePosterUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = "";
+        if (!file || !isValidImage(file)) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            setForms((current) => ({
+                ...current,
+                [kind]: { ...current[kind], poster: ev.target?.result as string },
+            }));
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleSpeakerImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files ?? []).filter(isValidImage);
+        e.target.value = "";
+        if (files.length === 0) return;
+
+        const promises = files.map(
+            (file) =>
+                new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => resolve(ev.target?.result as string);
+                    reader.readAsDataURL(file);
+                })
+        );
+
+        Promise.all(promises).then((results) => {
+            setForms((current) => ({
+                ...current,
+                [kind]: {
+                    ...current[kind],
+                },
+            }));
+        });
+    };
+
+    const addSpeaker = () => {
+        setForms((current) => ({
+            ...current,
+            [kind]: {
+                ...current[kind],
+            }
+        }));
+    };
+
+    const addExtraField = () => {
+        setForms((current) => ({
+            ...current,
+            [kind]: { ...current[kind], extraFields: [...current[kind].extraFields, { key: '', value: '' }] },
+        }));
+    };
+
+    const updateExtraField = (index: number, field: 'key' | 'value', value: string) => {
+        setForms((current) => {
+            const extraFields = [...current[kind].extraFields];
+            extraFields[index] = { ...extraFields[index], [field]: value };
+            return { ...current, [kind]: { ...current[kind], extraFields } };
+        });
+    };
+
+    const removeExtraField = (index: number) => {
+        setForms((current) => {
+            const extraFields = current[kind].extraFields.filter((_, i) => i !== index);
+            return { ...current, [kind]: { ...current[kind], extraFields } };
+        });
+    };
+
+    const removePoster = () => {
+        setForms((current) => ({
+            ...current,
+            [kind]: { ...current[kind], poster: '' },
+        }));
+    };
+
     const handleSubmit = async (intent: AnnouncementSubmitIntent) => {
         const validationErrors = validateForm(formData, kind);
 
@@ -392,8 +468,9 @@ function ComposerCard({
                 ...formData,
                 title,
                 body,
-                speaker: formData.speaker.trim(),
                 venue: formData.venue.trim(),
+                poster: formData.poster,
+                extraFields: formData.extraFields,
                 announcementId: editing?.id,
                 intent,
             });
@@ -403,14 +480,13 @@ function ComposerCard({
                 kind,
                 title,
                 body,
-                audience: formData.audience,
-                priority: formData.priority,
                 status: intent,
                 pinned: formData.pinned,
                 publishAt: formData.publishAt || undefined,
                 eventAt: formData.eventAt || undefined,
-                speaker: formData.speaker || undefined,
                 venue: formData.venue || undefined,
+                poster: formData.poster || undefined,
+                extraFields: formData.extraFields,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 author: { id: "current-admin", name: "You" },
@@ -557,173 +633,188 @@ function ComposerCard({
                 </div>
 
                 {kind === "seminar" && (
-                    <>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                                <Label htmlFor="seminar-event-at" className={FIELD_LABEL_CLASS}>
-                                    Date &amp; time
-                                </Label>
-
-                                <Input
-                                    id="seminar-event-at"
-                                    type="datetime-local"
-                                    value={formData.eventAt}
-                                    onChange={(event) =>
-                                        handleChange("eventAt", event.target.value)
-                                    }
-                                    className={cn(FIELD_CLASS, "mt-2")}
-                                    aria-invalid={Boolean(errors.eventAt)}
-                                />
-
-                                {errors.eventAt && (
-                                    <p className="mt-2 text-xs text-[#A45B4B]">
-                                        {errors.eventAt}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <Label htmlFor="seminar-speaker" className={FIELD_LABEL_CLASS}>
-                                    Speaker / host
-                                </Label>
-
-                                <Input
-                                    id="seminar-speaker"
-                                    type="text"
-                                    placeholder="e.g. Dr. Ayesha Rahman"
-                                    value={formData.speaker}
-                                    onChange={(event) =>
-                                        handleChange("speaker", event.target.value)
-                                    }
-                                    className={cn(FIELD_CLASS, "mt-2")}
-                                    aria-invalid={Boolean(errors.speaker)}
-                                />
-
-                                {errors.speaker && (
-                                    <p className="mt-2 text-xs text-[#A45B4B]">
-                                        {errors.speaker}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <Label htmlFor="seminar-venue" className={FIELD_LABEL_CLASS}>
-                                Venue / location
+                            <Label htmlFor="seminar-event-at" className={FIELD_LABEL_CLASS}>
+                                Schedule for
                             </Label>
 
                             <Input
-                                id="seminar-venue"
-                                type="text"
-                                placeholder="e.g. CILab Seminar Room, Block B"
-                                value={formData.venue}
-                                onChange={(event) => handleChange("venue", event.target.value)}
+                                id="seminar-event-at"
+                                type="datetime-local"
+                                value={formData.eventAt}
+                                onChange={(event) =>
+                                    handleChange("eventAt", event.target.value)
+                                }
                                 className={cn(FIELD_CLASS, "mt-2")}
+                                aria-invalid={Boolean(errors.eventAt)}
                             />
 
-                            <p className="mt-2 text-xs text-[#89877B]">
-                                Leave empty if the seminar is online.
-                            </p>
-                        </div>
-                    </>
-                )}
-
-                {showDistribution && (
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor={`${kind}-audience`} className={FIELD_LABEL_CLASS}>
-                                Audience
-                            </Label>
-
-                            <Select
-                                value={formData.audience}
-                                onValueChange={(value) =>
-                                    handleChange("audience", value as AnnouncementAudience)
-                                }
-                            >
-                                <SelectTrigger
-                                    id={`${kind}-audience`}
-                                    className={cn(TRIGGER_CLASS, "mt-2")}
-                                >
-                                    <SelectValue />
-                                </SelectTrigger>
-
-                                <SelectContent className="border-[#D8D5C9] bg-[#F4F3EE]">
-                                    <SelectGroup>
-                                        {ANNOUNCEMENT_AUDIENCES.map((audience) => (
-                                            <SelectItem
-                                                key={audience}
-                                                value={audience}
-                                                className={SELECT_ITEM_CLASS}
-                                            >
-                                                {AUDIENCE_LABELS[audience]}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div>
-                            <Label htmlFor={`${kind}-priority`} className={FIELD_LABEL_CLASS}>
-                                Priority
-                            </Label>
-
-                            <Select
-                                value={formData.priority}
-                                onValueChange={(value) =>
-                                    handleChange("priority", value as AnnouncementPriority)
-                                }
-                            >
-                                <SelectTrigger
-                                    id={`${kind}-priority`}
-                                    className={cn(TRIGGER_CLASS, "mt-2")}
-                                >
-                                    <SelectValue />
-                                </SelectTrigger>
-
-                                <SelectContent className="border-[#D8D5C9] bg-[#F4F3EE]">
-                                    <SelectGroup>
-                                        {ANNOUNCEMENT_PRIORITIES.map((priority) => (
-                                            <SelectItem
-                                                key={priority}
-                                                value={priority}
-                                                className={SELECT_ITEM_CLASS}
-                                            >
-                                                {PRIORITY_LABELS[priority]}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
+                            {errors.eventAt && (
+                                <p className="mt-2 text-xs text-[#A45B4B]">
+                                    {errors.eventAt}
+                                </p>
+                            )}
                         </div>
                     </div>
                 )}
 
                 {kind === "announcement" && (
                     <div>
-                        <Label htmlFor="announcement-publish-at" className={FIELD_LABEL_CLASS}>
-                            Schedule for
-                        </Label>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <Label htmlFor="announcement-publish-at" className={FIELD_LABEL_CLASS}>
+                                    Schedule for
+                                </Label>
 
-                        <Input
-                            id="announcement-publish-at"
-                            type="datetime-local"
-                            value={formData.publishAt}
-                            onChange={(event) => handleChange("publishAt", event.target.value)}
-                            className={cn(FIELD_CLASS, "mt-2")}
-                            aria-invalid={Boolean(errors.publishAt)}
-                        />
+                                <Input
+                                    id="announcement-publish-at"
+                                    type="datetime-local"
+                                    value={formData.publishAt}
+                                    onChange={(event) => handleChange("publishAt", event.target.value)}
+                                    className={cn(FIELD_CLASS, "mt-2")}
+                                    aria-invalid={Boolean(errors.publishAt)}
+                                />
 
-                        {errors.publishAt && (
-                            <p className="mt-2 text-xs text-[#A45B4B]">{errors.publishAt}</p>
-                        )}
-
+                                {errors.publishAt && (
+                                    <p className="mt-2 text-xs text-[#A45B4B]">{errors.publishAt}</p>
+                                )}
+                            </div>
+                        </div>
                         <p className="mt-2 text-xs text-[#89877B]">
                             Leave empty to publish as soon as you save.
                         </p>
                     </div>
                 )}
+
+                {(kind === "seminar" || kind === "announcement") && (
+                    <div>
+                        <Label htmlFor={`${kind}-venue`} className={FIELD_LABEL_CLASS}>
+                            Venue / location
+                        </Label>
+
+                        <Input
+                            id={`${kind}-venue`}
+                            type="text"
+                            placeholder={
+                                kind === "seminar"
+                                    ? "e.g. CILab Seminar Room, Block B"
+                                    : "e.g. CILab Auditorium, Block B"
+                            }
+                            value={formData.venue}
+                            onChange={(event) => handleChange("venue", event.target.value)}
+                            className={cn(FIELD_CLASS, "mt-2")}
+                        />
+
+                        <p className="mt-2 text-xs text-[#89877B]">
+                            Leave empty if the {copy.noun} is online.
+                        </p>
+                    </div>
+                )}
+
+                <div>
+                    <Label htmlFor={`${kind}-poster`} className={FIELD_LABEL_CLASS}>
+                        Poster
+                    </Label>
+
+                    <div className="mt-2 flex items-center gap-3">
+                        {formData.poster && (
+                            <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-[#DEDCD3]">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={formData.poster}
+                                    alt="Poster preview"
+                                    className="h-full w-full object-cover"
+                                />
+
+                                <button
+                                    type="button"
+                                    onClick={removePoster}
+                                    className="absolute right-0.5 top-0.5 rounded-full bg-[#A45B4B] p-0.5 text-white"
+                                    aria-label="Remove poster"
+                                >
+                                    <X className="h-3 w-3" aria-hidden />
+                                </button>
+                            </div>
+                        )}
+
+                        <label
+                            htmlFor={`${kind}-poster-input`}
+                            className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-[#C9C6B8] bg-[#FBFAF7] px-3 text-sm text-[#5E5D50] hover:bg-[#ECEBE4]"
+                        >
+                            <Upload className="h-4 w-4" aria-hidden />
+                            Upload poster
+                            <input
+                                id={`${kind}-poster-input`}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handlePosterUpload}
+                            />
+                        </label>
+                    </div>
+
+                    <p className="mt-2 text-xs text-[#89877B]">PNG, JPG or WebP, up to 2MB.</p>
+                </div>
+
+                <div>
+                    <span className={FIELD_LABEL_CLASS}>Extra fields</span>
+
+                    <p className="mt-1 text-xs text-[#89877B]">
+                        Add any additional details if needed (optional).
+                    </p>
+
+                    <div className="mt-2 space-y-2">
+                        {formData.extraFields.map((field, index) => (
+                            <div
+                                key={index}
+                                className="flex flex-col gap-2 rounded-lg border border-[#DEDCD3] bg-[#FBFAF7] p-3 sm:flex-row sm:items-center"
+                            >
+                                <Input
+                                    type="text"
+                                    placeholder="Label (e.g. Registration)"
+                                    value={field.key}
+                                    onChange={(event) =>
+                                        updateExtraField(index, "key", event.target.value)
+                                    }
+                                    className={FIELD_CLASS}
+                                />
+
+                                <Input
+                                    type="text"
+                                    placeholder="Value"
+                                    value={field.value}
+                                    onChange={(event) =>
+                                        updateExtraField(index, "value", event.target.value)
+                                    }
+                                    className={FIELD_CLASS}
+                                />
+
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeExtraField(index)}
+                                    className="text-[#A45B4B] hover:bg-[#F3E4E4]"
+                                    aria-label="Remove field"
+                                >
+                                    <Trash2 className="h-4 w-4" aria-hidden />
+                                </Button>
+                            </div>
+                        ))}
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={addExtraField}
+                            className="rounded-lg border-[#D7D4C9] text-[#5E5D50] hover:bg-[#ECEBE4]"
+                        >
+                            <Plus className="mr-1 h-3.5 w-3.5" aria-hidden />
+                            Add field
+                        </Button>
+                    </div>
+                </div>
 
                 <label className="flex cursor-pointer items-center gap-2.5 text-sm text-[#2D2D27]">
                     <input
@@ -825,7 +916,7 @@ function ListPanel({
             ? {
                 title: "Nothing published yet",
                 description:
-                    "Use the form to publish an announcement, post a notice, or schedule a seminar.",
+                    "Use the form to publish a conference, post a notice, or schedule a seminar.",
             }
             : {
                 title: `No ${KIND_COPY[kindFilter].plural.toLowerCase()} here`,
@@ -834,8 +925,8 @@ function ListPanel({
 
     return (
         <div className="space-y-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-3">
+            <div className="flex flex-col gap-4">
+                <div className="space-y-3 flex flex-col items-end">
                     <AdminFilterChips
                         label="Filter posts by type"
                         value={kindFilter}
@@ -844,7 +935,7 @@ function ListPanel({
                             { value: "all", label: "All", count: kindCounts.all },
                             {
                                 value: "announcement",
-                                label: "Announcements",
+                                label: "Conferences",
                                 count: kindCounts.announcement,
                             },
                             { value: "notice", label: "Notices", count: kindCounts.notice },
@@ -918,19 +1009,6 @@ function ListPanel({
                                         >
                                             {statusConfig.label}
                                         </Badge>
-
-                                        <Badge
-                                            className={cn(
-                                                "text-xs font-medium",
-                                                PRIORITY_BADGE_CLASS[item.priority]
-                                            )}
-                                        >
-                                            {PRIORITY_LABELS[item.priority]}
-                                        </Badge>
-
-                                        <Badge className="border border-[#DEDCD3] bg-[#ECEBE4] text-[#5E5D50]">
-                                            {AUDIENCE_LABELS[item.audience]}
-                                        </Badge>
                                     </div>
 
                                     <h4 className="mt-3 text-base font-semibold text-[#25251F]">
@@ -941,25 +1019,20 @@ function ListPanel({
                                         {item.body}
                                     </p>
 
-                                    {item.kind === "seminar" &&
-                                        (item.eventAt || item.speaker || item.venue) && (
+                                    {(item.kind === "seminar" || item.kind === "announcement") &&
+                                        (item.eventAt || item.venue) && (
                                             <div className="mt-4 grid grid-cols-1 gap-3 rounded-xl border border-[#DEDCD3] bg-[#FBFAF7] p-4 sm:grid-cols-3">
-                                                <ScheduleDetail
-                                                    icon={CalendarClock}
-                                                    label="When"
-                                                    value={
-                                                        item.eventAt
-                                                            ? formatDateTime(item.eventAt)
-                                                            : "Not set"
-                                                    }
-                                                />
-
-                                                <ScheduleDetail
-                                                    icon={Mic}
-                                                    label="Speaker"
-                                                    value={item.speaker || "Not set"}
-                                                />
-
+                                                {item.kind === "seminar" && (
+                                                    <ScheduleDetail
+                                                        icon={CalendarClock}
+                                                        label="When"
+                                                        value={
+                                                            item.eventAt
+                                                                ? formatDateTime(item.eventAt)
+                                                                : "Not set"
+                                                        }
+                                                    />
+                                                )}
                                                 <ScheduleDetail
                                                     icon={MapPin}
                                                     label="Venue"
@@ -1095,7 +1168,7 @@ export default function AnnouncementManager() {
                 id: "published",
                 label: "Published",
                 value: items.filter((item) => item.status === "published").length,
-                hint: "Live announcements, notices & seminars",
+                hint: "Live conferences, notices & seminars",
                 accent: "#4F8A63",
                 icon: Megaphone,
             },
@@ -1162,13 +1235,12 @@ export default function AnnouncementManager() {
                 kind: item.kind,
                 title: item.title,
                 body: item.body,
-                audience: item.audience,
-                priority: item.priority,
                 pinned: item.pinned,
                 publishAt: item.publishAt ?? "",
                 eventAt: item.eventAt ?? "",
-                speaker: item.speaker ?? "",
                 venue: item.venue ?? "",
+                poster: item.poster ?? "",
+                extraFields: item.extraFields ?? [],
                 intent: nextStatus,
             });
 
@@ -1227,14 +1299,14 @@ export default function AnnouncementManager() {
     return (
         <div className="w-full space-y-6 pb-8">
             <AdminSectionHeader
-                title="Announcements, Notices & Seminars"
-                description="Pick a type, publish it to the right audience, and manage everything you have posted in one place."
+                title="News"
+                description="Create, publish, and manage news updates to keep your audience informed about the latest conferences, notices and seminars."
                 isLoading={isLoading}
                 onRefresh={refresh}
             />
 
             {isLoading ? (
-                <AdminSkeleton variant="announcements" rows={3} />
+                <AdminSkeleton variant="news" rows={3} />
             ) : (
                 <>
                     <AdminStatCards stats={stats} />
