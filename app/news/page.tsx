@@ -75,6 +75,116 @@ const sample: Notice[] = [
         pinned: false,
         status: "published",
     },
+    {
+        id: "n7",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n8",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n9",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n10",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n11",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n12",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n13",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n14",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n15",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n16",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
+    {
+        id: "n17",
+        title: "Lab Meeting Moved to Thursday 3 PM",
+        summary:
+            "This week's lab meeting moves to Thursday at 3 PM in the main seminar room. The agenda is unchanged and the remote attendance link stays the same.",
+        category: "General",
+        date: "2026-10-15",
+        pinned: false,
+        status: "published",
+    },
 ];
 
 export default async function NewsPage({

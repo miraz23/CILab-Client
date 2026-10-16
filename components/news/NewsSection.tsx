@@ -3,12 +3,13 @@
 // components/news/NewsNotices.tsx
 // deps (already installed): motion, lucide-react, date-fns, next
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { format } from "date-fns";
-import { BellRing, Check, Copy, Pin, Share2, X } from "lucide-react";
+import { BellRing, Check, ChevronLeft, ChevronRight, Copy, Pin, Share2, X } from "lucide-react";
+import InteractiveBackground from "../shared/InteractiveBackground";
 
 export interface Notice {
     id: string;
@@ -20,6 +21,9 @@ export interface Notice {
     pinned: boolean;
     status: "published" | "draft";
 }
+
+/** Maximum cards per page. */
+const PAGE_SIZE = 12;
 
 const TINTS = [
     { from: "#F3F2E8", to: "#A3A171" }, // olive
@@ -41,6 +45,21 @@ export function sortNotices(notices: Notice[]): Notice[] {
     const pinned = live.filter((n) => n.pinned).sort((a, b) => time(a) - time(b));
     const rest = live.filter((n) => !n.pinned).sort((a, b) => time(b) - time(a));
     return [...pinned, ...rest];
+}
+
+/** 1 … 4 5 6 … 12 style page list. */
+function pageItems(page: number, pages: number): (number | "…")[] {
+    if (pages <= 7) return Array.from({ length: pages }, (_, i) => i + 1);
+    const set = new Set<number>([1, pages, page - 1, page, page + 1]);
+    if (page <= 3) [2, 3, 4].forEach((n) => set.add(n));
+    if (page >= pages - 2) [pages - 3, pages - 2, pages - 1].forEach((n) => set.add(n));
+    const nums = [...set].filter((n) => n >= 1 && n <= pages).sort((a, b) => a - b);
+    const out: (number | "…")[] = [];
+    nums.forEach((n, i) => {
+        if (i > 0 && n - nums[i - 1] > 1) out.push("…");
+        out.push(n);
+    });
+    return out;
 }
 
 /* ------------------------------- card ------------------------------- */
@@ -69,15 +88,7 @@ function NoticeCard({ notice, index }: { notice: Notice; index: number }) {
             >
                 <span className="absolute left-3.5 top-5.5 flex max-w-[60%] items-center gap-1.5 truncate rounded-full bg-white/60 px-3 py-1 text-[11px] font-medium text-neutral-800 backdrop-blur-md">
                     {notice.pinned && <Pin className="size-3 shrink-0 fill-neutral-800" />}
-                    <p className="mt-0.5 flex items-center gap-1.5 text-xs">
-                        {notice.pinned ? (
-                            <>
-                                Pinned
-                            </>
-                        ) : (
-                                "Notice"
-                        )}
-                    </p>
+                    <span className="truncate">{notice.pinned ? "Pinned" : "Notice"}</span>
                 </span>
 
                 <button
@@ -107,6 +118,7 @@ function NoticeCard({ notice, index }: { notice: Notice; index: number }) {
                 <Link
                     href={noticeHref(notice.id)}
                     scroll={false}
+                    aria-label={`Read notice: ${notice.title}`}
                     className="flex shrink-0 items-center gap-1.5 rounded-md bg-neutral-900 px-3.5 py-2.5 text-xs font-medium text-white transition hover:bg-neutral-700"
                 >
                     <BellRing className="size-3.5" />
@@ -202,17 +214,89 @@ function NoticeModal({ notice, onClose }: { notice: Notice | null; onClose: () =
                                     </>
                                 )}
                             </button>
-                            <button
+                            {/* <button
                                 onClick={onClose}
                                 className="rounded-2xl border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
                             >
                                 Close
-                            </button>
+                            </button> */}
                         </div>
                     </motion.div>
                 </motion.div>
             )}
         </AnimatePresence>
+    );
+}
+
+/* ----------------------------- pagination ----------------------------- */
+
+function Pagination({
+    page,
+    pages,
+    onChange,
+}: {
+    page: number;
+    pages: number;
+    onChange: (p: number) => void;
+}) {
+    const arrow =
+        "grid size-10 place-items-center rounded-full text-neutral-600 transition hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-35";
+
+    return (
+        <nav aria-label="Notices pagination" className="mt-14 flex flex-col items-center gap-3">
+            <div className="flex items-center gap-1 rounded-full border border-neutral-200/80 bg-white/80 p-1.5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.2)] backdrop-blur-md">
+                <button
+                    aria-label="Previous page"
+                    disabled={page === 1}
+                    onClick={() => onChange(page - 1)}
+                    className={arrow}
+                >
+                    <ChevronLeft className="size-4" />
+                </button>
+
+                {pageItems(page, pages).map((item, i) =>
+                    item === "…" ? (
+                        <span key={`gap-${i}`} className="grid size-10 place-items-center text-sm text-neutral-400">
+                            …
+                        </span>
+                    ) : (
+                        <button
+                            key={item}
+                            onClick={() => onChange(item)}
+                            aria-label={`Page ${item}`}
+                            aria-current={item === page ? "page" : undefined}
+                            className="relative grid size-10 place-items-center rounded-full text-sm font-medium"
+                        >
+                            {item === page && (
+                                <motion.span
+                                    layoutId="notice-page-pill"
+                                    className="absolute inset-0 rounded-full bg-neutral-900"
+                                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                />
+                            )}
+                            <span
+                                className={`relative transition-colors ${item === page ? "text-white" : "text-neutral-600 hover:text-neutral-900"
+                                    }`}
+                            >
+                                {item}
+                            </span>
+                        </button>
+                    )
+                )}
+
+                <button
+                    aria-label="Next page"
+                    disabled={page === pages}
+                    onClick={() => onChange(page + 1)}
+                    className={arrow}
+                >
+                    <ChevronRight className="size-4" />
+                </button>
+            </div>
+            <p className="text-xs text-neutral-500">
+                Page {page} of {pages}
+            </p>
+        </nav>
     );
 }
 
@@ -227,41 +311,116 @@ export default function NewsNotices({
 }) {
     const sorted = useMemo(() => sortNotices(notices), [notices]);
     const router = useRouter();
+    const gridTop = useRef<HTMLDivElement>(null);
+
+    // If a shared link points at a notice, open the page that contains it.
+    const [page, setPage] = useState(() => {
+        const idx = activeNoticeId ? sorted.findIndex((n) => n.id === activeNoticeId) : -1;
+        return idx >= 0 ? Math.floor(idx / PAGE_SIZE) + 1 : 1;
+    });
+
+    const pages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+    const current = Math.min(page, pages);
+    const start = (current - 1) * PAGE_SIZE;
+    const visible = sorted.slice(start, start + PAGE_SIZE);
+    const pinnedCount = sorted.filter((n) => n.pinned).length;
+
     const active = activeNoticeId ? (sorted.find((n) => n.id === activeNoticeId) ?? null) : null;
     const closeModal = () => router.push("/news", { scroll: false });
 
+    const goTo = (p: number) => {
+        setPage(p);
+        gridTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    const ease = [0.22, 1, 0.36, 1] as const;
+
     return (
         <section className="relative overflow-hidden bg-[#F8FAFC] py-28 sm:py-32">
-            {/* heading */}
-            <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                className="mx-auto max-w-2xl px-4 text-center"
-            >
-                <h1 className="text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl">
-                    Stay Informed with Our <span className="text-[#716f49]">Latest Notices</span>
-                </h1>
-                <p className="mx-auto mt-4 max-w-2xl text-base text-neutral-600 sm:text-lg">
-                    Announcements, seminar schedules, submission deadlines and lab updates, all published in
-                    one place so you never miss what matters.
-                </p>
-            </motion.div>
+            <InteractiveBackground />
 
-            {/* grid: 1 col mobile, 2 tablet, 4 desktop */}
-            <div className="mx-auto mt-14 max-w-7xl px-4 sm:px-6">
-                {sorted.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        {sorted.map((n, i) => (
-                            <NoticeCard key={n.id} notice={n} index={i} />
-                        ))}
+            <div className="relative">
+                {/* heading */}
+                <div className="mx-auto max-w-2xl px-4 text-center">
+                    {/* <motion.span
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, ease }}
+                        className="inline-flex items-center gap-2 rounded-full border border-[#716f49]/20 bg-white/70 px-3.5 py-1.5 text-xs font-medium tracking-wide text-[#716f49] shadow-sm backdrop-blur"
+                    >
+                        <span className="relative flex size-2">
+                            <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#716f49] opacity-50" />
+                            <span className="relative inline-flex size-2 rounded-full bg-[#716f49]" />
+                        </span>
+                        Notice Board
+                    </motion.span> */}
+
+                    <motion.h1
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7, delay: 0.08, ease }}
+                        className="mt-6 text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl"
+                    >
+                        Stay Informed with Our <span className="text-[#716f49]">Latest Notices</span>
+                    </motion.h1>
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7, delay: 0.16, ease }}
+                        className="mx-auto mt-4 max-w-2xl text-base text-neutral-600 sm:text-lg"
+                    >
+                        Announcements, seminar schedules, submission deadlines and lab updates, all published
+                        in one place so you never miss what matters.
+                    </motion.p>
+                </div>
+
+                {/* results bar */}
+                <div ref={gridTop} className="mx-auto mt-14 max-w-7xl scroll-mt-24 px-4 sm:px-6">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200/80 pb-4">
+                        <p className="text-sm text-neutral-600">
+                            {sorted.length > 0 ? (
+                                <>
+                                    Showing{" "}
+                                    <span className="font-semibold text-neutral-900">
+                                        {start + 1}–{start + visible.length}
+                                    </span>{" "}
+                                    of <span className="font-semibold text-neutral-900">{sorted.length}</span>{" "}
+                                    {sorted.length === 1 ? "notice" : "notices"}
+                                </>
+                            ) : (
+                                "No notices"
+                            )}
+                        </p>
+                        {pinnedCount > 0 && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F3F2E8] px-3 py-1 text-xs font-medium text-[#716f49]">
+                                <Pin className="size-3 fill-[#716f49]" />
+                                {pinnedCount} pinned
+                            </span>
+                        )}
                     </div>
-                ) : (
-                    <p className="py-20 text-center text-sm text-neutral-500">
-                        No notices have been published yet. Please check back soon.
-                    </p>
-                )}
+
+                    {/* grid: 1 col mobile, 2 tablet, 4 desktop */}
+                    {sorted.length > 0 ? (
+                        <motion.div
+                            key={current}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.45, ease }}
+                            className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
+                        >
+                            {visible.map((n, i) => (
+                                <NoticeCard key={n.id} notice={n} index={start + i} />
+                            ))}
+                        </motion.div>
+                    ) : (
+                        <p className="py-20 text-center text-sm text-neutral-500">
+                            No notices have been published yet. Please check back soon.
+                        </p>
+                    )}
+
+                    {pages > 1 && <Pagination page={current} pages={pages} onChange={goTo} />}
+                </div>
             </div>
 
             <NoticeModal notice={active} onClose={closeModal} />
