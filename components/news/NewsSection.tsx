@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { format } from "date-fns";
 import { BellRing, Check, ChevronLeft, ChevronRight, Copy, Pin, Share2, X } from "lucide-react";
-import InteractiveBackground from "../shared/InteractiveBackground";
 
 export interface Notice {
     id: string;
@@ -337,7 +336,19 @@ export default function NewsNotices({
 
     return (
         <section className="relative overflow-hidden bg-[#F8FAFC] py-28 sm:py-32">
-            <InteractiveBackground />
+            {/* ambient background: soft olive glow + fading dot grid */}
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+                <div className="absolute -top-40 left-1/2 h-105 w-205 -translate-x-1/2 rounded-full bg-[#A3A171]/25 blur-3xl" />
+                <div
+                    className="absolute inset-0 opacity-[0.14]"
+                    style={{
+                        backgroundImage: "radial-gradient(#716f49 1px, transparent 1px)",
+                        backgroundSize: "24px 24px",
+                        maskImage: "radial-gradient(ellipse 70% 45% at 50% 0%, #000, transparent)",
+                        WebkitMaskImage: "radial-gradient(ellipse 70% 45% at 50% 0%, #000, transparent)",
+                    }}
+                />
+            </div>
 
             <div className="relative">
                 {/* heading */}
