@@ -1,6 +1,6 @@
 // app/lectures/schedule/page.tsx
 
-import ScheduleSection from "@/components/lectures/ScheduleSection";
+import ScheduleSection from "@/components/schedule/ScheduleSection";
 import type { AvailabilitySlot } from "@/lib/types/admin/schedule";
 
 // TODO: replace with your real admin-managed data, e.g.
