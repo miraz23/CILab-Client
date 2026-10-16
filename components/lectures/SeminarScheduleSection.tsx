@@ -250,7 +250,7 @@ export default function SeminarScheduleSection({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                className="mx-auto max-w-2xl px-4 text-center"
+                className="mx-auto max-w-xl px-4 text-center"
             >
                 <h1 className="text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl">
                     Our Reference <span className="text-[#716f49]">Seminar Series</span>
