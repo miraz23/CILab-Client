@@ -110,7 +110,7 @@ function NoticeCard({ notice, index }: { notice: Notice; index: number }) {
                     className="flex shrink-0 items-center gap-1.5 rounded-md bg-neutral-900 px-3.5 py-2.5 text-xs font-medium text-white transition hover:bg-neutral-700"
                 >
                     <BellRing className="size-3.5" />
-                    Read notice
+                    {/* Read notice */}
                 </Link>
             </div>
         </motion.article>
