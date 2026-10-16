@@ -1,57 +1,101 @@
 "use client";
 
-// components/news/NewsNotices.tsx
-// deps (already installed): motion, lucide-react, date-fns, next
+// components/news/NewsSection.tsx
+// deps (already installed): motion, lucide-react, date-fns
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { format } from "date-fns";
-import { BellRing, Check, ChevronLeft, ChevronRight, Copy, Pin, Share2, X } from "lucide-react";
+import {
+    CalendarClock,
+    Check,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Copy,
+    MapPin,
+    Megaphone,
+    Pin,
+    Presentation,
+    StickyNote,
+} from "lucide-react";
 
-export interface Notice {
-    id: string;
+import type { Announcement, AnnouncementKind } from "@/lib/types/admin/announcement";
+
+/** Cards per page, per column. */
+const PAGE_SIZE = 5;
+
+const ease = [0.22, 1, 0.36, 1] as const;
+
+const SECTIONS: {
+    kind: AnnouncementKind;
     title: string;
-    summary?: string;
-    category: string; // e.g. "Seminar", "Deadline", "General"
-    /** ISO date string, e.g. "2026-10-12" */
-    date: string;
-    pinned: boolean;
-    status: "published" | "draft";
-}
+    blurb: string;
+    icon: typeof Megaphone;
+    badgeClass: string;
+    iconClass: string;
+    empty: string;
+}[] = [
+        {
+            kind: "announcement",
+            title: "Conferences",
+            blurb: "Calls for papers and conference updates",
+            icon: Megaphone,
+            badgeClass: "bg-[#E4E6DC] text-[#5C6446]",
+            iconClass: "bg-[#E4E6DC] text-[#5C6446]",
+            empty: "No conferences have been published yet.",
+        },
+        {
+            kind: "notice",
+            title: "Notices",
+            blurb: "Quick, at-a-glance lab updates",
+            icon: StickyNote,
+            badgeClass: "bg-[#ECE7DA] text-[#8A6420]",
+            iconClass: "bg-[#ECE7DA] text-[#8A6420]",
+            empty: "No notices have been published yet.",
+        },
+        {
+            kind: "seminar",
+            title: "Seminars",
+            blurb: "Upcoming talks and sessions",
+            icon: Presentation,
+            badgeClass: "bg-[#E3E8F0] text-[#5579A6]",
+            iconClass: "bg-[#E3E8F0] text-[#5579A6]",
+            empty: "No seminars have been scheduled yet.",
+        },
+    ];
 
-/** Maximum cards per page. */
-const PAGE_SIZE = 12;
-
-const TINTS = [
-    { from: "#F3F2E8", to: "#A3A171" }, // olive
-    { from: "#EAF0E5", to: "#8FA382" }, // dark green
-    { from: "#F1EFE1", to: "#88864F" }, // deep olive
-];
-
-const time = (n: Notice) => new Date(n.date).getTime();
-
-/** Shareable URL for a notice - opens /news with the detail modal showing it. */
+/** Shareable URL for an item - opens /news with that card expanded. */
 export const noticeHref = (id: string) => `/news?notice=${encodeURIComponent(id)}`;
 
-/**
- * Pinned notices come first, oldest → newest (ascending by date, as requested).
- * Everything else follows newest → oldest. Flip the last sort if you want the rest ascending too.
- */
-export function sortNotices(notices: Notice[]): Notice[] {
-    const live = notices.filter((n) => n.status === "published");
-    const pinned = live.filter((n) => n.pinned).sort((a, b) => time(a) - time(b));
-    const rest = live.filter((n) => !n.pinned).sort((a, b) => time(b) - time(a));
-    return [...pinned, ...rest];
+// The manager saves empty optional dates as "", so use || (not ??) to fall through.
+const primaryDate = (n: Announcement) => n.eventAt || n.publishAt || n.createdAt;
+
+const time = (n: Announcement) => {
+    const t = new Date(primaryDate(n)).getTime();
+    return Number.isNaN(t) ? 0 : t;
+};
+
+/** Only published items; pinned first, then newest → oldest. */
+export function sortAnnouncements(items: Announcement[]): Announcement[] {
+    return items
+        .filter((n) => n.status === "published")
+        .slice()
+        .sort((a, b) => Number(b.pinned) - Number(a.pinned) || time(b) - time(a));
+}
+
+function fmt(value: string | undefined, pattern: string) {
+    if (!value) return "";
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? value : format(d, pattern);
 }
 
 /** 1 … 4 5 6 … 12 style page list. */
 function pageItems(page: number, pages: number): (number | "…")[] {
-    if (pages <= 7) return Array.from({ length: pages }, (_, i) => i + 1);
+    if (pages <= 5) return Array.from({ length: pages }, (_, i) => i + 1);
     const set = new Set<number>([1, pages, page - 1, page, page + 1]);
-    if (page <= 3) [2, 3, 4].forEach((n) => set.add(n));
-    if (page >= pages - 2) [pages - 3, pages - 2, pages - 1].forEach((n) => set.add(n));
+    if (page <= 2) [2, 3].forEach((n) => set.add(n));
+    if (page >= pages - 1) [pages - 2, pages - 1].forEach((n) => set.add(n));
     const nums = [...set].filter((n) => n >= 1 && n <= pages).sort((a, b) => a - b);
     const out: (number | "…")[] = [];
     nums.forEach((n, i) => {
@@ -61,190 +105,202 @@ function pageItems(page: number, pages: number): (number | "…")[] {
     return out;
 }
 
-/* ------------------------------- card ------------------------------- */
+/* ------------------------------- detail row ------------------------------- */
 
-function NoticeCard({ notice, index }: { notice: Notice; index: number }) {
-    const tint = TINTS[index % TINTS.length];
-    const date = new Date(notice.date);
-
+function Detail({
+    icon: Icon,
+    label,
+    value,
+}: {
+    icon: typeof Megaphone;
+    label: string;
+    value: string;
+}) {
     return (
-        <motion.article
-            initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{
-                duration: 0.6,
-                delay: Math.min((index % 4) * 0.08, 0.24),
-                ease: [0.22, 1, 0.36, 1],
-            }}
-            whileHover={{ y: -8 }}
-            className="group w-full rounded-[28px] bg-neutral-100 p-2.5 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]"
-        >
-            {/* gradient panel */}
-            <div
-                className="relative h-52.5 overflow-hidden rounded-[22px] ring-1 ring-black/5"
-                style={{ background: `linear-gradient(135deg, ${tint.from} 0%, ${tint.to} 100%)` }}
-            >
-                <span className="absolute left-3.5 top-5.5 flex max-w-[60%] items-center gap-1.5 truncate rounded-full bg-white/60 px-3 py-1 text-[11px] font-medium text-neutral-800 backdrop-blur-md">
-                    {notice.pinned && <Pin className="size-3 shrink-0 fill-neutral-800" />}
-                    <span className="truncate">{notice.pinned ? "Pinned" : "Notice"}</span>
-                </span>
-
-                <button
-                    aria-label="Copy notice link"
-                    onClick={() => navigator.clipboard?.writeText(`${location.origin}${noticeHref(notice.id)}`)}
-                    className="absolute right-3.5 top-3.5 grid size-10 place-items-center rounded-xl border border-white/60 bg-white/40 text-neutral-900 backdrop-blur-md transition hover:bg-white/70"
-                >
-                    <Share2 className="size-4.5" />
-                </button>
-
-                <span className="absolute -bottom-4 left-3 select-none text-[76px] font-bold leading-none tracking-tighter text-white/40">
-                    {format(date, "dd MMM")}
-                </span>
-
-                <p className="absolute inset-x-4 top-1/2 line-clamp-3 -translate-y-1/2 text-[15px] font-semibold leading-snug text-neutral-900/80">
-                    {notice.title}
-                </p>
+        <div className="flex items-start gap-2">
+            <Icon className="mt-0.5 size-3.5 shrink-0 text-[#969386]" aria-hidden />
+            <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-[#969386]">{label}</p>
+                <p className="wrap-break-word text-xs font-medium text-[#41423B]">{value}</p>
             </div>
-
-            {/* footer */}
-            <div className="flex items-center justify-between gap-3 px-3 pb-2 pt-3.5">
-                <div className="min-w-0">
-                    <h3 className="truncate text-[15px] font-semibold text-neutral-900">
-                        {format(date, "MMM d, yyyy")}
-                    </h3>
-                </div>
-                <Link
-                    href={noticeHref(notice.id)}
-                    scroll={false}
-                    aria-label={`Read notice: ${notice.title}`}
-                    className="flex shrink-0 items-center gap-1.5 rounded-md bg-neutral-900 px-3.5 py-2.5 text-xs font-medium text-white transition hover:bg-neutral-700"
-                >
-                    <BellRing className="size-3.5" />
-                    {/* Read notice */}
-                </Link>
-            </div>
-        </motion.article>
+        </div>
     );
 }
 
-/* ----------------------------- detail modal ---------------------------- */
+/* ------------------------------- accordion card ------------------------------- */
 
-function NoticeModal({ notice, onClose }: { notice: Notice | null; onClose: () => void }) {
+function AccordionCard({
+    item,
+    open,
+    onToggle,
+}: {
+    item: Announcement;
+    open: boolean;
+    onToggle: () => void;
+}) {
     const [copied, setCopied] = useState(false);
-
-    useEffect(() => {
-        if (!notice) return;
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, [notice, onClose]);
+    const panelId = `panel-${item.id}`;
 
     const copyLink = () => {
-        if (!notice) return;
-        navigator.clipboard?.writeText(`${location.origin}${noticeHref(notice.id)}`);
+        navigator.clipboard?.writeText(`${location.origin}${noticeHref(item.id)}`);
         setCopied(true);
         window.setTimeout(() => setCopied(false), 2000);
     };
 
+    const extras = (item.extraFields ?? []).filter((f) => f.key.trim() || f.value.trim());
+    const showWhen = item.kind === "seminar" && item.eventAt;
+    const showVenue = (item.kind === "seminar" || item.kind === "announcement") && (item.venue || item.eventAt);
+
     return (
-        <AnimatePresence>
-            {notice && (
-                <motion.div
-                    className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4 backdrop-blur-sm"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={onClose}
-                >
-                    <motion.div
-                        onClick={(e) => e.stopPropagation()}
-                        initial={{ opacity: 0, y: 24, scale: 0.96 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 12, scale: 0.97 }}
-                        transition={{ type: "spring", stiffness: 260, damping: 24 }}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label={notice.title}
-                        className="relative w-full max-w-xl rounded-[28px] bg-white p-7 shadow-2xl"
+        <motion.div
+            id={`notice-${item.id}`}
+            layout="position"
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.45, ease }}
+            className={`scroll-mt-28 overflow-hidden rounded-2xl border bg-white transition-shadow ${open
+                ? "border-[#A3A171]/60 shadow-[0_18px_40px_-18px_rgba(40,40,25,0.35)]"
+                : "border-neutral-200/80 hover:shadow-[0_12px_30px_-16px_rgba(40,40,25,0.25)]"
+                }`}
+        >
+            <button
+                type="button"
+                onClick={onToggle}
+                aria-expanded={open}
+                aria-controls={panelId}
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
+            >
+                <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500">
+                        {item.pinned && <Pin className="size-3 shrink-0 fill-[#716f49] text-[#716f49]" aria-hidden />}
+                        {item.kind !== "seminar" && "Posted "}
+                        {fmt(primaryDate(item), "MMM d, yyyy")}
+                    </span>
+                    <span
+                        className={`mt-0.5 block text-sm font-semibold leading-snug text-neutral-900 ${open ? "" : "line-clamp-2"
+                            }`}
                     >
-                        <button
-                            onClick={onClose}
-                            aria-label="Close"
-                            className="absolute right-4 top-4 grid size-9 place-items-center rounded-full bg-neutral-100 hover:bg-neutral-200"
-                        >
-                            <X className="size-4" />
-                        </button>
+                        {item.title}
+                    </span>
+                </span>
 
-                        <p className="flex flex-wrap items-center gap-2 pr-10 text-xs font-medium uppercase tracking-wider text-neutral-500">
-                            <span className="rounded-full bg-[#F3F2E8] px-2.5 py-1 text-[#716f49]">
-                                {notice.category}
-                            </span>
-                            <span>{format(new Date(notice.date), "MMM d, yyyy")}</span>
-                            {notice.pinned && (
-                                <span className="flex items-center gap-1 text-neutral-700">
-                                    <Pin className="size-3 fill-neutral-700" /> Pinned
-                                </span>
+                <ChevronDown
+                    className={`size-4 shrink-0 text-neutral-500 transition-transform duration-300 ${open ? "rotate-180" : ""
+                        }`}
+                    aria-hidden
+                />
+            </button>
+
+            <AnimatePresence initial={false}>
+                {open && (
+                    <motion.div
+                        id={panelId}
+                        role="region"
+                        key="content"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.35, ease }}
+                        className="overflow-hidden"
+                    >
+                        <div className="space-y-4 border-t border-neutral-100 px-4 pb-4 pt-4">
+                            {item.poster && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={item.poster}
+                                    alt={`${item.title} poster`}
+                                    className="max-h-80 w-full rounded-xl border border-neutral-200/80 object-cover"
+                                />
                             )}
-                        </p>
 
-                        <h3 className="mt-3 pr-8 text-xl font-semibold leading-snug text-neutral-900">
-                            {notice.title}
-                        </h3>
+                            <p className="whitespace-pre-line text-sm leading-relaxed text-neutral-700">{item.body}</p>
 
-                        <p className="mt-4 text-sm leading-relaxed text-neutral-700">
-                            {notice.summary ?? "No additional details have been published for this notice."}
-                        </p>
+                            {(showWhen || showVenue) && (
+                                <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#DEDCD3] bg-[#FBFAF7] p-3.5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                                    {showWhen && (
+                                        <Detail
+                                            icon={CalendarClock}
+                                            label="When"
+                                            value={fmt(item.eventAt, "MMM d, yyyy · h:mm a")}
+                                        />
+                                    )}
+                                    {showVenue && (
+                                        <Detail icon={MapPin} label="Venue" value={item.venue || "Online / TBD"} />
+                                    )}
+                                </div>
+                            )}
 
-                        <div className="mt-6 flex gap-3">
-                            <button
-                                onClick={copyLink}
-                                className="flex items-center gap-2 rounded-2xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-700"
-                            >
-                                {copied ? (
-                                    <>
-                                        <Check className="size-4" /> Link copied
-                                    </>
-                                ) : (
-                                    <>
-                                        <Copy className="size-4" /> Copy link
-                                    </>
-                                )}
-                            </button>
-                            {/* <button
-                                onClick={onClose}
-                                className="rounded-2xl border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
-                            >
-                                Close
-                            </button> */}
+                            {extras.length > 0 && (
+                                <dl className="divide-y divide-neutral-100 rounded-xl border border-neutral-200/80 text-xs">
+                                    {extras.map((f, i) => (
+                                        <div key={`${f.key}-${i}`} className="flex gap-3 px-3.5 py-2.5">
+                                            <dt className="w-2/5 shrink-0 font-semibold text-neutral-500">{f.key}</dt>
+                                            <dd className="min-w-0 flex-1 wrap-break-word font-medium text-neutral-800">
+                                                {f.value}
+                                            </dd>
+                                        </div>
+                                    ))}
+                                </dl>
+                            )}
+
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <p className="text-[11px] text-neutral-500">
+                                    {item.author?.name ? `${item.author.name} · ` : ""}
+                                    updated {fmt(item.updatedAt, "MMM d, yyyy")}
+                                    {item.publishAt ? ` · goes live ${fmt(item.publishAt, "MMM d, yyyy")}` : ""}
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={copyLink}
+                                    className="flex items-center gap-1.5 rounded-lg bg-neutral-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-neutral-700"
+                                >
+                                    {copied ? (
+                                        <>
+                                            <Check className="size-3.5" /> Link copied
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Copy className="size-3.5" /> Copy link
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+                )}
+            </AnimatePresence>
+        </motion.div>
     );
 }
 
 /* ----------------------------- pagination ----------------------------- */
 
-function Pagination({
+function ColumnPagination({
+    kind,
     page,
     pages,
+    total,
+    start,
+    shown,
     onChange,
 }: {
+    kind: AnnouncementKind;
     page: number;
     pages: number;
+    total: number;
+    start: number;
+    shown: number;
     onChange: (p: number) => void;
 }) {
     const arrow =
-        "grid size-10 place-items-center rounded-full text-neutral-600 transition hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-35";
+        "grid size-8 place-items-center rounded-full text-neutral-600 transition hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-35";
 
     return (
-        <nav aria-label="Notices pagination" className="mt-14 flex flex-col items-center gap-3">
-            <div className="flex items-center gap-1 rounded-full border border-neutral-200/80 bg-white/80 p-1.5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.2)] backdrop-blur-md">
+        <nav aria-label={`${kind} pagination`} className="mt-6 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-0.5 rounded-full border border-neutral-200/80 bg-white/80 p-1 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.2)] backdrop-blur-md">
                 <button
+                    type="button"
                     aria-label="Previous page"
                     disabled={page === 1}
                     onClick={() => onChange(page - 1)}
@@ -255,20 +311,21 @@ function Pagination({
 
                 {pageItems(page, pages).map((item, i) =>
                     item === "…" ? (
-                        <span key={`gap-${i}`} className="grid size-10 place-items-center text-sm text-neutral-400">
+                        <span key={`gap-${i}`} className="grid size-8 place-items-center text-xs text-neutral-400">
                             …
                         </span>
                     ) : (
                         <button
                             key={item}
+                            type="button"
                             onClick={() => onChange(item)}
                             aria-label={`Page ${item}`}
                             aria-current={item === page ? "page" : undefined}
-                            className="relative grid size-10 place-items-center rounded-full text-sm font-medium"
+                            className="relative grid size-8 place-items-center rounded-full text-xs font-medium"
                         >
                             {item === page && (
                                 <motion.span
-                                    layoutId="notice-page-pill"
+                                    layoutId={`page-pill-${kind}`}
                                     className="absolute inset-0 rounded-full bg-neutral-900"
                                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                                 />
@@ -284,6 +341,7 @@ function Pagination({
                 )}
 
                 <button
+                    type="button"
                     aria-label="Next page"
                     disabled={page === pages}
                     onClick={() => onChange(page + 1)}
@@ -292,8 +350,9 @@ function Pagination({
                     <ChevronRight className="size-4" />
                 </button>
             </div>
-            <p className="text-xs text-neutral-500">
-                Page {page} of {pages}
+
+            <p className="text-[11px] text-neutral-500">
+                Showing {start + 1}–{start + shown} of {total}
             </p>
         </nav>
     );
@@ -305,34 +364,61 @@ export default function NewsNotices({
     notices,
     activeNoticeId,
 }: {
-    notices: Notice[];
+    notices: Announcement[];
     activeNoticeId?: string;
 }) {
-    const sorted = useMemo(() => sortNotices(notices), [notices]);
-    const router = useRouter();
-    const gridTop = useRef<HTMLDivElement>(null);
+    const grouped = useMemo(() => {
+        const sorted = sortAnnouncements(notices);
+        return {
+            announcement: sorted.filter((n) => n.kind === "announcement"),
+            notice: sorted.filter((n) => n.kind === "notice"),
+            seminar: sorted.filter((n) => n.kind === "seminar"),
+        } satisfies Record<AnnouncementKind, Announcement[]>;
+    }, [notices]);
 
-    // If a shared link points at a notice, open the page that contains it.
-    const [page, setPage] = useState(() => {
-        const idx = activeNoticeId ? sorted.findIndex((n) => n.id === activeNoticeId) : -1;
-        return idx >= 0 ? Math.floor(idx / PAGE_SIZE) + 1 : 1;
+    // One open card per column (FAQ style). A shared link opens its card.
+    const [openIds, setOpenIds] = useState<Record<AnnouncementKind, string | null>>(() => {
+        const init: Record<AnnouncementKind, string | null> = { announcement: null, notice: null, seminar: null };
+        if (activeNoticeId) {
+            (Object.keys(grouped) as AnnouncementKind[]).forEach((k) => {
+                if (grouped[k].some((n) => n.id === activeNoticeId)) init[k] = activeNoticeId;
+            });
+        }
+        return init;
     });
 
-    const pages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
-    const current = Math.min(page, pages);
-    const start = (current - 1) * PAGE_SIZE;
-    const visible = sorted.slice(start, start + PAGE_SIZE);
-    const pinnedCount = sorted.filter((n) => n.pinned).length;
+    // Current page per column. A shared link jumps to the page containing its card.
+    const [pageByKind, setPageByKind] = useState<Record<AnnouncementKind, number>>(() => {
+        const init: Record<AnnouncementKind, number> = { announcement: 1, notice: 1, seminar: 1 };
+        if (activeNoticeId) {
+            (Object.keys(grouped) as AnnouncementKind[]).forEach((k) => {
+                const idx = grouped[k].findIndex((n) => n.id === activeNoticeId);
+                if (idx >= 0) init[k] = Math.floor(idx / PAGE_SIZE) + 1;
+            });
+        }
+        return init;
+    });
 
-    const active = activeNoticeId ? (sorted.find((n) => n.id === activeNoticeId) ?? null) : null;
-    const closeModal = () => router.push("/news", { scroll: false });
+    const scrolled = useRef(false);
+    useEffect(() => {
+        if (!activeNoticeId || scrolled.current) return;
+        scrolled.current = true;
+        const t = window.setTimeout(() => {
+            document.getElementById(`notice-${activeNoticeId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 300);
+        return () => window.clearTimeout(t);
+    }, [activeNoticeId]);
 
-    const goTo = (p: number) => {
-        setPage(p);
-        gridTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const toggle = (kind: AnnouncementKind, id: string) =>
+        setOpenIds((cur) => ({ ...cur, [kind]: cur[kind] === id ? null : id }));
+
+    const goTo = (kind: AnnouncementKind, p: number) => {
+        setPageByKind((cur) => ({ ...cur, [kind]: p }));
+        setOpenIds((cur) => ({ ...cur, [kind]: null }));
+        document.getElementById(`news-col-${kind}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
-    const ease = [0.22, 1, 0.36, 1] as const;
+    const total = grouped.announcement.length + grouped.notice.length + grouped.seminar.length;
 
     return (
         <section className="relative overflow-hidden bg-[#F8FAFC] py-28 sm:py-32">
@@ -353,26 +439,13 @@ export default function NewsNotices({
             <div className="relative">
                 {/* heading */}
                 <div className="mx-auto max-w-2xl px-4 text-center">
-                    {/* <motion.span
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease }}
-                        className="inline-flex items-center gap-2 rounded-full border border-[#716f49]/20 bg-white/70 px-3.5 py-1.5 text-xs font-medium tracking-wide text-[#716f49] shadow-sm backdrop-blur"
-                    >
-                        <span className="relative flex size-2">
-                            <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#716f49] opacity-50" />
-                            <span className="relative inline-flex size-2 rounded-full bg-[#716f49]" />
-                        </span>
-                        Notice Board
-                    </motion.span> */}
-
                     <motion.h1
                         initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.08, ease }}
                         className="mt-6 text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl"
                     >
-                        Stay Informed with Our <span className="text-[#716f49]">Latest Notices</span>
+                        Stay Informed with Our <span className="text-[#716f49]">Latest News</span>
                     </motion.h1>
 
                     <motion.p
@@ -381,60 +454,82 @@ export default function NewsNotices({
                         transition={{ duration: 0.7, delay: 0.16, ease }}
                         className="mx-auto mt-4 max-w-2xl text-base text-neutral-600 sm:text-lg"
                     >
-                        Announcements, seminar schedules, submission deadlines and lab updates, all published
-                        in one place so you never miss what matters.
+                        Conferences, notices and seminar schedules, all published in one place so you never miss what
+                        matters.
                     </motion.p>
                 </div>
 
-                {/* results bar */}
-                <div ref={gridTop} className="mx-auto mt-14 max-w-7xl scroll-mt-24 px-4 sm:px-6">
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200/80 pb-4">
-                        <p className="text-sm text-neutral-600">
-                            {sorted.length > 0 ? (
-                                <>
-                                    Showing{" "}
-                                    <span className="font-semibold text-neutral-900">
-                                        {start + 1}–{start + visible.length}
-                                    </span>{" "}
-                                    of <span className="font-semibold text-neutral-900">{sorted.length}</span>{" "}
-                                    {sorted.length === 1 ? "notice" : "notices"}
-                                </>
-                            ) : (
-                                "No notices"
-                            )}
-                        </p>
-                        {pinnedCount > 0 && (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F3F2E8] px-3 py-1 text-xs font-medium text-[#716f49]">
-                                <Pin className="size-3 fill-[#716f49]" />
-                                {pinnedCount} pinned
-                            </span>
-                        )}
-                    </div>
-
-                    {/* grid: 1 col mobile, 2 tablet, 4 desktop */}
-                    {sorted.length > 0 ? (
-                        <motion.div
-                            key={current}
-                            initial={{ opacity: 0, y: 16 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.45, ease }}
-                            className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
-                        >
-                            {visible.map((n, i) => (
-                                <NoticeCard key={n.id} notice={n} index={start + i} />
-                            ))}
-                        </motion.div>
-                    ) : (
+                <div className="mx-auto mt-14 max-w-7xl px-4 sm:px-6">
+                    {total === 0 ? (
                         <p className="py-20 text-center text-sm text-neutral-500">
-                            No notices have been published yet. Please check back soon.
+                            Nothing has been published yet. Please check back soon.
                         </p>
-                    )}
+                    ) : (
+                        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
+                            {SECTIONS.map((section) => {
+                                const items = grouped[section.kind];
+                                const pages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+                                const current = Math.min(pageByKind[section.kind], pages);
+                                const start = (current - 1) * PAGE_SIZE;
+                                const visible = items.slice(start, start + PAGE_SIZE);
 
-                    {pages > 1 && <Pagination page={current} pages={pages} onChange={goTo} />}
+                                return (
+                                    <div key={section.kind} id={`news-col-${section.kind}`} className="min-w-0 scroll-mt-24">
+                                        <div className="mb-4 flex items-center justify-between gap-3 border-b border-neutral-200/80 pb-3">
+                                            <div>
+                                                <h2 className="text-lg font-semibold text-neutral-900">{section.title}</h2>
+                                                <p className="text-xs text-neutral-500">{section.blurb}</p>
+                                            </div>
+                                            <span
+                                                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${section.badgeClass}`}
+                                            >
+                                                {items.length}
+                                            </span>
+                                        </div>
+
+                                        {items.length === 0 ? (
+                                            <p className="rounded-2xl border border-dashed border-neutral-300 bg-white/60 px-4 py-10 text-center text-sm text-neutral-500">
+                                                {section.empty}
+                                            </p>
+                                        ) : (
+                                            <>
+                                                <motion.div
+                                                    key={current}
+                                                    initial={{ opacity: 0, y: 12 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ duration: 0.35, ease }}
+                                                    className="space-y-3"
+                                                >
+                                                    {visible.map((item) => (
+                                                        <AccordionCard
+                                                            key={item.id}
+                                                            item={item}
+                                                            open={openIds[section.kind] === item.id}
+                                                            onToggle={() => toggle(section.kind, item.id)}
+                                                        />
+                                                    ))}
+                                                </motion.div>
+
+                                                {pages > 1 && (
+                                                    <ColumnPagination
+                                                        kind={section.kind}
+                                                        page={current}
+                                                        pages={pages}
+                                                        total={items.length}
+                                                        start={start}
+                                                        shown={visible.length}
+                                                        onChange={(p) => goTo(section.kind, p)}
+                                                    />
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
-
-            <NoticeModal notice={active} onClose={closeModal} />
         </section>
     );
 }
