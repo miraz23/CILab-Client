@@ -68,21 +68,14 @@ export default function ScheduleManager() {
             const mode = formData.mode as MeetingMode;
             const place = formData.place.trim();
 
-            await createAvailabilitySlot({ dayOfWeek, startTime, endTime, mode, place });
+            const response = await createAvailabilitySlot({ dayOfWeek, startTime, endTime, mode, place });
 
-            setSlots((current) => [
-                ...current,
-                {
-                    id: `local-slot-${Date.now()}`,
-                    name: "Md. Khaliluzzaman",
-                    dayOfWeek,
-                    startTime,
-                    endTime,
-                    mode,
-                    place,
-                    active: true,
-                },
-            ]);
+            const createdSlot = response.slot;
+            if (createdSlot) {
+                setSlots((current) => [...current, createdSlot]);
+            } else {
+                await refresh();
+            }
 
             toast.success(`${DAY_OF_WEEK_LABELS[dayOfWeek]} availability added.`);
             setFormData(EMPTY_FORM);

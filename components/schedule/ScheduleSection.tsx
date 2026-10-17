@@ -103,7 +103,7 @@ const initialsOf = (name?: string | null) => {
 };
 
 const slotDescription = (slot: AvailabilitySlot) =>
-    `A recurring ${modeLabel(slot.mode).toLowerCase()} slot every ${DAY_OF_WEEK_LABELS[slot.dayOfWeek]} from ${formatTime(
+    `A recurring ${modeLabel(slot.mode).toLowerCase()} slot on ${DAY_OF_WEEK_LABELS[slot.dayOfWeek]} from ${formatTime(
         slot.startTime
     )} to ${formatTime(slot.endTime)}${slot.mode === "online" ? ". Join with the meeting link shared by the lab." : "."}`;
 

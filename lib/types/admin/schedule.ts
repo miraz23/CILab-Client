@@ -28,6 +28,7 @@ export interface AvailabilitySlot {
 export interface ScheduleBoardResponse {
     success: boolean;
     message: string;
+    slot?: AvailabilitySlot;
     slots?: AvailabilitySlot[];
 }
 
