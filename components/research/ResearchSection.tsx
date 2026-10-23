@@ -5,6 +5,7 @@
 // deps (already installed): motion, lucide-react, date-fns
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { fetchResearch } from "@/lib/api/research";
 import { AnimatePresence, motion } from "motion/react";
 import { format } from "date-fns";
 import {
@@ -28,11 +29,6 @@ const PAGE_SIZE = 12;
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-/* -------------------------------------------------------------------------- */
-/*                                 SAMPLE DATA                                */
-/*        Replace with your real data (or fetch from your API / Prisma).      */
-/* -------------------------------------------------------------------------- */
-
 export type PaperType = "Conference" | "Journal" | "Magazine" | "Early Access";
 
 export interface Paper {
@@ -51,7 +47,13 @@ export interface Paper {
     pdfUrl?: string;
 }
 
-export type PresentationType = "Conference Talk" | "Seminar" | "Workshop" | "Keynote" | "Poster";
+export type PresentationType =
+    | "Conference Talk"
+    | "Seminar"
+    | "Workshop"
+    | "Keynote"
+    | "Poster"
+    | "Other";
 
 export interface Presentation {
     id: string;
@@ -67,262 +69,6 @@ export interface Presentation {
     slidesUrl?: string;
     videoUrl?: string;
 }
-
-export const papers: Paper[] = [
-    {
-        id: "p1",
-        title: "E-STGCN: Enhanced Spatial-Temporal Graph Convolutional Network for Road Traffic Forecasting",
-        authors: ["Oleg Golovnin", "Nikita Perevozchikov"],
-        venue: "2021 International Conference on Information Technology and Nanotechnology (ITNT)",
-        year: 2021,
-        type: "Conference",
-        publisher: "IEEE",
-        citedBy: 2,
-        topic: "Graph Neural Networks",
-        access: "locked",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-    {
-        id: "p2",
-        title: "Integrating YOLO and DG-STGCN Systems for Enhanced Human Action Recognition",
-        authors: ["Tzu-Shan Hsiao", "Hsun-Yuan Hou", "Po Ting Lin", "Ching-Yuan Chang", "Yung-Yao Chen", "Chao-Lung Yang"],
-        venue: "2024 International Conference on Advanced Robotics and Intelligent Systems (ARIS)",
-        year: 2024,
-        type: "Conference",
-        publisher: "IEEE",
-        citedBy: 3,
-        topic: "Computer Vision",
-        access: "locked",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-    {
-        id: "p3",
-        title: "STGCN-Based Spatio-Temporal Evolution Modeling of Distribution System Disaster Chains",
-        authors: ["Zongchao Yu", "Ming Wen", "Xintao Xie", "Bo Wen", "Jiaxi Li", "Haipeng Xie", "Jingqi Fan"],
-        venue: "2025 IEEE 9th Conference on Energy Internet and Energy System Integration (EI2)",
-        year: 2025,
-        type: "Conference",
-        publisher: "IEEE",
-        citedBy: 0,
-        topic: "Smart Grid",
-        access: "locked",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-    {
-        id: "p4",
-        title: "Transformer Architectures for Low-Resource Language Understanding",
-        authors: ["Author One", "Author Two"],
-        venue: "IEEE Transactions on Neural Networks and Learning Systems",
-        year: 2023,
-        type: "Journal",
-        publisher: "IEEE",
-        citedBy: 14,
-        topic: "Natural Language Processing",
-        access: "open",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-    {
-        id: "p5",
-        title: "Federated Learning for Privacy-Preserving Intrusion Detection",
-        authors: ["Author Three", "Author Four", "Author Five"],
-        venue: "IEEE Access",
-        year: 2024,
-        type: "Journal",
-        publisher: "IEEE",
-        citedBy: 9,
-        topic: "Cybersecurity",
-        access: "open",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-    {
-        id: "p6",
-        title: "Consensus Mechanisms for Scalable Blockchain Networks",
-        authors: ["Author Six", "Author Seven"],
-        venue: "2022 IEEE International Conference on Blockchain (Blockchain)",
-        year: 2022,
-        type: "Conference",
-        publisher: "IEEE",
-        citedBy: 6,
-        topic: "Blockchain",
-        access: "locked",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-    {
-        id: "p7",
-        title: "Self-Supervised Representation Learning for Medical Imaging",
-        authors: ["Author Eight", "Author Nine"],
-        venue: "IEEE Journal of Biomedical and Health Informatics",
-        year: 2025,
-        type: "Early Access",
-        publisher: "IEEE",
-        citedBy: 1,
-        topic: "Computer Vision",
-        access: "locked",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-    {
-        id: "p8",
-        title: "A Survey of Explainable AI in Safety-Critical Systems",
-        authors: ["Author Ten", "Author Eleven", "Author Twelve"],
-        venue: "IEEE Computational Intelligence Magazine",
-        year: 2023,
-        type: "Magazine",
-        publisher: "IEEE",
-        citedBy: 21,
-        topic: "Machine Learning",
-        access: "open",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-    {
-        id: "p9",
-        title: "Evolutionary Neural Architecture Search with Multi-Objective Optimization",
-        authors: ["Author Thirteen", "Author Fourteen"],
-        venue: "2024 IEEE Congress on Evolutionary Computation (CEC)",
-        year: 2024,
-        type: "Conference",
-        publisher: "IEEE",
-        citedBy: 5,
-        topic: "Neural Networks",
-        access: "locked",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-    {
-        id: "p10",
-        title: "Reinforcement Learning for Adaptive Network Resource Allocation",
-        authors: ["Author Fifteen", "Author Sixteen"],
-        venue: "IEEE Transactions on Network and Service Management",
-        year: 2022,
-        type: "Journal",
-        publisher: "IEEE",
-        citedBy: 11,
-        topic: "Machine Learning",
-        access: "locked",
-        abstract: "Abstract text goes here.",
-        htmlUrl: "#",
-        pdfUrl: "#",
-    },
-];
-
-export const presentations: Presentation[] = [
-    {
-        id: "pr1",
-        title: "Graph Neural Networks in Practice: From Molecules to Social Networks",
-        speakers: ["Dr. A. Rahman"],
-        event: "CILab Weekly Research Seminar",
-        location: "CILab Seminar Room, Block B",
-        date: "2026-10-24",
-        type: "Seminar",
-        topic: "Graph Neural Networks",
-        abstract: "Abstract text goes here.",
-        slidesUrl: "#",
-        videoUrl: "#",
-    },
-    {
-        id: "pr2",
-        title: "Privacy-Preserving Federated Learning for Healthcare Data",
-        speakers: ["Author One", "Author Two"],
-        event: "International Conference on Machine Learning 2026",
-        location: "Dhaka, Bangladesh",
-        date: "2026-06-18",
-        type: "Conference Talk",
-        topic: "Federated Learning",
-        abstract: "Abstract text goes here.",
-        slidesUrl: "#",
-    },
-    {
-        id: "pr3",
-        title: "The Next Decade of Intelligent Systems",
-        speakers: ["Prof. B. Chowdhury"],
-        event: "Lab Symposium on Intelligent Systems 2026",
-        location: "CILab Auditorium",
-        date: "2026-03-12",
-        type: "Keynote",
-        topic: "Artificial Intelligence",
-        abstract: "Abstract text goes here.",
-        slidesUrl: "#",
-        videoUrl: "#",
-    },
-    {
-        id: "pr4",
-        title: "Hands-on Workshop: Building Reliable Computer Vision Pipelines",
-        speakers: ["Author Three", "Author Four", "Author Five"],
-        event: "Applied AI Workshop Series",
-        location: "Online",
-        date: "2025-11-08",
-        type: "Workshop",
-        topic: "Computer Vision",
-        abstract: "Abstract text goes here.",
-        slidesUrl: "#",
-        videoUrl: "#",
-    },
-    {
-        id: "pr5",
-        title: "Consensus Protocols for Scalable Blockchain Networks",
-        speakers: ["Author Six"],
-        event: "IEEE International Conference on Blockchain",
-        location: "Singapore",
-        date: "2025-08-21",
-        type: "Conference Talk",
-        topic: "Blockchain",
-        abstract: "Abstract text goes here.",
-        slidesUrl: "#",
-    },
-    {
-        id: "pr6",
-        title: "Explainable AI for Safety-Critical Decision Support",
-        speakers: ["Author Seven", "Author Eight"],
-        event: "CILab Weekly Research Seminar",
-        location: "CILab Seminar Room, Block B",
-        date: "2025-05-15",
-        type: "Seminar",
-        topic: "Machine Learning",
-        abstract: "Abstract text goes here.",
-        slidesUrl: "#",
-    },
-    {
-        id: "pr7",
-        title: "Self-Supervised Learning for Medical Image Analysis",
-        speakers: ["Author Nine"],
-        event: "Biomedical Informatics Poster Session",
-        location: "Kuala Lumpur, Malaysia",
-        date: "2025-02-27",
-        type: "Poster",
-        topic: "Computer Vision",
-        abstract: "Abstract text goes here.",
-        slidesUrl: "#",
-    },
-    {
-        id: "pr8",
-        title: "Adaptive Resource Allocation with Reinforcement Learning",
-        speakers: ["Author Ten", "Author Eleven"],
-        event: "Network Systems Research Forum",
-        location: "Online",
-        date: "2024-12-05",
-        type: "Conference Talk",
-        topic: "Reinforcement Learning",
-        abstract: "Abstract text goes here.",
-        slidesUrl: "#",
-        videoUrl: "#",
-    },
-];
 
 /* -------------------------------------------------------------------------- */
 /*                                   helpers                                  */
@@ -844,7 +590,29 @@ const presentationModal = (p: Presentation): ModalData => ({
 
 export default function Researchs() {
     const [modal, setModal] = useState<ModalData | null>(null);
+    const [papers, setPapers] = useState<Paper[]>([]);
+    const [presentations, setPresentations] = useState<Presentation[]>([]);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const closeModal = () => setModal(null);
+
+    useEffect(() => {
+        let active = true;
+
+        fetchResearch()
+            .then(({ papers: fetchedPapers, presentations: fetchedPresentations }) => {
+                if (!active) return;
+                setPapers(fetchedPapers);
+                setPresentations(fetchedPresentations);
+            })
+            .catch((error: unknown) => {
+                if (!active) return;
+                setLoadError(error instanceof Error ? error.message : "Unable to load research.");
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
 
     return (
         <section className="relative overflow-hidden bg-[#F8FAFC] py-32">
@@ -863,6 +631,11 @@ export default function Researchs() {
             </div>
 
             <div className="relative">
+                {loadError && (
+                    <p className="mx-auto max-w-7xl px-4 text-sm text-red-700 sm:px-6" role="alert">
+                        {loadError}
+                    </p>
+                )}
                 {/* page heading */}
                 <motion.div
                     initial={{ opacity: 0, y: 24 }}
