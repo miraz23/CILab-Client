@@ -3,7 +3,8 @@
 // components/research/ResearchPapers.tsx
 // deps: npm i motion lucide-react
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchResearch } from "@/lib/api/research";
 import { AnimatePresence, motion } from "motion/react";
 import {
     BookOpen,
@@ -16,8 +17,6 @@ import {
     Unlock,
     X,
 } from "lucide-react";
-
-// SAMPLE DATA: replace with your real papers (or fetch from your API / Prisma).
 
 export type PaperType = "Conference" | "Journal" | "Magazine" | "Early Access";
 
@@ -252,7 +251,7 @@ function PaperCard({
                 </span>
 
                 <p className="absolute inset-x-4 top-1/2 line-clamp-3 -translate-y-1/2 text-[15px] font-semibold leading-snug text-neutral-900/80">
-                    {paper.title.replace("Sample Paper: ", "")}
+                    {paper.title}
                 </p>
             </div>
 
@@ -388,9 +387,30 @@ function PaperModal({ paper, onClose }: { paper: Paper | null; onClose: () => vo
 
 export default function Resources() {
     const [active, setActive] = useState<Paper | null>(null);
-    const half = Math.ceil(papers.length / 2);
-    const top = papers.slice(0, half);
-    const bottom = papers.slice(half).concat(papers.slice(0, 2)); // keep rows from being too short
+    const [researchPapers, setResearchPapers] = useState<Paper[]>([]);
+    const [loadError, setLoadError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let activeRequest = true;
+
+        fetchResearch()
+            .then(({ papers: fetchedPapers }) => {
+                if (!activeRequest) return;
+                setResearchPapers(fetchedPapers);
+            })
+            .catch((error: unknown) => {
+                if (!activeRequest) return;
+                setLoadError(error instanceof Error ? error.message : "Unable to load research.");
+            });
+
+        return () => {
+            activeRequest = false;
+        };
+    }, []);
+
+    const half = Math.ceil(researchPapers.length / 2);
+    const top = researchPapers.slice(0, half);
+    const bottom = researchPapers.slice(half).concat(researchPapers.slice(0, 2));
 
     return (
         <section id="research-papers" className="relative overflow-hidden bg-[#F8FAFC] py-28">
@@ -422,6 +442,12 @@ export default function Resources() {
                     cybersecurity and blockchain. Search, filter and dive straight into the full text.
                 </p>
             </motion.div>
+
+            {loadError && (
+                <p className="mx-auto mt-8 max-w-2xl px-4 text-center text-sm text-red-700" role="alert">
+                    {loadError}
+                </p>
+            )}
 
             {/* marquees (top moves left → right, bottom moves right → left) */}
             <motion.div
