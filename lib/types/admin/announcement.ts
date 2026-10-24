@@ -42,6 +42,8 @@ export interface Announcement {
     title: string;
     body: string;
     status: AnnouncementStatus;
+    audience?: AnnouncementAudience;
+    priority?: AnnouncementPriority;
     pinned: boolean;
     publishAt?: string;
     eventAt?: string;
