@@ -1,4 +1,5 @@
 export type ReceivedRequestStatus = "pending" | "accepted" | "declined" | "expired";
+export type SentRequestStatus = ReceivedRequestStatus | "revoked";
 
 export interface ReceivedRequest {
     id: string;
@@ -15,6 +16,24 @@ export interface ReceivedRequest {
     status: ReceivedRequestStatus;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface SentRequest {
+    id: string;
+    toUser: {
+        id: string;
+        name: string;
+        email: string;
+        role: string;
+        institution: string;
+    };
+    shareLink: string;
+    message?: string;
+    expiresAt?: string;
+    status: SentRequestStatus;
+    createdAt: string;
+    updatedAt: string;
+    decidedAt?: string;
 }
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -63,9 +82,20 @@ export async function fetchReceivedRequests(): Promise<ReceivedRequest[]> {
     return data.requests ?? [];
 }
 
+export async function fetchSentRequests(): Promise<SentRequest[]> {
+    if (!SERVER_URL) throw new Error("NEXT_PUBLIC_SERVER_URL is not configured.");
+
+    const response = await fetch(`${SERVER_URL}/api/access-requests/sent`, {
+        headers: getHeaders(),
+        credentials: "include",
+    });
+    const data = await parseResponse(response);
+    return data.requests ?? [];
+}
+
 export async function updateAccessRequest(
     requestId: string,
-    status: "accepted" | "declined"
+    status: "accepted" | "declined" | "revoked"
 ) {
     if (!SERVER_URL) throw new Error("NEXT_PUBLIC_SERVER_URL is not configured.");
 
@@ -74,6 +104,21 @@ export async function updateAccessRequest(
         headers: getHeaders(),
         credentials: "include",
         body: JSON.stringify({ status }),
+    });
+    return parseResponse(response);
+}
+
+export async function updateSentAccessRequest(
+    requestId: string,
+    payload: { shareLink: string; message?: string; expiresAt?: string }
+) {
+    if (!SERVER_URL) throw new Error("NEXT_PUBLIC_SERVER_URL is not configured.");
+
+    const response = await fetch(`${SERVER_URL}/api/access-requests/${requestId}`, {
+        method: "PATCH",
+        headers: getHeaders(),
+        credentials: "include",
+        body: JSON.stringify(payload),
     });
     return parseResponse(response);
 }
