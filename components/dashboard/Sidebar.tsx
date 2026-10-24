@@ -28,6 +28,7 @@ const NAV_ITEMS = [
     { label: "Home", href: "/", icon: Home, shortLabel: "Home" },
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard, shortLabel: "Overview" },
     { label: "Upload Paper & Presentation", href: "/dashboard/upload", icon: Upload, shortLabel: "Upload" },
+    { label: "My Papers", href: "/dashboard/my-papers", icon: FileText, shortLabel: "My Papers" },
 ];
 
 const PROFILE_ITEM = { label: "Profile", href: "/dashboard/profile", icon: User };
