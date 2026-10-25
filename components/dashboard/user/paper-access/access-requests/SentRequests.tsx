@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { CheckCircle, Clock, ExternalLink, Link as LinkIcon, Pencil, RefreshCw, Trash2, XCircle } from "lucide-react";
+import { CheckCircle, Clock, Download, ExternalLink, Link as LinkIcon, Pencil, RefreshCw, Trash2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -179,6 +179,11 @@ export default function SentRequests() {
                                             <Button variant="outline" size="sm" onClick={() => window.open(request.shareLink, "_blank", "noopener,noreferrer")}>
                                                 <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Open link
                                             </Button>
+                                            {request.paper && (
+                                                <Button variant="outline" size="sm" onClick={() => window.open(request.paper?.url, "_blank", "noopener,noreferrer")}>
+                                                    <Download className="mr-1.5 h-3.5 w-3.5" /> Download paper
+                                                </Button>
+                                            )}
                                             {(request.status === "pending" || request.status === "accepted") && (
                                                 <>
                                                     <Button type="button" variant="outline" size="sm" onClick={() => openEditor(request)}>

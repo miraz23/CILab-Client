@@ -1,4 +1,4 @@
-export type ReceivedRequestStatus = "pending" | "accepted" | "declined" | "expired";
+export type ReceivedRequestStatus = "pending" | "accepted" | "declined" | "expired" | "revoked";
 export type SentRequestStatus = ReceivedRequestStatus | "revoked";
 
 export interface ReceivedRequest {
@@ -16,6 +16,11 @@ export interface ReceivedRequest {
     status: ReceivedRequestStatus;
     createdAt: string;
     updatedAt: string;
+    paper?: {
+        url: string;
+        originalFilename?: string;
+        uploadedAt?: string;
+    };
 }
 
 export interface SentRequest {
@@ -34,6 +39,7 @@ export interface SentRequest {
     createdAt: string;
     updatedAt: string;
     decidedAt?: string;
+    paper?: ReceivedRequest["paper"];
 }
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -80,6 +86,25 @@ export async function fetchReceivedRequests(): Promise<ReceivedRequest[]> {
     });
     const data = await parseResponse(response);
     return data.requests ?? [];
+}
+
+export async function uploadReceivedPaper(requestId: string, file: File) {
+    if (!SERVER_URL) throw new Error("NEXT_PUBLIC_SERVER_URL is not configured.");
+
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("paper", file);
+    const response = await fetch(`${SERVER_URL}/api/access-requests/${requestId}/paper`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: "include",
+        body: formData,
+    });
+    const data = await parseResponse(response);
+    return {
+        paper: data.paper as ReceivedRequest["paper"],
+        status: data.status as ReceivedRequestStatus,
+    };
 }
 
 export async function fetchSentRequests(): Promise<SentRequest[]> {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
-import { Mail, CheckCircle, Clock, XCircle, Eye, Download, QrCode, RefreshCw } from "lucide-react";
+import { Mail, CheckCircle, Clock, XCircle, Eye, QrCode, RefreshCw, Upload } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,11 @@ import { ReceivedRequestsSkeleton } from "@/components/dashboard/skeleton-loader
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import { cn } from "@/lib/utils";
 import { QRCodeSVG as QRCode } from "qrcode.react";
-import { fetchReceivedRequests, updateAccessRequest, type ReceivedRequest } from "@/lib/api/paper-access/access-requests";
+import {
+    fetchReceivedRequests,
+    uploadReceivedPaper,
+    type ReceivedRequest,
+} from "@/lib/api/paper-access/access-requests";
 
 const STATUS_CONFIG = {
     pending: {
@@ -33,6 +37,12 @@ const STATUS_CONFIG = {
     expired: {
         label: "Expired",
         icon: Clock,
+        badgeClass: "bg-[#F1F0EA] text-[#85897F] border border-[#DEDCD3]",
+        iconColor: "text-[#85897F]",
+    },
+    revoked: {
+        label: "Revoked",
+        icon: XCircle,
         badgeClass: "bg-[#F1F0EA] text-[#85897F] border border-[#DEDCD3]",
         iconColor: "text-[#85897F]",
     },
@@ -77,6 +87,7 @@ export default function ReceivedRequests() {
     const [filter, setFilter] = useState<"all" | "pending" | "accepted" | "declined">("all");
     const [openQrId, setOpenQrId] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState("");
+    const [uploadingRequestId, setUploadingRequestId] = useState<string | null>(null);
 
     const loadRequests = useCallback(
         async () => {
@@ -117,18 +128,21 @@ export default function ReceivedRequests() {
         return new Date(expiresAt) < new Date();
     };
 
-    const handleDecision = async (requestId: string, status: "accepted" | "declined") => {
+    const handlePaperUpload = async (requestId: string, file?: File) => {
+        if (!file) return;
+        setErrorMessage("");
+        setUploadingRequestId(requestId);
         try {
-            await updateAccessRequest(requestId, status);
+            const result = await uploadReceivedPaper(requestId, file);
             setRequests((current) =>
-                current.map((request) =>
-                    request.id === requestId
-                        ? { ...request, status, updatedAt: new Date().toISOString() }
-                        : request
-                )
+                current.map((request) => request.id === requestId
+                    ? { ...request, paper: result.paper, status: result.status }
+                    : request)
             );
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : "Unable to update request.");
+            setErrorMessage(error instanceof Error ? error.message : "Unable to upload the requested paper.");
+        } finally {
+            setUploadingRequestId(null);
         }
     };
 
@@ -285,6 +299,44 @@ export default function ReceivedRequests() {
                                                 </span>
                                             </div>
 
+                                            {["pending", "accepted"].includes(request.status) && (
+                                                <div className="mt-4 flex flex-col gap-2 rounded-xl border border-[#DEDCD3] bg-[#FBFAF7] p-3 sm:flex-row sm:items-center sm:justify-between">
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-medium text-[#25251F]">
+                                                            {request.paper ? "Requested paper uploaded" : "Upload requested paper"}
+                                                        </p>
+                                                        {request.paper?.originalFilename && (
+                                                            <p className="truncate text-xs text-[#89877B]">
+                                                                {request.paper.originalFilename}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <label
+                                                        htmlFor={`paper-upload-${request.id}`}
+                                                        className={cn(
+                                                            "inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#716F49] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#625F3F]",
+                                                            uploadingRequestId === request.id && "pointer-events-none opacity-60"
+                                                        )}
+                                                    >
+                                                        <Upload className="h-3.5 w-3.5" aria-hidden />
+                                                        {uploadingRequestId === request.id
+                                                            ? "Uploading..."
+                                                            : request.paper ? "Replace PDF" : "Upload PDF"}
+                                                        <input
+                                                            id={`paper-upload-${request.id}`}
+                                                            type="file"
+                                                            accept="application/pdf,.pdf"
+                                                            className="sr-only"
+                                                            disabled={uploadingRequestId !== null}
+                                                            onChange={(event) => {
+                                                                void handlePaperUpload(request.id, event.target.files?.[0]);
+                                                                event.currentTarget.value = "";
+                                                            }}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            )}
+
                                             {openQrId === request.id && (
                                                 <div className="mt-4 rounded-xl border border-[#DEDCD3] bg-[#FBFAF7] p-4 duration-200 animate-in fade-in slide-in-from-top-2">
                                                     <div className="mb-3 flex items-center justify-between">
@@ -315,42 +367,6 @@ export default function ReceivedRequests() {
                                             )}
                                         </div>
 
-                                        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
-                                            {request.status === "pending" && (
-                                                <>
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        onClick={() => handleDecision(request.id, "accepted")}
-                                                        className="rounded-lg bg-[#716F49] text-sm font-medium text-white shadow-[0_5px_15px_rgba(40,40,25,0.2)] hover:bg-[#625F3F]"
-                                                    >
-                                                        <CheckCircle className="mr-1 h-3.5 w-3.5" aria-hidden />
-                                                        Accept
-                                                    </Button>
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => handleDecision(request.id, "declined")}
-                                                        className="rounded-lg border-[#E4C2BC] text-[#A45B4B] hover:bg-[#FBF0EE]"
-                                                    >
-                                                        <XCircle className="mr-1 h-3.5 w-3.5" aria-hidden />
-                                                        Decline
-                                                    </Button>
-                                                </>
-                                            )}
-                                            {request.status === "accepted" && (
-                                                <a
-                                                    href={request.shareLink}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center justify-center gap-1 rounded-lg border border-[#D7D4C9] bg-[#FBFAF7] px-3 py-2 text-sm font-medium text-[#716F49] hover:bg-[#ECEAE2]"
-                                                >
-                                                    <Download className="h-3.5 w-3.5" aria-hidden />
-                                                    Access Paper
-                                                </a>
-                                            )}
-                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
