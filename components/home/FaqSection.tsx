@@ -154,7 +154,7 @@ export default function FaqSection() {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
     return (
-        <section id="faq" className="relative overflow-hidden bg-[#F8FAFC] pt-20">
+        <section id="faq" className="relative overflow-hidden bg-[#F8FAFC] py-20">
             <div className="relative">
                 {/* heading */}
                 <div className="mx-auto max-w-2xl px-4 text-center">
