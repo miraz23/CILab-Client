@@ -27,7 +27,7 @@ const LINK_GROUPS = [
         links: [
             { label: "Home", href: "/" },
             { label: "News", href: "/news" },
-            { label: "Board", href: "/board" },
+            { label: "Schedule", href: "/schedule" },
         ],
     },
     {
@@ -35,28 +35,16 @@ const LINK_GROUPS = [
         links: [
             { label: "Introduction", href: "/about-us/introduction" },
             { label: "Members", href: "/about-us/members" },
-            { label: "Photos", href: "/about-us/photos" },
-            { label: "Join CILab", href: "/about-us/ci-lab" },
             { label: "Contact information", href: "/about-us/contact-information" },
         ],
     },
     {
         title: "Research",
         links: [
-            { label: "Research area", href: "/research/research-area" },
-            { label: "Projects", href: "/research/projects" },
             { label: "Papers", href: "/research/papers" },
+            { label: "Presentations", href: "/research/presentations" },
         ],
-    },
-    {
-        title: "Lectures",
-        links: [
-            { label: "Class description", href: "/lectures/class-description" },
-            { label: "Schedule", href: "/lectures/schedule" },
-            { label: "Seminar schedule", href: "/lectures/reference-seminar-schedule" },
-            { label: "Seminar archive", href: "/lectures/reference-seminar-archive" },
-        ],
-    },
+    }
 ];
 
 const SOCIALS = [
@@ -114,9 +102,9 @@ export default function Footer() {
                 variants={container}
                 className="relative mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20"
             >
-                <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
+                <div className="grid gap-12 lg:grid-cols-9 lg:gap-10">
                     {/* brand */}
-                    <motion.div variants={item} className="lg:col-span-4">
+                    <motion.div variants={item} className="lg:col-span-3">
                         <Link
                             href="/"
                             className="inline-flex items-center"
@@ -165,9 +153,9 @@ export default function Footer() {
                     <motion.nav
                         variants={item}
                         aria-label="Footer"
-                        className="lg:col-span-8"
+                        className="lg:col-span-6"
                     >
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4 lg:grid-cols-4">
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-3">
                             {LINK_GROUPS.map((group) => (
                                 <div key={group.title}>
                                     <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">

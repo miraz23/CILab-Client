@@ -10,6 +10,7 @@ import {
     BookOpen,
     ChevronDown,
     FileText,
+    Link,
     Lock,
     Quote,
     Search,
@@ -371,9 +372,9 @@ function PaperModal({ paper, onClose }: { paper: Paper | null; onClose: () => vo
                             </a>
                             <a
                                 href={paper.htmlUrl ?? "#"}
-                                className="rounded-2xl border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
+                                className="flex items-center gap-2 rounded-2xl border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
                             >
-                                HTML
+                                <Link className="size-4" /> LINK
                             </a>
                         </div>
                     </motion.div>

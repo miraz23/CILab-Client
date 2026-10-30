@@ -27,13 +27,15 @@ const NAV_ITEMS: NavItem[] = [
         children: [
             { label: "Introduction", href: "/about-us/introduction" },
             { label: "Members", href: "/about-us/members" },
-            { label: "Photos", href: "/about-us/photos" },
-            { label: "Join CILab", href: "/about-us/ci-lab" },
             { label: "Contact information", href: "/about-us/contact-information" },
         ],
     },
     {
-        label: "Research", href: "/research"
+        label: "Research",
+        children: [
+            { label: "Papers", href: "/research/papers" },
+            { label: "Presentations", href: "/research/presentations" },
+        ],
     },
     {
         label: "Schedule", href: "/schedule"

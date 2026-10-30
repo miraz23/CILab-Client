@@ -1,10 +1,9 @@
-import Researchs from '@/components/research/ResearchSection'
-import React from 'react'
+import ResearchSection from '@/components/research/ResearchSection'
 
-export default function page() {
+export default function ResearchPage() {
   return (
-    <div>
-        <Researchs />
-    </div>
+    <main>
+        <ResearchSection />
+    </main>
   )
 }
