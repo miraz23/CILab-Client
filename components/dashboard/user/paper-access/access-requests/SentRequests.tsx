@@ -26,6 +26,7 @@ const STATUS_CONFIG: Record<SentRequestStatus, {
     declined: { label: "Declined", icon: XCircle, className: "bg-[#FBF0EE] text-[#A45B4B] border-[#E4C2BC]" },
     expired: { label: "Expired", icon: Clock, className: "bg-[#F1F0EA] text-[#85897F] border-[#DEDCD3]" },
     revoked: { label: "Revoked", icon: XCircle, className: "bg-[#F1F0EA] text-[#85897F] border-[#DEDCD3]" },
+    fulfilled: { label: "Resolved", icon: CheckCircle, className: "bg-[#EAF0EA] text-[#4F8A63] border-[#D8E2D9]" },
 };
 
 export default function SentRequests() {

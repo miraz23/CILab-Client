@@ -1,5 +1,5 @@
-export type ReceivedRequestStatus = "pending" | "accepted" | "declined" | "expired" | "revoked";
-export type SentRequestStatus = ReceivedRequestStatus | "revoked";
+export type ReceivedRequestStatus = "pending" | "accepted" | "declined" | "expired" | "revoked" | "fulfilled";
+export type SentRequestStatus = ReceivedRequestStatus;
 
 export interface ReceivedRequest {
     id: string;

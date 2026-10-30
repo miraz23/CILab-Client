@@ -46,6 +46,12 @@ const STATUS_CONFIG = {
         badgeClass: "bg-[#F1F0EA] text-[#85897F] border border-[#DEDCD3]",
         iconColor: "text-[#85897F]",
     },
+    fulfilled: {
+        label: "Resolved",
+        icon: CheckCircle,
+        badgeClass: "bg-[#EAF0EA] text-[#4F8A63] border border-[#D8E2D9]",
+        iconColor: "text-[#4F8A63]",
+    },
 } as const;
 
 interface SummaryStatProps {
