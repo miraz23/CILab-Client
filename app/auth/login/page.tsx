@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { LoginApiError, submitLoginApplication } from "@/lib/api/auth/login";
+import { safeRedirectPath, saveSession } from "@/lib/auth/session";
 import type { LoginFormData, LoginFormErrors, LoginTextField } from "@/lib/types/auth/login";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -61,15 +62,15 @@ export default function LoginForm() {
                     email: formData.email,
                     password: formData.password,
                 });
-                localStorage.setItem("token", data.token ?? "");
-                localStorage.setItem(
-                    "user",
-                    JSON.stringify(data.user ?? { userId: data.userId })
-                );
-                document.cookie = `auth_token=${data.token ?? ""}; path=/; max-age=86400; samesite=lax`;
-                window.dispatchEvent(new Event("auth-changed"));
+                if (!data.token) {
+                    toast.error("Sign-in failed: the server did not return a session token.");
+                    return;
+                }
+                saveSession(data.token, data.user ?? { userId: data.userId });
                 toast.success("Signed in. Redirecting to your dashboard…");
-                router.push("/dashboard");
+                const next = new URLSearchParams(window.location.search).get("next");
+                router.replace(safeRedirectPath(next));
+                router.refresh();
             } catch (error) {
                 const message =
                     error instanceof LoginApiError

@@ -22,6 +22,7 @@ import {
     ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AUTH_CHANGED_EVENT, clearSession, getStoredUser } from "@/lib/auth/session";
 import { CollapsibleNavGroup, MobileNavSheet } from "@/components/dashboard/SidebarNavParts";
 
 const NAV_ITEMS = [
@@ -85,16 +86,12 @@ export default function Sidebar() {
 
     useEffect(() => {
         const syncRole = () => {
-            try {
-                const user = JSON.parse(localStorage.getItem("user") || "null");
-                setIsAdmin(user?.appRole === "ADMIN");
-            } catch {
-                setIsAdmin(false);
-            }
+            const user = getStoredUser();
+            setIsAdmin(Boolean(user && "appRole" in user && user.appRole === "ADMIN"));
         };
         syncRole();
-        window.addEventListener("auth-changed", syncRole);
-        return () => window.removeEventListener("auth-changed", syncRole);
+        window.addEventListener(AUTH_CHANGED_EVENT, syncRole);
+        return () => window.removeEventListener(AUTH_CHANGED_EVENT, syncRole);
     }, []);
 
     const expandIfCollapsed = () => {
@@ -102,9 +99,7 @@ export default function Sidebar() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        document.cookie = "auth_token=; path=/; max-age=0";
+        clearSession();
         window.location.href = "/";
     };
 

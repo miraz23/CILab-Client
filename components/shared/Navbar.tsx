@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AUTH_CHANGED_EVENT, hasSessionCookie } from "@/lib/auth/session";
 import Image from "next/image";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -206,13 +207,13 @@ export default function Navbar() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        const sync = () => setIsLoggedIn(Boolean(localStorage.getItem("user") || localStorage.getItem("token")));
+        const sync = () => setIsLoggedIn(hasSessionCookie());
         sync();
         window.addEventListener("storage", sync);
-        window.addEventListener("auth-changed", sync);
+        window.addEventListener(AUTH_CHANGED_EVENT, sync);
         return () => {
             window.removeEventListener("storage", sync);
-            window.removeEventListener("auth-changed", sync);
+            window.removeEventListener(AUTH_CHANGED_EVENT, sync);
         };
     }, []);
 

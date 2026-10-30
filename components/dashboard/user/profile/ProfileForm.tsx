@@ -39,6 +39,7 @@ import {
 } from "@/lib/api/users/profile";
 import { ACADEMIC_ROLES, type AcademicRole } from "@/lib/types/auth/register";
 import { toast } from "react-toastify";
+import { updateStoredUser } from "@/lib/auth/session";
 
 interface ProfileFormProps {
     initialData: UserProfile;
@@ -267,8 +268,8 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                 const response = await updateUserProfile(payload);
 
                 if (response.user) {
-                    localStorage.setItem("user", JSON.stringify({ userId: response.user.id }));
-                    window.dispatchEvent(new Event("auth-changed"));
+                    // Merge so appRole/status from login survive a profile save.
+                    updateStoredUser({ ...response.user, userId: response.user.id });
                 }
 
                 toast.success(response.message || "Profile saved");
