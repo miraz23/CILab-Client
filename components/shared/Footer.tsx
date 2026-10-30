@@ -33,7 +33,6 @@ const LINK_GROUPS = [
     {
         title: "About us",
         links: [
-            { label: "Introduction", href: "/about-us/introduction" },
             { label: "Members", href: "/about-us/members" },
             { label: "Contact information", href: "/about-us/contact-information" },
         ],
@@ -43,6 +42,13 @@ const LINK_GROUPS = [
         links: [
             { label: "Papers", href: "/research/papers" },
             { label: "Presentations", href: "/research/presentations" },
+        ],
+    },
+    {
+        title: "Extra",
+        links: [
+            { label: "Terms & Conditions", href: "/terms" },
+            { label: "Privacy Policy", href: "/research/presentations" },
         ],
     }
 ];
@@ -102,9 +108,9 @@ export default function Footer() {
                 variants={container}
                 className="relative mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20"
             >
-                <div className="grid gap-12 lg:grid-cols-9 lg:gap-10">
+                <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
                     {/* brand */}
-                    <motion.div variants={item} className="lg:col-span-3">
+                    <motion.div variants={item} className="lg:col-span-4">
                         <Link
                             href="/"
                             className="inline-flex items-center"
@@ -132,7 +138,7 @@ export default function Footer() {
                             <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </Link>
 
-                        <div className="mt-7 flex items-center gap-3">
+                        {/* <div className="mt-7 flex items-center gap-3">
                             {SOCIALS.map(({ label, href, Icon }) => (
                                 <motion.a
                                     key={label}
@@ -146,16 +152,16 @@ export default function Footer() {
                                     <Icon className="size-4" aria-hidden />
                                 </motion.a>
                             ))}
-                        </div>
+                        </div> */}
                     </motion.div>
 
                     {/* link columns */}
                     <motion.nav
                         variants={item}
                         aria-label="Footer"
-                        className="lg:col-span-6"
+                        className="lg:col-span-8"
                     >
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-3">
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4 lg:grid-cols-4">
                             {LINK_GROUPS.map((group) => (
                                 <div key={group.title}>
                                     <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
@@ -192,20 +198,6 @@ export default function Footer() {
                     </p>
 
                     <div className="flex items-center gap-6">
-                        <Link
-                            href="#"
-                            className="text-xs text-white/45 transition-colors hover:text-white"
-                        >
-                            Privacy
-                        </Link>
-
-                        <Link
-                            href="#"
-                            className="text-xs text-white/45 transition-colors hover:text-white"
-                        >
-                            Terms
-                        </Link>
-
                         <motion.button
                             type="button"
                             onClick={scrollToTop}
