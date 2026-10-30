@@ -1,4 +1,5 @@
 import Banner from "@/components/home/Banner";
+import FaqSection from "@/components/home/FaqSection";
 import Resources from "@/components/home/Resources";
 
 export default function Home() {
@@ -6,6 +7,7 @@ export default function Home() {
     <div>
       <Banner />
       <Resources />
+      <FaqSection />
     </div>
   );
 }

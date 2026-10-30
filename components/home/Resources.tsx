@@ -228,7 +228,7 @@ function PaperCard({
             transition={{ type: "spring", stiffness: 300, damping: 22 }}
             onPointerEnter={() => onHoverChange(true)}
             onPointerLeave={() => onHoverChange(false)}
-            className="w-75 shrink-0 rounded-[28px] bg-neutral-100 p-2.5 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]"
+            className="w-75 shrink-0 rounded-[28px] bg-neutral-100 p-2.5 shadow-[0_9px_20px_-6px_rgba(0,0,0,0.25)]"
         >
             {/* gradient panel */}
             <div
@@ -414,7 +414,7 @@ export default function Resources() {
     const bottom = researchPapers.slice(half).concat(researchPapers.slice(0, 2));
 
     return (
-        <section id="research-papers" className="relative overflow-hidden bg-[#F8FAFC] py-28">
+        <section id="research-papers" className="relative overflow-hidden bg-[#F8FAFC] pt-20">
             {/* marquee keyframes: top row left → right, bottom row right → left, seamless, respects reduced motion */}
             <style>{`
         @keyframes rp-ltr { from { transform: translateX(-50%); } to { transform: translateX(0); } }
