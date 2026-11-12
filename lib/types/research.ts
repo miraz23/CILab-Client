@@ -38,7 +38,7 @@ export interface Presentation {
     date: string;
     type: PresentationType;
     topic: string;
-    abstract?: string;
+    description?: string;
     slidesUrl?: string;
     videoUrl?: string;
     featured?: boolean;

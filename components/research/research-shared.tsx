@@ -112,6 +112,7 @@ export function ResearchCard({
     meta,
     venue,
     abstract,
+    summaryLabel = "Abstract",
     publisher,
     footnote,
     thumbId,
@@ -131,6 +132,7 @@ export function ResearchCard({
     meta: string;
     venue?: string;
     abstract?: string;
+    summaryLabel?: string;
     /** publisher shown in the footer */
     publisher?: string;
     footnote?: string;
@@ -236,10 +238,12 @@ export function ResearchCard({
                             </p>
                         )}
 
-                        {/* abstract */}
                         <p className="mt-3 line-clamp-3 text-justify font-serif text-[9px] leading-snug text-neutral-600">
-                            <span className="font-bold italic text-neutral-800">Abstract-</span>
-                            {abstract ?? "No abstract available."}
+                            <span className="font-bold italic text-neutral-800">{summaryLabel}-</span>
+                            {abstract ??
+                                (summaryLabel === "Description"
+                                    ? "No description available."
+                                    : "No abstract available.")}
                         </p>
 
                         {/* faux two-column body text */}
@@ -713,7 +717,7 @@ export const presentationModal = (p: Presentation, paperPreviewUrl?: string): Mo
     title: p.title,
     byline: p.speakers.join("; "),
     sub: [p.event, p.location].filter(Boolean).join(" · "),
-    body: p.abstract ?? "No abstract available.",
+    body: p.description ?? "No description available.",
     details: presentationDetails(p),
     actions: [
         ...(p.slidesUrl ? [{ label: "Slides", href: p.slidesUrl, icon: PresentationIcon, primary: true }] : []),

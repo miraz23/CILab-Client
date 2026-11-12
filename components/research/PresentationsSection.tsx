@@ -44,7 +44,8 @@ export default function PresentationsSection({ showHeading = true }: { showHeadi
                         byline={`${p.speakers[0]}${p.speakers.length > 1 ? " et al." : ""}`}
                         meta={p.type}
                         venue={[p.event, p.location].filter(Boolean).join(" · ")}
-                        abstract={p.abstract}
+                        abstract={p.description}
+                        summaryLabel="Description"
                         shareText={p.videoUrl ?? ""}
                         openLabel={`View details: ${p.title}`}
                         onOpen={() => {
