@@ -5,6 +5,7 @@ import {
     Archive,
     CalendarClock,
     FileEdit,
+    FileText,
     Inbox,
     MapPin,
     Megaphone,
@@ -46,9 +47,11 @@ import {
 import {
     deleteAnnouncement,
     fetchAnnouncements,
+    uploadAnnouncementPoster,
     upsertAnnouncement,
 } from "@/lib/api/admin/announcements";
 import { confirmAction } from "@/lib/confirm";
+import { announcementPosterHref, isPdfPoster } from "@/lib/announcement-poster";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import {
     ANNOUNCEMENT_AUDIENCES,
@@ -374,18 +377,36 @@ function ComposerCard({
         return true;
     };
 
+    const isValidPoster = (file: File) => {
+        if (file.type === "application/pdf") {
+            if (file.size > 2 * 1024 * 1024) {
+                toast.error("That PDF is over 2MB. Choose a smaller one.");
+                return false;
+            }
+            return true;
+        }
+
+        return isValidImage(file);
+    };
+
     const handlePosterUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         e.target.value = "";
-        if (!file || !isValidImage(file)) return;
+        if (!file || !isValidPoster(file)) return;
 
         const reader = new FileReader();
         reader.onload = (ev) => {
+            const result = ev.target?.result;
+            if (typeof result !== "string") {
+                toast.error("Unable to read that file.");
+                return;
+            }
             setForms((current) => ({
                 ...current,
-                [kind]: { ...current[kind], poster: ev.target?.result as string },
+                [kind]: { ...current[kind], poster: result },
             }));
         };
+        reader.onerror = () => toast.error("Unable to read that file.");
         reader.readAsDataURL(file);
     };
 
@@ -463,19 +484,20 @@ function ComposerCard({
         try {
             const title = formData.title.trim();
             const body = formData.body.trim();
+            const pdfPoster = isPdfPoster(formData.poster) ? formData.poster : null;
 
             const response = await upsertAnnouncement({
                 ...formData,
                 title,
                 body,
                 venue: formData.venue.trim(),
-                poster: formData.poster,
+                poster: pdfPoster ? "" : formData.poster,
                 extraFields: formData.extraFields,
                 announcementId: editing?.id,
                 intent,
             });
 
-            const saved: Announcement = response.announcement ?? {
+            let saved: Announcement = response.announcement ?? {
                 id: `local-${kind}-${Date.now()}`,
                 kind,
                 title,
@@ -491,6 +513,11 @@ function ComposerCard({
                 updatedAt: new Date().toISOString(),
                 author: { id: "current-admin", name: "You" },
             };
+
+            if (pdfPoster) {
+                const posterResponse = await uploadAnnouncementPoster(saved.id, pdfPoster);
+                if (posterResponse.announcement) saved = posterResponse.announcement;
+            }
 
             setForms((current) => ({
                 ...current,
@@ -720,12 +747,24 @@ function ComposerCard({
                     <div className="mt-2 flex items-center gap-3">
                         {formData.poster && (
                             <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-[#DEDCD3]">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                    src={formData.poster}
-                                    alt="Poster preview"
-                                    className="h-full w-full object-cover"
-                                />
+                                {isPdfPoster(formData.poster) ? (
+                                    <a
+                                        href={announcementPosterHref(formData.poster)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex h-full flex-col items-center justify-center gap-1 text-[10px] font-medium text-[#5E5D50]"
+                                    >
+                                        <FileText className="h-6 w-6 text-[#A45B4B]" aria-hidden />
+                                        PDF
+                                    </a>
+                                ) : (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={formData.poster}
+                                        alt="Poster preview"
+                                        className="h-full w-full object-cover"
+                                    />
+                                )}
 
                                 <button
                                     type="button"
@@ -743,18 +782,18 @@ function ComposerCard({
                             className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-[#C9C6B8] bg-[#FBFAF7] px-3 text-sm text-[#5E5D50] hover:bg-[#ECEBE4]"
                         >
                             <Upload className="h-4 w-4" aria-hidden />
-                            Upload poster
+                            Upload poster or PDF
                             <input
                                 id={`${kind}-poster-input`}
                                 type="file"
-                                accept="image/*"
+                                accept="image/*,application/pdf,.pdf"
                                 className="hidden"
                                 onChange={handlePosterUpload}
                             />
                         </label>
                     </div>
 
-                    <p className="mt-2 text-xs text-[#89877B]">PNG, JPG or WebP, up to 2MB.</p>
+                    <p className="mt-2 text-xs text-[#89877B]">PNG, JPG, WebP or PDF, up to 2MB.</p>
                 </div>
 
                 <div>

@@ -4,7 +4,7 @@ import type {
     AnnouncementMutationPayload,
     AnnouncementsResponse,
 } from "@/lib/types/admin/announcement";
-import { adminRequest } from "@/lib/api/admin/client";
+import { adminRequest, getAuthToken } from "@/lib/api/admin/client";
 
 export async function fetchAnnouncements(
     filters: AnnouncementFilters = {}
@@ -39,4 +39,35 @@ export function deleteAnnouncement(
     return adminRequest<AnnouncementsResponse>(`/api/admin/announcements/${announcementId}`, {
         method: "DELETE",
     });
+}
+
+export async function uploadAnnouncementPoster(
+    announcementId: string,
+    dataUrl: string
+): Promise<AnnouncementsResponse> {
+    const [header, encoded] = dataUrl.split(",", 2);
+    if (!header || !encoded) {
+        throw new Error("The PDF upload data is invalid.");
+    }
+
+    const mimeType = header.match(/^data:([^;]+)/i)?.[1] ?? "application/pdf";
+    const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
+    const formData = new FormData();
+    formData.append("poster", new Blob([bytes], { type: mimeType }), "poster.pdf");
+
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+    if (!baseUrl) throw new Error("NEXT_PUBLIC_SERVER_URL is not configured.");
+
+    const token = getAuthToken();
+    const response = await fetch(`${baseUrl}/api/admin/announcements/${announcementId}/poster`, {
+        method: "POST",
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+    });
+    const data = (await response.json()) as AnnouncementsResponse;
+    if (!response.ok || data.success === false) {
+        throw new Error(data.message ?? "Unable to upload the PDF.");
+    }
+    return data;
 }

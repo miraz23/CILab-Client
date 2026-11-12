@@ -13,6 +13,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Copy,
+    FileText,
     MapPin,
     Megaphone,
     Pin,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 
 import type { Announcement, AnnouncementKind } from "@/lib/types/admin/announcement";
+import { announcementPosterHref, isPdfPoster } from "@/lib/announcement-poster";
 
 /** Cards per page, per column. */
 const PAGE_SIZE = 5;
@@ -205,14 +207,25 @@ function AccordionCard({
                         className="overflow-hidden"
                     >
                         <div className="space-y-4 border-t border-neutral-100 px-4 pb-4 pt-4">
-                            {item.poster && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={item.poster}
-                                    alt={`${item.title} poster`}
-                                    className="max-h-80 w-full rounded-lg border border-neutral-200/80 object-cover"
-                                />
-                            )}
+                            {item.poster &&
+                                (isPdfPoster(item.poster) ? (
+                                    <a
+                                        href={announcementPosterHref(item.poster)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-2 rounded-lg border border-neutral-200/80 bg-neutral-50 px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+                                    >
+                                        <FileText className="size-5 text-[#A45B4B]" aria-hidden />
+                                        Open attached PDF
+                                    </a>
+                                ) : (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={item.poster}
+                                        alt={`${item.title} poster`}
+                                        className="max-h-80 w-full rounded-lg border border-neutral-200/80 object-cover"
+                                    />
+                                ))}
 
                             <p className="whitespace-pre-line text-sm leading-relaxed text-neutral-700">{item.body}</p>
 

@@ -9,6 +9,7 @@ import {
     ArrowUpRight,
     CalendarClock,
     ChevronDown,
+    FileText,
     MapPin,
     Megaphone,
     Pin,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 import type { Announcement, AnnouncementKind } from "@/lib/types/admin/announcement";
+import { announcementPosterHref, isPdfPoster } from "@/lib/announcement-poster";
 // DUMMY-DATA: remove this import (and the fallback below) once the backend is integrated.
 import { DUMMY_ANNOUNCEMENTS } from "@/lib/dummy/announcements";
 
@@ -166,15 +168,26 @@ function FeaturedCard({
                         className="overflow-hidden"
                     >
                         <div className="space-y-4 border-t border-neutral-100 px-4 pb-4 pt-4">
-                            {item.poster && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={item.poster}
-                                    alt={`${item.title} poster`}
-                                    loading="lazy"
-                                    className="max-h-56 w-full rounded-lg border border-neutral-200/80 object-cover"
-                                />
-                            )}
+                            {item.poster &&
+                                (isPdfPoster(item.poster) ? (
+                                    <a
+                                        href={announcementPosterHref(item.poster)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-2 rounded-lg border border-neutral-200/80 bg-neutral-50 px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+                                    >
+                                        <FileText className="size-5 text-[#A45B4B]" aria-hidden />
+                                        Open attached PDF
+                                    </a>
+                                ) : (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={item.poster}
+                                        alt={`${item.title} poster`}
+                                        loading="lazy"
+                                        className="max-h-56 w-full rounded-lg border border-neutral-200/80 object-cover"
+                                    />
+                                ))}
 
                             <p className="line-clamp-4 whitespace-pre-line text-sm leading-relaxed text-neutral-700">
                                 {item.body}
