@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from "react";
 import {
     CheckCircle,
     Clock,
-    Filter,
     Loader2,
     Search,
     ShieldCheck,
@@ -39,12 +38,10 @@ import {
 import { fetchManagedUsers, updateUserAccess } from "@/lib/api/admin/users";
 import { confirmAction, type ConfirmOptions } from "@/lib/confirm";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
-import { ACADEMIC_ROLES } from "@/lib/types/auth/register";
 import { APP_ROLES } from "@/lib/types/admin/role";
 import type { AppRole } from "@/lib/types/admin/role";
 import type {
     ManagedUser,
-    ManagedUserSort,
     UserStatus,
 } from "@/lib/types/admin/user";
 import { cn } from "@/lib/utils";
@@ -85,12 +82,6 @@ const APP_ROLE_CONFIG: Record<AppRole, { label: string; badgeClass: string }> = 
     },
 };
 
-const SORT_LABELS: Record<ManagedUserSort, string> = {
-    newest: "Newest first",
-    name: "Name A–Z",
-    active: "Recently active",
-};
-
 const SEARCH_FIELD =
     "h-11 w-full rounded-lg border border-[#D7D4C9] bg-[#FBFAF7] pl-10 pr-4 text-sm text-[#2D2D27] shadow-none " +
     "placeholder:text-[#A5A297] transition-colors focus-visible:border-[#716F49] focus-visible:ring-1 " +
@@ -119,10 +110,7 @@ function getInitials(name: string) {
 export default function UserManagement() {
     const [users, setUsers] = useState<ManagedUser[]>([]);
     const [search, setSearch] = useState("");
-    const [status, setStatus] = useState<UserStatus | "all">("all");
     const [appRole, setAppRole] = useState<AppRole | "all">("all");
-    const [academicRole, setAcademicRole] = useState<string>("all");
-    const [sort, setSort] = useState<ManagedUserSort>("newest");
     const [busyUserId, setBusyUserId] = useState<string | null>(null);
 
     const loadUsers = useCallback(async () => {
@@ -144,9 +132,8 @@ export default function UserManagement() {
     const counts = useMemo(
         () => ({
             total: users.length,
-            active: users.filter((user) => user.status === "active").length,
-            pending: users.filter((user) => user.status === "pending").length,
-            suspended: users.filter((user) => user.status === "suspended").length,
+            generalUsers: users.filter((user) => user.appRole === "USER").length,
+            members: users.filter((user) => user.appRole === "MEMBER").length,
             admins: users.filter((user) => user.appRole === "ADMIN").length,
         }),
         [users]
@@ -156,9 +143,7 @@ export default function UserManagement() {
         const query = search.trim().toLowerCase();
 
         const matched = users.filter((user) => {
-            if (status !== "all" && user.status !== status) return false;
             if (appRole !== "all" && user.appRole !== appRole) return false;
-            if (academicRole !== "all" && user.academicRole !== academicRole) return false;
 
             if (!query) return true;
 
@@ -167,46 +152,35 @@ export default function UserManagement() {
             );
         });
 
-        switch (sort) {
-            case "name":
-                return [...matched].sort((a, b) => a.name.localeCompare(b.name));
-            case "active":
-                return [...matched].sort(
-                    (a, b) =>
-                        Date.parse(b.lastActiveAt ?? "0") -
-                        Date.parse(a.lastActiveAt ?? "0")
-                );
-            default:
-                return [...matched].sort(
-                    (a, b) => Date.parse(b.joinedAt) - Date.parse(a.joinedAt)
-                );
-        }
-    }, [users, search, status, appRole, academicRole, sort]);
+        return [...matched].sort(
+            (a, b) => Date.parse(b.joinedAt) - Date.parse(a.joinedAt)
+        );
+    }, [users, search, appRole]);
 
     const stats: AdminStat[] = [
         {
             id: "total",
-            label: "Registered Users",
+            label: "Total Users",
             value: counts.total,
             hint: "Across all institutions",
             accent: "#5579A6",
             icon: Users,
         },
         {
-            id: "active",
-            label: "Active",
-            value: counts.active,
-            hint: "Able to use the platform",
-            accent: "#4F8A63",
+            id: "general-users",
+            label: "General Users",
+            value: counts.generalUsers,
+            hint: "Registered users with User role",
+            accent: "#5579A6",
             icon: UserCheck,
         },
         {
-            id: "pending",
-            label: "Awaiting Approval",
-            value: counts.pending,
-            hint: "Requires an admin decision",
-            accent: "#C58A3A",
-            icon: Clock,
+            id: "members",
+            label: "Members",
+            value: counts.members,
+            hint: "Registered users with Member role",
+            accent: "#4F8A63",
+            icon: UserCog,
         },
         {
             id: "admins",
@@ -270,7 +244,7 @@ export default function UserManagement() {
                     <AdminStatCards stats={stats} />
 
                     <Card className="rounded-lg border border-[#D8D5C9] bg-[#F4F3EE]">
-                        <CardContent className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
+                        <CardContent className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
                             <div>
                                 <Label
                                     htmlFor="admin-user-search"
@@ -291,61 +265,6 @@ export default function UserManagement() {
                                         className={SEARCH_FIELD}
                                     />
                                 </div>
-                            </div>
-
-                            <div>
-                                <Label
-                                    htmlFor="admin-user-status"
-                                    className="text-xs font-semibold uppercase tracking-wide text-[#5E5D50]"
-                                >
-                                    Status
-                                </Label>
-
-                                <Select
-                                    value={status}
-                                    onValueChange={(value) =>
-                                        setStatus(value as UserStatus | "all")
-                                    }
-                                >
-                                    <SelectTrigger
-                                        id="admin-user-status"
-                                        className="mt-2 h-11 w-full justify-between border-[#D7D4C9] bg-[#FBFAF7] text-[#2D2D27]"
-                                    >
-                                        <SelectValue placeholder="Any status" />
-                                    </SelectTrigger>
-
-                                    <SelectContent className="border-[#D8D5C9] bg-[#F4F3EE]">
-                                        <SelectGroup>
-                                            <SelectItem
-                                                value="all"
-                                                className="text-[#2D2D27] focus:bg-[#716F49] focus:text-white"
-                                            >
-                                                Any status
-                                            </SelectItem>
-
-                                            <SelectItem
-                                                value="active"
-                                                className="text-[#2D2D27] focus:bg-[#716F49] focus:text-white"
-                                            >
-                                                Active
-                                            </SelectItem>
-
-                                            <SelectItem
-                                                value="pending"
-                                                className="text-[#2D2D27] focus:bg-[#716F49] focus:text-white"
-                                            >
-                                                Pending approval
-                                            </SelectItem>
-
-                                            <SelectItem
-                                                value="suspended"
-                                                className="text-[#2D2D27] focus:bg-[#716F49] focus:text-white"
-                                            >
-                                                Suspended
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
                             </div>
 
                             <div>
@@ -392,82 +311,8 @@ export default function UserManagement() {
                                 </Select>
                             </div>
 
-                            <div>
-                                <Label
-                                    htmlFor="admin-user-academic-role"
-                                    className="text-xs font-semibold uppercase tracking-wide text-[#5E5D50]"
-                                >
-                                    Academic role
-                                </Label>
-
-                                <Select
-                                    value={academicRole}
-                                    onValueChange={(value) => setAcademicRole(value ?? "all")}
-                                >
-                                    <SelectTrigger
-                                        id="admin-user-academic-role"
-                                        className="mt-2 h-11 w-full justify-between border-[#D7D4C9] bg-[#FBFAF7] text-[#2D2D27]"
-                                    >
-                                        <SelectValue placeholder="Any academic role" />
-                                    </SelectTrigger>
-
-                                    <SelectContent className="max-h-72 border-[#D8D5C9] bg-[#F4F3EE]">
-                                        <SelectGroup>
-                                            <SelectItem
-                                                value="all"
-                                                className="text-[#2D2D27] focus:bg-[#716F49] focus:text-white"
-                                            >
-                                                Any academic role
-                                            </SelectItem>
-
-                                            {ACADEMIC_ROLES.map((role) => (
-                                                <SelectItem
-                                                    key={role}
-                                                    value={role}
-                                                    className="text-[#2D2D27] focus:bg-[#716F49] focus:text-white"
-                                                >
-                                                    {role}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            </div>
                         </CardContent>
                     </Card>
-
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-end">
-
-
-                        <div className="flex items-center gap-2 sm:w-auto">
-                            <Filter className="h-4 w-4 shrink-0 text-[#85897F]" aria-hidden />
-
-                            <Select value={sort} onValueChange={(value) => setSort(value as ManagedUserSort)}>
-                                <SelectTrigger
-                                    className="h-9 w-full justify-between border-[#D7D4C9] bg-[#FBFAF7] text-[#2D2D27] sm:w-auto"
-                                    aria-label="Sort users"
-                                >
-                                    <SelectValue />
-                                </SelectTrigger>
-
-                                <SelectContent className="border-[#D8D5C9] bg-[#F4F3EE]">
-                                    <SelectGroup>
-                                        {(Object.keys(SORT_LABELS) as ManagedUserSort[]).map(
-                                            (option) => (
-                                                <SelectItem
-                                                    key={option}
-                                                    value={option}
-                                                    className="text-[#2D2D27] focus:bg-[#716F49] focus:text-white"
-                                                >
-                                                    {SORT_LABELS[option]}
-                                                </SelectItem>
-                                            )
-                                        )}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
 
                     {filteredUsers.length === 0 ? (
                         <AdminEmptyState

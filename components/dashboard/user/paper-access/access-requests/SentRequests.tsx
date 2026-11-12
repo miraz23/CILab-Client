@@ -225,6 +225,7 @@ export default function SentRequests() {
                         {filteredRequests.map((group) => {
                             const request = group.head;
                             const allSame = group.requests.every((item) => item.status === request.status);
+                            const canEdit = group.requests.every((item) => item.status === "pending");
                             const config = STATUS_CONFIG[request.status];
                             const StatusIcon = config.icon;
                             return (
@@ -274,9 +275,11 @@ export default function SentRequests() {
                                             )}
                                             {(request.status === "pending" || request.status === "accepted") && (
                                                 <>
-                                                    <Button type="button" variant="outline" size="sm" onClick={() => openEditor(group)}>
-                                                        <Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit
-                                                    </Button>
+                                                    {canEdit && (
+                                                        <Button type="button" variant="outline" size="sm" onClick={() => openEditor(group)}>
+                                                            <Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit
+                                                        </Button>
+                                                    )}
                                                     <Button type="button" variant="outline" size="sm" onClick={() => revokeRequest(group)}>
                                                         <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
                                                     </Button>
