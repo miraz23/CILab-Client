@@ -217,22 +217,20 @@ export default function UploadHistory() {
     setIsSaving(true);
     setErrorMessage("");
     const isPaper = editing.type === "paper";
-    const body: BodyInit = isPaper
-      ? (() => {
-        const formData = new FormData();
-        formData.append("paper_title", editing.title);
-        Object.entries(editing.fields).forEach(([key, value]) => formData.append(key, value));
-        if (editing.replacementFile) formData.append("paper_file", editing.replacementFile);
-        return formData;
-      })()
-      : JSON.stringify({ presentation_title: editing.title, ...editing.fields });
+    const body: BodyInit = (() => {
+      const formData = new FormData();
+      formData.append(isPaper ? "paper_title" : "presentation_title", editing.title);
+      Object.entries(editing.fields).forEach(([key, value]) => formData.append(key, value));
+      if (editing.replacementFile) {
+        formData.append(isPaper ? "paper_file" : "presentation_file", editing.replacementFile);
+      }
+      return formData;
+    })();
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/uploads/${editing.id}`, {
         method: "PATCH",
-        headers: isPaper
-          ? authHeaders()
-          : { ...authHeaders(), "Content-Type": "application/json" },
+        headers: authHeaders(),
         body,
       });
       const data = await response.json().catch(() => null);
@@ -342,20 +340,22 @@ export default function UploadHistory() {
                 );
               })}
             </div>
-            {editing.type === "paper" && (
-              <div className="space-y-2 rounded-lg border border-[#D7D8D0] bg-white px-3 py-3">
-                <Label htmlFor="edit-paper-file">Research paper PDF</Label>
+            <div className="space-y-2 rounded-lg border border-[#D7D8D0] bg-white px-3 py-3">
+                <Label htmlFor="edit-upload-file">
+                  {editing.type === "paper" ? "Research paper PDF" : "Presentation file"}
+                </Label>
                 <p className="truncate text-xs text-[#6F7267]" title={editing.originalFilename}>Current file: {editing.originalFilename}</p>
                 <input
-                  id="edit-paper-file"
+                  id="edit-upload-file"
                   type="file"
-                  accept="application/pdf,.pdf"
+                  accept={editing.type === "paper" ? "application/pdf,.pdf" : "application/pdf,.pdf,.ppt,.pptx"}
                   className="block w-full text-xs text-[#565D54] file:mr-3 file:rounded-md file:border-0 file:bg-[#E8E7DD] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-[#565D54]"
                   onChange={(event) => setEditing({ ...editing, replacementFile: event.target.files?.[0] ?? null })}
                 />
-                <p className="text-[11px] text-[#85897F]">Choose a PDF only if you want to replace the current paper.</p>
-              </div>
-            )}
+                <p className="text-[11px] text-[#85897F]">
+                  Choose a file only if you want to replace the current {editing.type === "paper" ? "paper PDF" : "presentation"}.
+                </p>
+            </div>
             <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setEditing(null)} disabled={isSaving}>Cancel</Button><Button type="submit" disabled={isSaving}>{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save changes</Button></div>
           </form>
         </div>
