@@ -27,7 +27,6 @@ export default function UploadPaperForm() {
   const [publicationVenue, setPublicationVenue] = useState("");
   const [indexedIn, setIndexedIn] = useState("");
   const [publicationDate, setPublicationDate] = useState("");
-  const [featured, setFeatured] = useState(false);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -124,7 +123,6 @@ export default function UploadPaperForm() {
       formData.append("paper_tags", tags);
       formData.append("paper_url", trimmedPublicationLink);
       formData.append("paper_abstract", abstract);
-      formData.append("is_featured", String(featured));
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/papers/upload`,
@@ -158,7 +156,6 @@ export default function UploadPaperForm() {
       setPublicationVenue("");
       setIndexedIn("");
       setPublicationDate("");
-      setFeatured(false);
       setPdfFile(null);
       window.dispatchEvent(new Event("uploads:changed"));
     } catch (error) {
@@ -427,27 +424,6 @@ export default function UploadPaperForm() {
               />
             </div>
 
-            {/* Featured */}
-            <label
-              htmlFor="paper-featured"
-              className="flex cursor-pointer items-start gap-3 rounded-lg border border-[#D7D8D0] bg-[#EBEAE3] px-3 py-2.5"
-            >
-              <input
-                id="paper-featured"
-                type="checkbox"
-                checked={featured}
-                onChange={(e) => setFeatured(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#626C49]"
-              />
-              <span>
-                <span className="block text-xs font-semibold text-[#565D54]">
-                  Show as featured
-                </span>
-                <span className="block text-[11px] text-[#85897F]">
-                  Highlight this paper as featured.
-                </span>
-              </span>
-            </label>
           </div>
 
           {/* Divider */}

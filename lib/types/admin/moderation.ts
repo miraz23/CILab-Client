@@ -54,4 +54,5 @@ export interface ModerationDecisionPayload {
     submissionId: string;
     decision: ModerationDecision;
     note?: string;
+    featured?: boolean;
 }

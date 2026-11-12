@@ -35,6 +35,7 @@ export async function submitModerationDecision(
             body: {
                 decision: payload.decision,
                 note: payload.note,
+                featured: payload.featured,
             },
         }
     );

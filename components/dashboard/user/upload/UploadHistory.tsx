@@ -48,7 +48,6 @@ interface EditState {
   replacementFile: File | null;
   /** Keyed by the same metadata/payload keys the upload forms send. */
   fields: Record<string, string>;
-  featured: boolean;
 }
 
 interface EditField {
@@ -60,7 +59,7 @@ interface EditField {
   placeholder?: string;
 }
 
-// Mirrors the fields collected by UploadPaperForm (title and "featured" are handled separately).
+// Mirrors the fields collected by UploadPaperForm (title is handled separately).
 const PAPER_FIELDS: EditField[] = [
   { key: "paper_category", label: "Paper Category", required: true, placeholder: "e.g. Machine Learning" },
   { key: "authors_name", label: "Authors", placeholder: "Author names, separated by commas" },
@@ -147,7 +146,6 @@ export default function UploadHistory() {
     fieldsFor(upload.upload_type).forEach(({ key }) => {
       fields[key] = metadataText(metadata[key]);
     });
-    const featured = metadata.is_featured ?? metadata.featured;
     setEditing({
       id: upload.id,
       type: upload.upload_type,
@@ -155,7 +153,6 @@ export default function UploadHistory() {
       originalFilename: upload.original_filename,
       replacementFile: null,
       fields,
-      featured: featured === true || featured === "true",
     });
   };
 
@@ -225,7 +222,6 @@ export default function UploadHistory() {
         const formData = new FormData();
         formData.append("paper_title", editing.title);
         Object.entries(editing.fields).forEach(([key, value]) => formData.append(key, value));
-        formData.append("is_featured", String(editing.featured));
         if (editing.replacementFile) formData.append("paper_file", editing.replacementFile);
         return formData;
       })()
@@ -346,12 +342,6 @@ export default function UploadHistory() {
                 );
               })}
             </div>
-            {editing.type === "paper" && (
-              <label htmlFor="edit-featured" className="flex cursor-pointer items-start gap-3 rounded-lg border border-[#D7D8D0] bg-white px-3 py-2.5">
-                <input id="edit-featured" type="checkbox" checked={editing.featured} onChange={(event) => setEditing({ ...editing, featured: event.target.checked })} className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#626C49]" />
-                <span><span className="block text-xs font-semibold text-[#565D54]">Show as featured</span><span className="block text-[11px] text-[#85897F]">Highlight this paper as featured.</span></span>
-              </label>
-            )}
             {editing.type === "paper" && (
               <div className="space-y-2 rounded-lg border border-[#D7D8D0] bg-white px-3 py-3">
                 <Label htmlFor="edit-paper-file">Research paper PDF</Label>

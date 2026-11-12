@@ -125,6 +125,7 @@ export default function ContentModeration() {
     const [search, setSearch] = useState("");
     const [openNoteId, setOpenNoteId] = useState<string | null>(null);
     const [note, setNote] = useState("");
+    const [featured, setFeatured] = useState(false);
     const [busyId, setBusyId] = useState<string | null>(null);
 
     const loadQueue = useCallback(async () => {
@@ -274,6 +275,7 @@ export default function ContentModeration() {
                 submissionId: submission.id,
                 decision,
                 note: note.trim() || undefined,
+                featured: submission.contentType === "paper" ? featured : undefined,
             });
 
             setSubmissions((current) =>
@@ -283,6 +285,10 @@ export default function ContentModeration() {
                               ...item,
                               status: decision,
                               reviewNote: note.trim() || undefined,
+                              metadata:
+                                  item.contentType === "paper"
+                                      ? { ...item.metadata, is_featured: featured }
+                                      : item.metadata,
                               reviewedAt: new Date().toISOString(),
                           }
                         : item
@@ -297,6 +303,7 @@ export default function ContentModeration() {
 
             setOpenNoteId(null);
             setNote("");
+            setFeatured(false);
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : "Unable to record this decision."
@@ -495,6 +502,29 @@ export default function ContentModeration() {
 
                                                     {isNoteOpen && (
                                                         <div className="mt-4 rounded-lg border border-[#DEDCD3] bg-[#FBFAF7] p-4 animate-in fade-in slide-in-from-top-2">
+                                                            {submission.contentType === "paper" && (
+                                                                <label
+                                                                    htmlFor={`moderation-featured-${submission.id}`}
+                                                                    className="mb-4 flex cursor-pointer items-start gap-3 rounded-lg border border-[#D7D4C9] bg-white px-3 py-2.5"
+                                                                >
+                                                                    <input
+                                                                        id={`moderation-featured-${submission.id}`}
+                                                                        type="checkbox"
+                                                                        checked={featured}
+                                                                        onChange={(event) => setFeatured(event.target.checked)}
+                                                                        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#626C49]"
+                                                                    />
+                                                                    <span>
+                                                                        <span className="block text-xs font-semibold text-[#565D54]">
+                                                                            Show as featured
+                                                                        </span>
+                                                                        <span className="block text-[11px] text-[#85897F]">
+                                                                            Highlight this paper in the research archive.
+                                                                        </span>
+                                                                    </span>
+                                                                </label>
+                                                            )}
+
                                                             <label
                                                                 htmlFor={`moderation-note-${submission.id}`}
                                                                 className="text-xs font-semibold uppercase tracking-wide text-[#5E5D50]"
@@ -544,6 +574,7 @@ export default function ContentModeration() {
                                                                     onClick={() => {
                                                                         setOpenNoteId(null);
                                                                         setNote("");
+                                                                        setFeatured(false);
                                                                     }}
                                                                     className="rounded-lg text-[#89877B] hover:bg-[#ECEBE4]"
                                                                 >
@@ -575,6 +606,10 @@ export default function ContentModeration() {
                                                                 onClick={() => {
                                                                     setOpenNoteId(submission.id);
                                                                     setNote(submission.reviewNote ?? "");
+                                                                    setFeatured(
+                                                                        submission.metadata.is_featured === true ||
+                                                                            submission.metadata.is_featured === "true"
+                                                                    );
                                                                 }}
                                                                 className="rounded-lg bg-[#716F49] text-white shadow-[0_5px_15px_rgba(40,40,25,0.2)] hover:bg-[#625F3F]"
                                                             >
