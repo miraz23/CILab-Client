@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 
 import { fetchManagedUsers, updateUserAccess } from "@/lib/api/admin/users";
+import { decideMemberRequest, fetchMemberRequests } from "@/lib/api/admin/member-requests";
 import { confirmAction, type ConfirmOptions } from "@/lib/confirm";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import { APP_ROLES } from "@/lib/types/admin/role";
@@ -44,6 +45,7 @@ import type {
     ManagedUser,
     UserStatus,
 } from "@/lib/types/admin/user";
+import type { AdminMemberRequest } from "@/lib/types/admin/user";
 import { cn } from "@/lib/utils";
 
 const STATUS_CONFIG: Record<
@@ -112,11 +114,14 @@ export default function UserManagement() {
     const [search, setSearch] = useState("");
     const [appRole, setAppRole] = useState<AppRole | "all">("all");
     const [busyUserId, setBusyUserId] = useState<string | null>(null);
+    const [memberRequests, setMemberRequests] = useState<AdminMemberRequest[]>([]);
+    const [busyRequestId, setBusyRequestId] = useState<string | null>(null);
 
     const loadUsers = useCallback(async () => {
         try {
             const fetchedUsers = await fetchManagedUsers();
             setUsers(fetchedUsers);
+            setMemberRequests(await fetchMemberRequests());
         } catch (error) {
             setUsers([]);
             toast.error(
@@ -228,6 +233,24 @@ export default function UserManagement() {
         }
     };
 
+    const decideMembership = async (request: AdminMemberRequest, status: "approved" | "declined") => {
+        setBusyRequestId(request.id);
+        try {
+            await decideMemberRequest(request.id, status);
+            setMemberRequests((current) => current.filter((item) => item.id !== request.id));
+            if (status === "approved") {
+                setUsers((current) => current.map((user) =>
+                    user.id === request.user.id ? { ...user, appRole: "MEMBER" } : user
+                ));
+            }
+            toast.success(status === "approved" ? `${request.user.name} is now a member.` : "Member request declined.");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Unable to decide this member request.");
+        } finally {
+            setBusyRequestId(null);
+        }
+    };
+
     return (
         <div className="w-full space-y-6 pb-8">
             <AdminSectionHeader
@@ -242,6 +265,32 @@ export default function UserManagement() {
             ) : (
                 <>
                     <AdminStatCards stats={stats} />
+
+                    {memberRequests.length > 0 && (
+                        <Card className="rounded-lg border border-[#D8D5C9] bg-[#F4F3EE]">
+                            <CardContent className="p-5">
+                                <h3 className="text-base font-semibold text-[#25251F]">Member requests</h3>
+                                <p className="mt-1 text-sm text-[#777568]">Review requests from registered users who want to join as members.</p>
+                                <div className="mt-4 space-y-3">
+                                    {memberRequests.map((request) => {
+                                        const isBusy = busyRequestId === request.id;
+                                        return (
+                                            <div key={request.id} className="flex flex-col gap-3 rounded-lg border border-[#DEDCD3] bg-[#FBFAF7] p-4 sm:flex-row sm:items-center sm:justify-between">
+                                                <div>
+                                                    <p className="font-medium text-[#25251F]">{request.user.name}</p>
+                                                    <p className="text-sm text-[#777568]">{request.user.email} · {request.user.academicRole} · {request.user.institution}</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <Button type="button" size="sm" disabled={isBusy} onClick={() => decideMembership(request, "approved")} className="rounded-lg bg-[#716F49] text-white hover:bg-[#625F3F]">Approve</Button>
+                                                    <Button type="button" size="sm" variant="outline" disabled={isBusy} onClick={() => decideMembership(request, "declined")} className="rounded-lg border-[#E4C2BC] text-[#A45B4B] hover:bg-[#FBF0EE]">Decline</Button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
 
                     <Card className="rounded-lg border border-[#D8D5C9] bg-[#F4F3EE]">
                         <CardContent className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">

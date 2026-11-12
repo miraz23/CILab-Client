@@ -1,4 +1,6 @@
 import type { AcademicRole } from "@/lib/types/auth/register";
+import type { AppRole } from "@/lib/types/admin/role";
+import type { MemberRequest } from "@/lib/api/member-requests";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
@@ -9,6 +11,8 @@ export interface UserProfile {
     scholarId: string;
     institution: string;
     role: AcademicRole;
+    appRole: AppRole;
+    memberRequest: MemberRequest | null;
 }
 
 export interface UpdateProfilePayload {

@@ -44,3 +44,20 @@ export interface UpdateUserAccessPayload {
     appRole?: AppRole;
     status?: UserStatus;
 }
+
+export interface MemberRequestUser {
+    id: string;
+    name: string;
+    email: string;
+    scholarId: string;
+    institution: string;
+    academicRole: AcademicRole;
+    appRole: AppRole;
+}
+
+export interface AdminMemberRequest {
+    id: string;
+    user: MemberRequestUser;
+    status: "pending";
+    createdAt: string;
+}

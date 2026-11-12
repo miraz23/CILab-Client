@@ -14,8 +14,8 @@ import {
     CheckCircle,
     IdCard,
     AlertCircle,
-    UserCog,
     ShieldCheck,
+    UserRoundPlus,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ import {
 import { ACADEMIC_ROLES, type AcademicRole } from "@/lib/types/auth/register";
 import { toast } from "react-toastify";
 import { updateStoredUser } from "@/lib/auth/session";
+import { submitMemberRequest } from "@/lib/api/member-requests";
 
 interface ProfileFormProps {
     initialData: UserProfile;
@@ -128,6 +129,8 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
+    const [memberRequest, setMemberRequest] = useState(initialData.memberRequest);
+    const [isRequestingMembership, setIsRequestingMembership] = useState(false);
 
     const initials = useMemo(() => {
         const source = (formData.name || initialData.name || "").trim();
@@ -248,6 +251,19 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
         [formData, validate]
     );
 
+    const handleMemberRequest = useCallback(async () => {
+        setIsRequestingMembership(true);
+        try {
+            const response = await submitMemberRequest();
+            if (response.request) setMemberRequest(response.request);
+            toast.success(response.message);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Unable to send your member request.");
+        } finally {
+            setIsRequestingMembership(false);
+        }
+    }, []);
+
     return (
         <div className="w-full space-y-7 py-7">
             <form id="profile-form" onSubmit={handleSubmit} noValidate className="space-y-5">
@@ -268,6 +284,23 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                                 {[formData.role, formData.institution].filter(Boolean).join(" · ") ||
                                     "Add your role and institution below"}
                             </p>
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                <span className="rounded-full border border-[#D8D5C9] bg-[#ECEBE4] px-2.5 py-1 text-xs font-medium text-[#5E5D50]">
+                                    Account role: {initialData.appRole === "ADMIN" ? "Admin" : initialData.appRole === "MEMBER" ? "Member" : "User"}
+                                </span>
+                                {initialData.appRole === "USER" && (
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={handleMemberRequest}
+                                        disabled={isRequestingMembership || memberRequest?.status === "pending"}
+                                        className="rounded-lg bg-[#716F49] text-white hover:bg-[#625F3F]"
+                                    >
+                                        {isRequestingMembership ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <UserRoundPlus className="mr-1.5 h-3.5 w-3.5" />}
+                                        {memberRequest?.status === "pending" ? "Request pending" : memberRequest?.status === "declined" ? "Request again" : "Join as member"}
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
