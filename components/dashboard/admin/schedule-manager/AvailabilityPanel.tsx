@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, CalendarDays, MapPin, Plus, Trash2, Video } from "lucide-react";
+import { CalendarClock, CalendarDays, MapPin, Pencil, Plus, Trash2, Video, X } from "lucide-react";
 
 import AdminEmptyState from "@/components/dashboard/admin/AdminEmptyState";
 import { Button } from "@/components/ui/button";
@@ -39,11 +39,14 @@ interface AvailabilityPanelProps {
     errors: AvailabilitySlotFormErrors;
     isSavingSlot: boolean;
     busySlotId: string | null;
+    editingSlotId: string | null;
     onFieldChange: <K extends keyof AvailabilitySlotFormData>(
         key: K,
         value: AvailabilitySlotFormData[K]
     ) => void;
     onSubmit: () => void;
+    onEditSlot: (slot: AvailabilitySlot) => void;
+    onCancelEdit: () => void;
     onToggleSlot: (slot: AvailabilitySlot) => void;
     onDeleteSlot: (slot: AvailabilitySlot) => void;
 }
@@ -54,8 +57,11 @@ export default function AvailabilityPanel({
     errors,
     isSavingSlot,
     busySlotId,
+    editingSlotId,
     onFieldChange,
     onSubmit,
+    onEditSlot,
+    onCancelEdit,
     onToggleSlot,
     onDeleteSlot,
 }: AvailabilityPanelProps) {
@@ -64,7 +70,10 @@ export default function AvailabilityPanel({
     return (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
             <div>
-                <SectionCard title="Add availability" subtitle="Publish a time and place for the lab.">
+                <SectionCard
+                    title={editingSlotId ? "Edit availability" : "Add availability"}
+                    subtitle={editingSlotId ? "Update this published time and place." : "Publish a time and place for the lab."}
+                >
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="slot-day" className={FIELD_LABEL_CLASS}>Day of the week</Label>
@@ -156,8 +165,20 @@ export default function AvailabilityPanel({
                             className="w-full rounded-lg bg-[#716F49] text-white shadow-[0_5px_15px_rgba(40,40,25,0.2)] hover:bg-[#625F3F]"
                         >
                             <Plus className="mr-1.5 h-4 w-4" aria-hidden />
-                            Publish availability
+                            {editingSlotId ? "Save changes" : "Publish availability"}
                         </Button>
+                        {editingSlotId ? (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={onCancelEdit}
+                                disabled={isSavingSlot}
+                                className="w-full rounded-lg text-[#5E5D50] hover:bg-[#ECEBE4]"
+                            >
+                                <X className="mr-1.5 h-4 w-4" aria-hidden />
+                                Cancel edit
+                            </Button>
+                        ) : null}
                     </div>
                 </SectionCard>
             </div>
@@ -206,6 +227,17 @@ export default function AvailabilityPanel({
                                                 </div>
                                             </div>
                                             <div className="flex shrink-0 items-center gap-1.5">
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    disabled={isBusy || isSavingSlot}
+                                                    onClick={() => onEditSlot(slot)}
+                                                    aria-label={`Edit ${slot.name} availability`}
+                                                    className="rounded-lg text-[#5E5D50] hover:bg-[#ECEBE4]"
+                                                >
+                                                    <Pencil className="h-4 w-4" aria-hidden />
+                                                </Button>
                                                 <Button
                                                     type="button"
                                                     variant="ghost"

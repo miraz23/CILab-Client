@@ -37,6 +37,7 @@ export default function ScheduleManager() {
     const [errors, setErrors] = useState<AvailabilitySlotFormErrors>({});
     const [isSavingSlot, setIsSavingSlot] = useState(false);
     const [busySlotId, setBusySlotId] = useState<string | null>(null);
+    const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
 
     const loadBoard = useCallback(async () => {
         const board = await fetchScheduleBoard();
@@ -53,7 +54,7 @@ export default function ScheduleManager() {
         setErrors((current) => ({ ...current, [key]: undefined }));
     };
 
-    const handleAddSlot = async () => {
+    const handleSaveSlot = async () => {
         const validationErrors = validateSlotForm(formData);
         setErrors(validationErrors);
 
@@ -68,22 +69,56 @@ export default function ScheduleManager() {
             const mode = formData.mode as MeetingMode;
             const place = formData.place.trim();
 
-            const response = await createAvailabilitySlot({ dayOfWeek, startTime, endTime, mode, place });
+            const payload = { dayOfWeek, startTime, endTime, mode, place };
+            const response = editingSlotId
+                ? await updateAvailabilitySlot(editingSlotId, payload)
+                : await createAvailabilitySlot(payload);
 
-            const createdSlot = response.slot;
-            if (createdSlot) {
-                setSlots((current) => [...current, createdSlot]);
+            const savedSlot = response.slot;
+            if (savedSlot) {
+                setSlots((current) =>
+                    editingSlotId
+                        ? current.map((slot) => (slot.id === savedSlot.id ? savedSlot : slot))
+                        : [...current, savedSlot]
+                );
             } else {
                 await refresh();
             }
 
-            toast.success(`${DAY_OF_WEEK_LABELS[dayOfWeek]} availability added.`);
+            toast.success(
+                editingSlotId
+                    ? `${DAY_OF_WEEK_LABELS[dayOfWeek]} availability updated.`
+                    : `${DAY_OF_WEEK_LABELS[dayOfWeek]} availability added.`
+            );
             setFormData(EMPTY_FORM);
+            setEditingSlotId(null);
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Unable to add this slot.");
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : `Unable to ${editingSlotId ? "update" : "add"} this slot.`
+            );
         } finally {
             setIsSavingSlot(false);
         }
+    };
+
+    const handleEditSlot = (slot: AvailabilitySlot) => {
+        setEditingSlotId(slot.id);
+        setFormData({
+            dayOfWeek: slot.dayOfWeek,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            mode: slot.mode,
+            place: slot.place,
+        });
+        setErrors({});
+    };
+
+    const handleCancelEdit = () => {
+        setEditingSlotId(null);
+        setFormData(EMPTY_FORM);
+        setErrors({});
     };
 
     const handleToggleSlot = async (slot: AvailabilitySlot) => {
@@ -120,6 +155,11 @@ export default function ScheduleManager() {
         try {
             await deleteAvailabilitySlot(slot.id);
             setSlots((current) => current.filter((item) => item.id !== slot.id));
+            if (editingSlotId === slot.id) {
+                setEditingSlotId(null);
+                setFormData(EMPTY_FORM);
+                setErrors({});
+            }
             toast.success("Availability removed.");
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Unable to remove availability.");
@@ -147,7 +187,10 @@ export default function ScheduleManager() {
                     isSavingSlot={isSavingSlot}
                     busySlotId={busySlotId}
                     onFieldChange={handleSlotFieldChange}
-                    onSubmit={handleAddSlot}
+                    editingSlotId={editingSlotId}
+                    onSubmit={handleSaveSlot}
+                    onEditSlot={handleEditSlot}
+                    onCancelEdit={handleCancelEdit}
                     onToggleSlot={handleToggleSlot}
                     onDeleteSlot={handleDeleteSlot}
                 />
