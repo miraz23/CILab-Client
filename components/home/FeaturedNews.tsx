@@ -19,8 +19,6 @@ import {
 
 import type { Announcement, AnnouncementKind } from "@/lib/types/admin/announcement";
 import { announcementPosterHref, isPdfPoster } from "@/lib/announcement-poster";
-// DUMMY-DATA: remove this import (and the fallback below) once the backend is integrated.
-import { DUMMY_ANNOUNCEMENTS } from "@/lib/dummy/announcements";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -41,7 +39,7 @@ const SECTIONS: {
             blurb: "Calls for papers and conference updates",
             icon: Megaphone,
             badgeClass: "bg-[#E4E6DC] text-[#5C6446]",
-            empty: "No pinned conferences right now. Browse all news for the latest.",
+            empty: "No conferences to display yet. New calls for papers and conference updates will appear here.",
         },
         {
             kind: "notice",
@@ -49,7 +47,7 @@ const SECTIONS: {
             blurb: "Quick, at-a-glance lab updates",
             icon: StickyNote,
             badgeClass: "bg-[#ECE7DA] text-[#8A6420]",
-            empty: "No pinned notices right now. Browse all news for the latest.",
+            empty: "No notices to display yet. Lab updates will appear here once they are published.",
         },
         {
             kind: "seminar",
@@ -57,7 +55,7 @@ const SECTIONS: {
             blurb: "Upcoming talks and sessions",
             icon: Presentation,
             badgeClass: "bg-[#E3E8F0] text-[#5579A6]",
-            empty: "No pinned seminars right now. Browse all news for the latest.",
+            empty: "No seminars to display yet. Upcoming talks and sessions will appear here.",
         },
     ];
 
@@ -238,14 +236,11 @@ export default function FeaturedNews({
     notices = [],
     perColumn = DEFAULT_PER_COLUMN,
 }: {
-    /** Optional while the backend isn't integrated - dummy data is shown when empty. */
     notices?: Announcement[];
     /** How many items to feature in each column. */
     perColumn?: number;
 }) {
-    // DUMMY-DATA: fall back to sample items when the API returns nothing.
-    // Once the backend is integrated, delete this line and use `notices` directly.
-    const source = notices.length > 0 ? notices : DUMMY_ANNOUNCEMENTS;
+    const source = notices;
 
     const columns = useMemo(() => {
         const sorted = featuredSort(source);

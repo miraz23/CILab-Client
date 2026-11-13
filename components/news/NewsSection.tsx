@@ -45,7 +45,7 @@ const SECTIONS: {
             icon: Megaphone,
             badgeClass: "bg-[#E4E6DC] text-[#5C6446]",
             iconClass: "bg-[#E4E6DC] text-[#5C6446]",
-            empty: "No conferences have been published yet.",
+            empty: "No conferences to display yet. New calls for papers and conference updates will appear here.",
         },
         {
             kind: "notice",
@@ -54,7 +54,7 @@ const SECTIONS: {
             icon: StickyNote,
             badgeClass: "bg-[#ECE7DA] text-[#8A6420]",
             iconClass: "bg-[#ECE7DA] text-[#8A6420]",
-            empty: "No notices have been published yet.",
+            empty: "No notices to display yet. Lab updates will appear here once they are published.",
         },
         {
             kind: "seminar",
@@ -63,7 +63,7 @@ const SECTIONS: {
             icon: Presentation,
             badgeClass: "bg-[#E3E8F0] text-[#5579A6]",
             iconClass: "bg-[#E3E8F0] text-[#5579A6]",
-            empty: "No seminars have been scheduled yet.",
+            empty: "No seminars to display yet. Upcoming talks and sessions will appear here.",
         },
     ];
 
@@ -431,10 +431,9 @@ export default function NewsNotices({
         document.getElementById(`news-col-${kind}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
-    const total = grouped.announcement.length + grouped.notice.length + grouped.seminar.length;
 
     return (
-        <section className="relative overflow-hidden bg-[#F8FAFC] py-28 sm:py-32">
+        <section className="relative overflow-hidden bg-[#F8FAFC] py-28">
             {/* ambient background: soft olive glow + fading dot grid */}
             <div aria-hidden className="pointer-events-none absolute inset-0">
                 <div className="absolute -top-40 left-1/2 h-105 w-205 -translate-x-1/2 rounded-lg bg-[#A3A171]/25 blur-3xl" />
@@ -473,11 +472,6 @@ export default function NewsNotices({
                 </div>
 
                 <div className="mx-auto mt-14 max-w-7xl px-4 sm:px-6">
-                    {total === 0 ? (
-                        <p className="py-20 text-center text-sm text-neutral-500">
-                            Nothing has been published yet. Please check back soon.
-                        </p>
-                    ) : (
                         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
                             {SECTIONS.map((section) => {
                                 const items = grouped[section.kind];
@@ -540,7 +534,6 @@ export default function NewsNotices({
                                 );
                             })}
                         </div>
-                    )}
                 </div>
             </div>
         </section>

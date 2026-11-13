@@ -30,10 +30,10 @@ export interface RegisterFormData {
     password: string;
     scholarId: string;
     institution: string;
-    role: AcademicRole | "";
+    role: string;
 }
 
-export type RegisterTextField = keyof Omit<RegisterFormData, "role">;
+export type RegisterTextField = keyof RegisterFormData;
 
 export interface RegisterFormErrors {
     name?: string;
@@ -50,7 +50,7 @@ export interface RegisterApiPayload {
     password: string;
     scholarId: string;
     institution: string;
-    role: AcademicRole;
+    role: string;
 }
 
 export interface RegisterApiResponse {

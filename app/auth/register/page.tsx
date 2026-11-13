@@ -6,15 +6,8 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { RegisterApiError, submitRegisterApplication } from "@/lib/api/auth/register";
-import { ACADEMIC_ROLES, type RegisterFormData, type RegisterFormErrors, type RegisterTextField, type AcademicRole } from "@/lib/types/auth/register";
+import { ACADEMIC_ROLES, type RegisterFormData, type RegisterFormErrors, type RegisterTextField } from "@/lib/types/auth/register";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthShell, { authButtonClass, authInputClass, authLabelClass } from "@/components/shared/AuthShell";
@@ -48,7 +41,7 @@ function validate(data: RegisterFormData): RegisterFormErrors {
 
     if (!data.scholarId.trim()) errors.scholarId = "Scholar ID is required.";
     if (!data.institution.trim()) errors.institution = "Institution / organization is required.";
-    if (!data.role) errors.role = "Please select your current role.";
+    if (!data.role.trim()) errors.role = "Current role is required.";
 
     return errors;
 }
@@ -69,19 +62,13 @@ export default function RegisterForm() {
         []
     );
 
-    const handleRoleChange = useCallback((value: string | null) => {
-        if (!value) return;
-        setFormData((prev) => ({ ...prev, role: value as AcademicRole }));
-        setErrors((prev) => ({ ...prev, role: undefined }));
-    }, []);
-
     const handleSubmit = useCallback(
         async (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
 
             const validationErrors = validate(formData);
             setErrors(validationErrors);
-            if (Object.keys(validationErrors).length > 0 || !formData.role) return;
+            if (Object.keys(validationErrors).length > 0) return;
 
             setIsSubmitting(true);
             try {
@@ -91,7 +78,7 @@ export default function RegisterForm() {
                     password: formData.password,
                     scholarId: formData.scholarId,
                     institution: formData.institution,
-                    role: formData.role,
+                    role: formData.role.trim(),
                 });
                 toast.success("Verification email sent. Check your inbox to complete registration.");
                 router.push("/auth/login");
@@ -181,7 +168,7 @@ export default function RegisterForm() {
                     </Label>
                     <Input
                         id="scholarId"
-                        placeholder="e.g. 0000-0002-1825-0097"
+                        placeholder="e.g. _SXy3FkAAAAJ&hl"
                         value={formData.scholarId}
                         onChange={handleTextChange("scholarId")}
                         className={`mt-1.5 ${authInputClass}`}
@@ -209,22 +196,21 @@ export default function RegisterForm() {
                     <Label htmlFor="role" className={authLabelClass}>
                         Current role
                     </Label>
-                    <Select value={formData.role} onValueChange={handleRoleChange}>
-                        <SelectTrigger
-                            id="role"
-                            className="mt-1.5 h-11 w-full rounded-lg border border-[#dddbd8] bg-[#F8FAFC] px-3.5 text-sm font-medium text-slate-900 shadow-none focus-visible:border-[#716f49] focus-visible:ring-2 focus-visible:ring-[#716f49]/20"
-                            aria-invalid={Boolean(errors.role)}
-                        >
-                            <SelectValue placeholder="Select your current role" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-72">
-                            {ACADEMIC_ROLES.map((role) => (
-                                <SelectItem key={role} value={role}>
-                                    {role}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <Input
+                        id="role"
+                        list="role-suggestions"
+                        autoComplete="organization-title"
+                        placeholder="e.g. Undergraduate Student"
+                        value={formData.role}
+                        onChange={handleTextChange("role")}
+                        className={`mt-1.5 ${authInputClass}`}
+                        aria-invalid={Boolean(errors.role)}
+                    />
+                    {/* <datalist id="role-suggestions">
+                        {ACADEMIC_ROLES.map((role) => (
+                            <option key={role} value={role} />
+                        ))}
+                    </datalist> */}
                     {errors.role && <p className="mt-1 text-xs text-red-500">{errors.role}</p>}
                 </div>
 

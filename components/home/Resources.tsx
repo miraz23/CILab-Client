@@ -10,6 +10,7 @@ import { motion } from "motion/react";
 import {
     BookOpen,
     Check,
+    FileText,
     Share2,
 } from "lucide-react";
 
@@ -257,6 +258,7 @@ export default function Resources() {
         );
     }, [active, allPresentations]);
     const [loadError, setLoadError] = useState<string | null>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
         let activeRequest = true;
@@ -266,6 +268,7 @@ export default function Resources() {
                 if (!activeRequest) return;
                 setResearchPapers(fetchedPapers.filter((paper) => paper.featured));
                 setAllPresentations(fetchedPresentations);
+                setIsLoaded(true);
             })
             .catch((error: unknown) => {
                 if (!activeRequest) return;
@@ -312,6 +315,18 @@ export default function Resources() {
                 <p className="mx-auto mt-8 max-w-2xl px-4 text-center text-sm text-red-700" role="alert">
                     {loadError}
                 </p>
+            )}
+
+            {isLoaded && !loadError && researchPapers.length === 0 && (
+                <div className="mx-auto mt-10 max-w-xl rounded-lg border border-dashed border-neutral-300 bg-white/60 px-6 py-16 text-center">
+                    <span className="mx-auto grid size-12 place-items-center rounded-lg bg-[#F3F2E8] text-[#716f49]">
+                        <FileText className="size-5" aria-hidden />
+                    </span>
+                    <p className="mt-4 text-sm font-semibold text-neutral-900">No featured research yet</p>
+                    <p className="mt-1 text-xs text-neutral-500">
+                        Featured papers from the lab will appear here once they are published.
+                    </p>
+                </div>
             )}
 
             {/* featured papers marquee (moves left → right) */}
