@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { CalendarClock, CalendarDays, MapPin, Pencil, Plus, Trash2, Video, X } from "lucide-react";
 
 import AdminEmptyState from "@/components/dashboard/admin/AdminEmptyState";
@@ -66,10 +67,21 @@ export default function AvailabilityPanel({
     onDeleteSlot,
 }: AvailabilityPanelProps) {
     const openSlotCount = slots.filter((slot) => slot.active).length;
+    const formRef = useRef<HTMLDivElement>(null);
+
+    // On narrow screens the form sits far above the list, so bring it into view after an edit is requested.
+    const handleEdit = (slot: AvailabilitySlot) => {
+        onEditSlot(slot);
+        requestAnimationFrame(() => {
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            formRef.current?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+            document.getElementById("slot-start")?.focus({ preventScroll: true });
+        });
+    };
 
     return (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
-            <div>
+            <div ref={formRef} className="scroll-mt-24 xl:sticky xl:top-4 xl:self-start">
                 <SectionCard
                     title={editingSlotId ? "Edit availability" : "Add availability"}
                     subtitle={editingSlotId ? "Update this published time and place." : "Publish a time and place for the lab."}
@@ -232,7 +244,7 @@ export default function AvailabilityPanel({
                                                     variant="ghost"
                                                     size="icon"
                                                     disabled={isBusy || isSavingSlot}
-                                                    onClick={() => onEditSlot(slot)}
+                                                    onClick={() => handleEdit(slot)}
                                                     aria-label={`Edit ${slot.name} availability`}
                                                     className="rounded-lg text-[#5E5D50] hover:bg-[#ECEBE4]"
                                                 >

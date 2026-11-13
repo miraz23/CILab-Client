@@ -1,5 +1,6 @@
 "use client";
 
+import ReviewNote from "@/components/dashboard/ReviewNote";
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
@@ -297,10 +298,7 @@ export default function UploadHistory() {
                         <span>{formatDate(upload.created_at)}</span><span>•</span><span>{formatFileSize(upload.file_size)}</span>
                       </div>
                       {upload.review_note && (
-                        <div className="mt-3 rounded-lg border border-[#E1C0C0] bg-[#F6E8E8] px-3 py-2 text-xs text-[#7A4141]">
-                          <span className="font-semibold">Review note:</span>{" "}
-                          {upload.review_note}
-                        </div>
+                        <ReviewNote className="mt-3" note={upload.review_note} status={upload.status} />
                       )}
                     </div>
                     <div className="flex shrink-0 items-center gap-1">

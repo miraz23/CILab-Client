@@ -1,9 +1,11 @@
 "use client";
 
+import ReviewNote from "@/components/dashboard/ReviewNote";
 import { useCallback, useMemo, useState } from "react";
 import {
     CheckCircle,
     Clock,
+    ExternalLink,
     Eye,
     FileText,
     Loader2,
@@ -65,7 +67,7 @@ const CONTENT_TYPE_LABELS: Record<ModerationContentType, string> = {
 
 const DETAIL_FIELDS: Record<
     ModerationContentType,
-    { key: string; label: string; full?: boolean }[]
+    { key: string; label: string; full?: boolean; link?: boolean }[]
 > = {
     paper: [
         { key: "authors_name", label: "Authors" },
@@ -77,7 +79,7 @@ const DETAIL_FIELDS: Record<
         { key: "indexed_in", label: "Indexed in" },
         { key: "publication_date", label: "Publication date" },
         { key: "paper_tags", label: "Research tags" },
-        { key: "paper_url", label: "Publication link" },
+        { key: "paper_url", label: "Publication link", link: true },
         { key: "paper_abstract", label: "Abstract", full: true },
         { key: "is_featured", label: "Featured" },
     ],
@@ -89,7 +91,7 @@ const DETAIL_FIELDS: Record<
         { key: "presentation_category", label: "Presentation category" },
         { key: "presentation_date", label: "Presentation date" },
         { key: "presentation_tags", label: "Presentation tags" },
-        { key: "paper_url", label: "Publication link" },
+        { key: "paper_url", label: "Publication link", link: true },
         { key: "presentation_description", label: "Description", full: true },
     ],
 };
@@ -104,6 +106,16 @@ function formatDate(value: string) {
 
 function isPdf(mimeType: string) {
     return mimeType === "application/pdf";
+}
+
+function isHttpUrl(value: unknown): value is string {
+    if (typeof value !== "string") return false;
+    try {
+        const { protocol } = new URL(value.trim());
+        return protocol === "http:" || protocol === "https:";
+    } catch {
+        return false;
+    }
 }
 
 function formatDetailValue(value: unknown) {
@@ -432,10 +444,6 @@ export default function ContentModeration() {
 
                                                             {statusConfig.label}
                                                         </Badge>
-
-                                                        <Badge className="border border-[#DEDCD3] bg-[#ECEBE4] text-[#5E5D50]">
-                                                            {submission.category}
-                                                        </Badge>
                                                     </div>
 
                                                     <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-[#89877B]">
@@ -483,8 +491,20 @@ export default function ContentModeration() {
                                                                     <dt className="text-[11px] font-medium uppercase tracking-wide text-[#89877B]">
                                                                         {field.label}
                                                                     </dt>
-                                                                    <dd className="mt-1 whitespace-pre-wrap break-words text-sm text-[#3F3E35]">
-                                                                        {formatDetailValue(submission.metadata[field.key])}
+                                                                    <dd className="mt-1 whitespace-pre-wrap wrap-break-word text-sm text-[#3F3E35]">
+                                                                        {field.link && isHttpUrl(submission.metadata[field.key]) ? (
+                                                                            <a
+                                                                                href={(submission.metadata[field.key] as string).trim()}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="inline-flex items-center gap-1.5 font-medium text-[#716F49] underline-offset-2 hover:underline"
+                                                                            >
+                                                                                <span className="break-all">{(submission.metadata[field.key] as string).trim()}</span>
+                                                                                <ExternalLink className="size-3.5 shrink-0" aria-hidden />
+                                                                            </a>
+                                                                        ) : (
+                                                                            formatDetailValue(submission.metadata[field.key])
+                                                                        )}
                                                                     </dd>
                                                                 </div>
                                                             ))}
@@ -492,12 +512,12 @@ export default function ContentModeration() {
                                                     </div>
 
                                                     {submission.reviewNote && (
-                                                        <p className="mt-3 rounded-lg border border-[#DEDCD3] bg-[#FBFAF7] p-3 text-sm text-[#5E5D50]">
-                                                            <span className="font-medium text-[#25251F]">
-                                                                Review note:{" "}
-                                                            </span>
-                                                            {submission.reviewNote}
-                                                        </p>
+                                                        <ReviewNote
+                                                            className="mt-4"
+                                                            note={submission.reviewNote}
+                                                            status={submission.status}
+                                                            reviewedAt={submission.reviewedAt}
+                                                        />
                                                     )}
 
                                                     {isNoteOpen && (

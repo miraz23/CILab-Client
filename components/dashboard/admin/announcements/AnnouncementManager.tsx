@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
     Archive,
     CalendarClock,
@@ -1163,6 +1163,7 @@ function ListPanel({
 export default function AnnouncementManager() {
     const [items, setItems] = useState<Announcement[]>([]);
     const [editing, setEditing] = useState<Announcement | null>(null);
+    const composerRef = useRef<HTMLDivElement>(null);
     const [formKind, setFormKind] = useState<AnnouncementKind>("announcement");
     const [kindFilter, setKindFilter] = useState<AnnouncementKind | "all">("all");
     const [statusFilter, setStatusFilter] = useState<AnnouncementStatus | "all">("all");
@@ -1260,6 +1261,12 @@ export default function AnnouncementManager() {
     const handleEdit = (item: Announcement) => {
         setEditing(item);
         setFormKind(item.kind);
+        // The composer remounts for the edited post; scroll to it once it has rendered.
+        requestAnimationFrame(() => {
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            composerRef.current?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+            document.getElementById(`${item.kind}-title`)?.focus({ preventScroll: true });
+        });
     };
 
     const handleStatusChange = async (
@@ -1351,7 +1358,7 @@ export default function AnnouncementManager() {
                     <AdminStatCards stats={stats} />
 
                     <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-                        <div>
+                        <div ref={composerRef} className="scroll-mt-24">
                             <ComposerCard
                                 key={editing?.id ?? "new"}
                                 kind={formKind}
