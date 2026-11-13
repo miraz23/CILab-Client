@@ -665,26 +665,29 @@ export function DetailModal({ data, onClose }: { data: ModalData | null; onClose
     );
 }
 
-const capitalize = (value?: string) => (value ? value.charAt(0).toUpperCase() + value.slice(1) : undefined);
-
 const toDetails = (rows: [string, string | undefined][]) =>
     rows.flatMap(([label, value]) => (value ? [{ label, value }] : []));
 
 const paperDetails = (p: Paper) =>
     toDetails([
-        ["Type", capitalize(p.type)],
+        ["Publication type", p.type],
+        ["Publication venue", p.venue],
         ["Publisher", p.publisher],
-        ["Published", p.publishedAt ? formatDate(p.publishedAt) : String(p.year)],
-        ["Topic", p.topic],
+        ["Publication date", p.publicationDate ? formatDate(p.publicationDate) : p.publishedAt ? formatDate(p.publishedAt) : String(p.year)],
+        ["Paper category", p.category],
+        ["Paper tags", p.tags?.join(", ")],
+        ["Indexed in", p.indexedIn?.join(", ")],
         ["Access", p.access === "open" ? "Open access" : "Restricted"],
         ["File size", p.fileSizeMb ? `${p.fileSizeMb} MB` : undefined],
     ]);
 
 const presentationDetails = (p: Presentation) =>
     toDetails([
-        ["Type", capitalize(p.type)],
-        ["Date", formatDate(p.date)],
-        ["Topic", p.topic],
+        ["Presentation event", p.type],
+        ["Event name", p.event],
+        ["Presentation date", formatDate(p.date)],
+        ["Presentation category", p.category],
+        ["Presentation tags", p.tags?.join(", ")],
         ["File size", p.fileSizeMb ? `${p.fileSizeMb} MB` : undefined],
     ]);
 

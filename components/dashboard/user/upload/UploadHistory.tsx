@@ -36,7 +36,8 @@ interface UploadItem {
   cloudinary_url: string;
   status: UploadStatus;
   review_note?: string;
-  file_size: number;
+  /** The API returns this as a numeric string. */
+  file_size: number | string;
   created_at: string;
   is_owner: boolean;
 }
@@ -139,7 +140,7 @@ export default function UploadHistory() {
   const formatDate = (date: string) => new Date(date).toLocaleDateString("en-US", {
     year: "numeric", month: "short", day: "numeric",
   });
-  const formatFileSize = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  const formatFileSize = (bytes: number | string) => `${(Number(bytes) / (1024 * 1024)).toFixed(1)} MB`;
 
   const openEditor = (upload: UploadItem) => {
     const metadata = upload.metadata ?? {};
@@ -282,7 +283,7 @@ export default function UploadHistory() {
           <div className="space-y-2">
             {filteredUploads.map((upload) => {
               const isPaper = upload.upload_type === "paper";
-              const category = isPaper ? upload.metadata?.category : upload.metadata?.presentationType;
+              const category = metadataText(upload.metadata?.[isPaper ? "paper_category" : "presentation_category"]);
               const Icon = isPaper ? FileText : Presentation;
               return (
                 <div key={upload.id} className="rounded-lg border border-[#D9D8CD] bg-[#F7F6F1] px-4 py-4">
