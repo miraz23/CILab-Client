@@ -36,6 +36,7 @@ const LINK_GROUPS = [
             { label: "Introduction", href: "/#introduction" },
             { label: "Members", href: "/about-us/members" },
             { label: "Contact information", href: "/about-us/contact-information" },
+            { label: "Building Team", href: "/about-us/building-team" }
         ],
     },
     {

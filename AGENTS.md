@@ -4,7 +4,7 @@
 This version has breaking changes - APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# CILab Client (Computational Intelligence Lab)
+# Computational Intelligence Lab Client (Computational Intelligence Lab)
 
 Next.js 16.2.4 (App Router) + React 19.2.4 + Tailwind v4 + shadcn-style UI on `@base-ui/react` primitives. Single-page marketing site with auth. No tests, no CI.
 

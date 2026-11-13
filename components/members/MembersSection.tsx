@@ -174,7 +174,7 @@ export default function MembersSection({ members }: { members: Member[] }) {
                         transition={{ duration: 0.7, delay: 0.16, ease }}
                         className="mx-auto mt-4 max-w-3xl text-base text-neutral-600 sm:text-lg"
                     >
-                        The researchers, students and collaborators who make CILab a community for computational
+                        The researchers, students and collaborators who make Computational Intelligence Lab a community for computational
                         intelligence research.
                     </motion.p>
                 </div>
@@ -187,7 +187,7 @@ export default function MembersSection({ members }: { members: Member[] }) {
                             </span>
                             <p className="mt-4 text-sm font-semibold text-neutral-900">No members to display yet</p>
                             <p className="mt-1 text-xs text-neutral-500">
-                                The CILab member directory will appear here soon.
+                                The Computational Intelligence Lab member directory will appear here soon.
                             </p>
                         </div>
                     ) : (

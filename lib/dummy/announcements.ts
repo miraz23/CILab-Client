@@ -4,7 +4,7 @@
 
 import type { Announcement } from "@/lib/types/admin/announcement";
 
-const author = { name: "CILab Admin" };
+const author = { name: "Computational Intelligence Lab Admin" };
 
 export const DUMMY_ANNOUNCEMENTS = [
     /* ------------------------------ conferences ------------------------------ */

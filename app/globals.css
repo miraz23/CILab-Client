@@ -187,7 +187,7 @@
   }
 }
 
-/* ── SweetAlert2 · CILab theme ───────────────────────────────────────────────
+/* ── SweetAlert2 · Computational Intelligence Lab theme ───────────────────────────────────────────────
    sweetalert2 injects its <style> at runtime (after this file), so selectors
    repeat the built-in class to win on specificity. Popup background, text
    colour and backdrop are set inline from lib/confirm.ts. */

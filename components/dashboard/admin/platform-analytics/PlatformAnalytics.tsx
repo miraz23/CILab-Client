@@ -82,43 +82,6 @@ export default function PlatformAnalytics() {
         icon: METRIC_ICONS[metric.id] ?? Activity,
     }));
 
-    const directoryStats: AdminStat[] = stats
-        ? [
-            {
-                id: "total-users",
-                label: "Total Users",
-                value: stats.totalUsers,
-                hint: "Registered on the platform",
-                accent: "#716F49",
-                icon: Users,
-            },
-            {
-                id: "active-users",
-                label: "Active Users",
-                value: stats.activeUsers,
-                hint: "Signed in during the last 30 days",
-                accent: "#4F8A63",
-                icon: CheckCircle,
-            },
-            {
-                id: "pending-users",
-                label: "Pending Approval",
-                value: stats.pendingUsers,
-                hint: "Waiting on an admin decision",
-                accent: "#C58A3A",
-                icon: Clock,
-            },
-            {
-                id: "suspended-users",
-                label: "Suspended",
-                value: stats.suspendedUsers,
-                hint: "Access temporarily withdrawn",
-                accent: "#B85C55",
-                icon: XCircle,
-            },
-        ]
-        : [];
-
     const maxRoleCount = Math.max(
         1,
         ...(stats?.roleBreakdown ?? []).map((entry) => entry.users)
@@ -143,8 +106,12 @@ export default function PlatformAnalytics() {
                 />
             ) : (
                 <>
-                    <AdminStatCards stats={directoryStats} />
-
+                    {metrics.length > 0 && (
+                        <div>
+                            <AdminStatCards stats={metrics} />
+                        </div>
+                    )}
+                    
                     <Card className="overflow-hidden rounded-lg border border-white/60 bg-[#F4F3EE]/95 backdrop-blur-xl">
                         <CardContent className="p-5">
                             <div className="flex flex-wrap items-end justify-between gap-3">
@@ -396,16 +363,6 @@ export default function PlatformAnalytics() {
                             </Card>
                         </div>
                     </div>
-
-                    {metrics.length > 0 && (
-                        <div>
-                            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">
-                                Content Totals
-                            </p>
-
-                            <AdminStatCards stats={metrics} />
-                        </div>
-                    )}
                 </>
             )}
         </div>

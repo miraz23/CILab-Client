@@ -285,8 +285,8 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                                     "Add your role and institution below"}
                             </p>
                             <div className="mt-3 flex flex-wrap items-center gap-2">
-                                <span className="rounded-full border border-[#D8D5C9] bg-[#ECEBE4] px-2.5 py-1 text-xs font-medium text-[#5E5D50]">
-                                    Account role: {initialData.appRole === "ADMIN" ? "Admin" : initialData.appRole === "MEMBER" ? "Member" : "User"}
+                                <span className="rounded-lg border border-[#D8D5C9] bg-[#ECEBE4] px-2.5 py-1 text-xs font-medium text-[#5E5D50]">
+                                    {initialData.appRole === "ADMIN" ? "ADMIN" : initialData.appRole === "MEMBER" ? "MEMBER" : "USER"}
                                 </span>
                                 {initialData.appRole === "USER" && (
                                     <Button

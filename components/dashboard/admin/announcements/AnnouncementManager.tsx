@@ -725,8 +725,8 @@ function ComposerCard({
                             type="text"
                             placeholder={
                                 kind === "seminar"
-                                    ? "e.g. CILab Seminar Room, Block B"
-                                    : "e.g. CILab Auditorium, Block B"
+                                    ? "e.g. Computational Intelligence Lab Seminar Room, Block B"
+                                    : "e.g. Computational Intelligence Lab Auditorium, Block B"
                             }
                             value={formData.venue}
                             onChange={(event) => handleChange("venue", event.target.value)}

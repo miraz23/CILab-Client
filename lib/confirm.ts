@@ -2,7 +2,7 @@ import Swal from "sweetalert2";
 import type { SweetAlertIcon } from "sweetalert2";
 
 /**
- * Shared SweetAlert2 helpers themed to the CILab palette.
+ * Shared SweetAlert2 helpers themed to the Computational Intelligence Lab palette.
  * Styles live in `app/globals.css` (see the "SweetAlert2" section).
  */
 
