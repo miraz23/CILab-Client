@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "react-toastify";
 import ReviewNote from "@/components/dashboard/ReviewNote";
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
@@ -238,10 +239,13 @@ export default function UploadHistory() {
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.message ?? "Unable to update this upload.");
       setUploads((current) => current.map((upload) => upload.id === editing.id ? data.upload : upload));
+      toast.success(editing.replacementFile ? "File replaced successfully." : "Upload updated successfully.");
       setEditing(null);
       window.dispatchEvent(new Event("uploads:changed"));
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Unable to update this upload.");
+      const message = error instanceof Error ? error.message : "Unable to update this upload.";
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
@@ -287,28 +291,28 @@ export default function UploadHistory() {
               const Icon = isPaper ? FileText : Presentation;
               return (
                 <div key={upload.id} className="rounded-lg border border-[#D9D8CD] bg-[#F7F6F1] px-4 py-4">
-                  <div className="flex items-start gap-3">
+                  <div className="flex flex-wrap items-start gap-3 sm:flex-nowrap">
                     <Icon className="mt-0.5 h-5 w-5 shrink-0 text-[#656748]" />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <p className="truncate pr-2 text-sm font-semibold text-[#292D25]">{upload.title}</p>
-                        {getStatusBadge(upload.status)}
+                        <p>{getStatusBadge(upload.status)}</p>
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#7B7D72]">
                         <span>{category || (isPaper ? "Paper" : "Presentation")}</span><span>•</span>
                         <span>{formatDate(upload.created_at)}</span><span>•</span><span>{formatFileSize(upload.file_size)}</span>
                       </div>
-                      {upload.review_note && (
-                        <ReviewNote className="mt-3" note={upload.review_note} status={upload.status} />
-                      )}
                     </div>
-                    <div className="flex shrink-0 items-center gap-1">
+                    <div className="flex w-full shrink-0 items-center justify-end gap-1 border-t border-[#E4E3D9] pt-2 sm:w-auto sm:border-0 sm:pt-0">
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-[#737568]" onClick={() => handleFileAction(upload, "preview")} title={upload.upload_type === "presentation" && upload.mime_type !== "application/pdf" ? "Download" : "Preview"}><Eye className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-[#737568]" onClick={() => handleFileAction(upload, "download")} title="Download"><Download className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-[#737568]" onClick={() => openEditor(upload)} title="Edit"><Pencil className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-[#9A6B6B]" onClick={() => handleDelete(upload.id)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </div>
+                  {upload.review_note && (
+                    <ReviewNote className="mt-3" note={upload.review_note} status={upload.status} />
+                  )}
                 </div>
               );
             })}

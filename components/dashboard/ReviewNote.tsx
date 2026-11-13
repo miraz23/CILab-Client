@@ -54,8 +54,8 @@ export default function ReviewNote({ note, status, reviewedAt, className }: Revi
             )}
         >
             <span aria-hidden className={cn("")} />
-            <div className="flex items-start gap-3 py-3.5 pl-5 pr-4">
-                <span className={cn("mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg", tone.iconWrap)}>
+            <div className="flex items-start gap-2.5 px-3 py-3 sm:gap-3 sm:py-3.5 sm:pl-5 sm:pr-4">
+                <span className={cn("mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg sm:size-8", tone.iconWrap)}>
                     <Icon className="size-4" aria-hidden />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -69,7 +69,7 @@ export default function ReviewNote({ note, status, reviewedAt, className }: Revi
                             {date && ` · ${date}`}
                         </p>
                     </div>
-                    <p className="mt-1.5 whitespace-pre-wrap wrap-break-word text-sm leading-6 text-[#3F3E35]">
+                    <p className="mt-1.5 whitespace-pre-wrap break-words text-[13px] leading-5 text-[#3F3E35] sm:text-sm sm:leading-6">
                         {note}
                     </p>
                 </div>

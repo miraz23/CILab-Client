@@ -9,6 +9,7 @@ import { ReceivedRequestsSkeleton } from "@/components/dashboard/skeleton-loader
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import { cn } from "@/lib/utils";
 import { QRCodeSVG as QRCode } from "qrcode.react";
+import { toast } from "react-toastify";
 import {
     fetchReceivedRequests,
     uploadReceivedPaper,
@@ -138,6 +139,7 @@ export default function ReceivedRequests() {
         if (!file) return;
         setErrorMessage("");
         setUploadingRequestId(requestId);
+        const isReplacement = Boolean(requests.find((request) => request.id === requestId)?.paper);
         try {
             const result = await uploadReceivedPaper(requestId, file);
             setRequests((current) =>
@@ -145,8 +147,13 @@ export default function ReceivedRequests() {
                     ? { ...request, paper: result.paper, status: result.status }
                     : request)
             );
+            toast.success(isReplacement ? "Paper replaced successfully." : "Paper uploaded successfully.");
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : "Unable to upload the requested paper.");
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : `Unable to ${isReplacement ? "replace" : "upload"} the requested paper.`
+            );
         } finally {
             setUploadingRequestId(null);
         }
