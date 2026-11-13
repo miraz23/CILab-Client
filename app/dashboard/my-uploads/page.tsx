@@ -9,7 +9,7 @@ export default function MyPapersPage() {
     <section className="mx-auto w-[95%] py-5">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">My Papers</h1>
+          <h1 className="text-2xl font-bold text-white">My Uploads</h1>
           <p className="mt-1 text-white/80">View and manage your uploaded papers and presentations.</p>
         </div>
         <Button

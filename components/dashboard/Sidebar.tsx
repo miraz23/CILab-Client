@@ -9,8 +9,6 @@ import {
     FileText,
     Gauge,
     Home,
-    Inbox,
-    LayoutDashboard,
     Megaphone,
     Upload,
     User,
@@ -20,16 +18,19 @@ import {
     PanelLeftOpen,
     LogOut,
     ShieldCheck,
+    FileUp,
+    Inbox,
+    Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AUTH_CHANGED_EVENT, clearSession, getStoredUser } from "@/lib/auth/session";
-import { CollapsibleNavGroup, MobileNavSheet } from "@/components/dashboard/SidebarNavParts";
+import { MobileNavSheet } from "@/components/dashboard/SidebarNavParts";
 
 const NAV_ITEMS = [
     { label: "Home", href: "/", icon: Home, shortLabel: "Home" },
     { label: "Profile", href: "/dashboard/profile", icon: User, shortLabel: "Profile" },
-    { label: "Upload Paper & Presentation", href: "/dashboard/upload", icon: Upload, shortLabel: "Upload" },
-    { label: "My Papers", href: "/dashboard/my-papers", icon: FileText, shortLabel: "My Papers" },
+    { label: "Upload Paper & Presentation", href: "/dashboard/upload", icon: FileUp, shortLabel: "Upload" },
+    { label: "My Uploads", href: "/dashboard/my-uploads", icon: Upload, shortLabel: "My Uploads" },
 ];
 
 // const PROFILE_ITEM = { label: "Profile", href: "/dashboard/profile", icon: User };
@@ -57,8 +58,9 @@ const PAPER_ACCESS_LABEL = "Paper Access";
 const PAPER_ACCESS_SHORT_LABEL = "Access";
 
 const PAPER_ACCESS_ITEMS = [
-    { label: "Access Requests", href: "/dashboard/paper-access/access-requests" },
-    { label: "Received Requests", href: "/dashboard/paper-access/received-requests" },
+    { label: "Access Requests", href: "/dashboard/paper-access/access-requests", icon: FolderOpen },
+    { label: "Received Requests", href: "/dashboard/paper-access/received-requests", icon: Inbox },
+    { label: "Sent Access Requests", href: "/dashboard/paper-access/sent-requests", icon: Send },
 ];
 
 const ADMIN_NAV_LABEL = "Admin";
@@ -77,7 +79,6 @@ const ADMIN_NAV_ITEMS = [
 export default function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
-    const [paperAccessOpen, setPaperAccessOpen] = useState(true);
     const [appRole, setAppRole] = useState<string | null>(null);
     const [mobileSheet, setMobileSheet] = useState<null | "paper-access" | "admin">(null);
 
@@ -102,10 +103,6 @@ export default function Sidebar() {
     const visibleNavItems = canManageUploads
         ? NAV_ITEMS
         : NAV_ITEMS.filter((item) => item.href !== "/dashboard/upload" && item.href !== "/dashboard/my-papers");
-
-    const expandIfCollapsed = () => {
-        if (collapsed) setCollapsed(false);
-    };
 
     const handleLogout = () => {
         clearSession();
@@ -175,18 +172,26 @@ export default function Sidebar() {
                         );
                     })}
 
-                    <CollapsibleNavGroup
-                        label={PAPER_ACCESS_LABEL}
-                        icon={FolderOpen}
-                        items={visiblePaperAccessItems}
-                        open={paperAccessOpen}
-                        onOpenChange={(open) => {
-                            expandIfCollapsed();
-                            setPaperAccessOpen(open);
-                        }}
-                        onNavigate={expandIfCollapsed}
-                        collapsed={collapsed}
-                    />
+                    {visiblePaperAccessItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.href;
+
+                        return (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                className={cn(
+                                    "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium text-white/80 transition-colors duration-150 hover:bg-white/10 hover:text-white",
+                                    collapsed && "justify-center px-2",
+                                    isActive && "bg-white/15 text-white shadow-inner"
+                                )}
+                                title={collapsed ? item.label : undefined}
+                            >
+                                <Icon size={18} aria-hidden />
+                                {!collapsed && item.label}
+                            </Link>
+                        );
+                    })}
 
                     {isAdmin &&
                         ADMIN_NAV_ITEMS.map((item) => {

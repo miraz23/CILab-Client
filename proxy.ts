@@ -14,6 +14,7 @@ const ROLE_PROTECTED_ROUTES: { prefix: string; roles: AppRole[] }[] = [
     { prefix: "/dashboard/upload", roles: ["MEMBER", "ADMIN"] },
     { prefix: "/dashboard/my-papers", roles: ["MEMBER", "ADMIN"] },
     { prefix: "/dashboard/paper-access/received-requests", roles: ["MEMBER", "ADMIN"] },
+    // sent-requests is open to any signed-in user (same as access-requests)
 ];
 
 function matchesPrefix(pathname: string, prefix: string) {

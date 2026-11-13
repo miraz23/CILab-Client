@@ -16,7 +16,7 @@ const CONTACT = {
     address: ["Computational Intelligence Lab", "Computer Science & Engineering, Room no.", "International Islamic University Chittagong, Chittagong, Bangladesh"],
     phone: "+880 1711-199212",
     email: "khalilcse021@gmail.com",
-    hours: ["Saturday – Wednesday", "10:00 am – 5:00 pm"],
+    hours: ["Saturday – Wednesday", "10:00 am – 4:00 pm"],
     // Exact embed URL: Google Maps → Share → Embed a map → Copy HTML → src="..."
     mapEmbedSrc:
         "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3686.199751066927!2d91.72031249999999!3d22.4966875!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30acd10345e7ed67%3A0xd558e3c1af516fe9!2sCSE%20Office%2C%20IIUC!5e0!3m2!1sen!2sbd!4v1793385791393!5m2!1sen!2sbd",

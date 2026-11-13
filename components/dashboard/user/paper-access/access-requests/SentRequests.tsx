@@ -4,7 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 import { CheckCircle, Clock, Download, ExternalLink, Link as LinkIcon, Pencil, RefreshCw, Trash2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
 import { cn } from "@/lib/utils";
 import {
@@ -151,7 +152,7 @@ export default function SentRequests() {
         setErrorMessage("");
     };
 
-    const saveEdit = async (event: React.FormEvent) => {
+    const saveEdit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!editingRequest) return;
         setIsSaving(true);
@@ -181,39 +182,81 @@ export default function SentRequests() {
     };
 
     return (
-        <Card className="overflow-hidden rounded-lg border border-[#D8D5C9] bg-[#F4F3EE]">
-            <CardHeader className="border-b border-[#DEDCD3] px-5 py-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <CardTitle className="text-base font-semibold text-[#25251F]">Sent Access Requests</CardTitle>
-                        <p className="mt-0.5 text-xs text-[#777568]">Track requests you sent to collaborators.</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="flex gap-1 rounded-lg border border-[#D7D4C9] bg-[#E8E7DD] p-1">
-                            {(["all", "pending", "accepted", "declined"] as const).map((value) => (
-                                <button
-                                    key={value}
-                                    type="button"
-                                    onClick={() => setFilter(value)}
-                                    className={cn(
-                                        "rounded-lg px-2.5 py-1 text-xs font-medium",
-                                        filter === value ? "bg-white text-[#716F49] shadow-sm" : "text-[#737568]"
-                                    )}
-                                >
-                                    {value.charAt(0).toUpperCase() + value.slice(1)}
-                                </button>
-                            ))}
-                        </div>
-                        <Button type="button" variant="ghost" size="icon" onClick={refresh} disabled={isLoading} title="Reload sent requests">
-                            <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
-                        </Button>
-                    </div>
+        <div className="w-full space-y-7 pb-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 className="text-xl font-semibold tracking-tight text-white md:text-2xl">
+                        Sent Access Requests
+                    </h1>
+                    <p className="mt-1 text-sm text-white/60">
+                        Track requests you sent to collaborators.
+                    </p>
                 </div>
-            </CardHeader>
+
+                <div className="flex items-center gap-3">
+                    <div
+                        className="flex gap-1 rounded-lg border border-white/10 bg-white/5 p-1 backdrop-blur-md"
+                        role="group"
+                        aria-label="Filter requests"
+                    >
+                        {(["all", "pending", "accepted", "declined"] as const).map((f) => (
+                            <button
+                                key={f}
+                                type="button"
+                                onClick={() => setFilter(f)}
+                                className={cn(
+                                    "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                                    filter === f
+                                        ? "bg-[#F4F3EE] text-[#716F49] shadow-sm"
+                                        : "text-white/70 hover:text-white"
+                                )}
+                            >
+                                {f.charAt(0).toUpperCase() + f.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={refresh}
+                        disabled={isLoading}
+                        aria-busy={isLoading}
+                        className="w-fit gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-white/80 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
+                    >
+                        <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} aria-hidden />
+                        <span className="hidden md:block">Reload</span>
+                    </Button>
+                </div>
+            </div>
+
+        <Card className="overflow-hidden rounded-lg border border-[#D8D5C9] bg-[#F4F3EE]">
             <CardContent className="p-5">
                 {errorMessage && <p className="mb-4 rounded-lg bg-[#FBF0EE] px-3 py-2 text-xs text-[#A45B4B]">{errorMessage}</p>}
                 {isLoading ? (
-                    <p className="py-8 text-center text-sm text-[#777568]">Loading sent requests...</p>
+                    <div className="space-y-3" aria-busy="true" aria-label="Loading sent requests">
+                        {Array.from({ length: 3 }).map((_, index) => (
+                            <div key={index} className="rounded-lg border border-[#D9D8CD] bg-[#FBFAF7] p-4">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                    <div className="min-w-0 flex-1 space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <Skeleton className="h-4 w-48" />
+                                            <Skeleton className="h-5 w-16 rounded-full" />
+                                        </div>
+                                        <Skeleton className="h-3 w-40" />
+                                        <Skeleton className="h-3 w-56" />
+                                        <Skeleton className="h-4 w-3/4" />
+                                    </div>
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        <Skeleton className="h-8 w-24" />
+                                        <Skeleton className="h-8 w-16" />
+                                        <Skeleton className="h-8 w-20" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 ) : filteredRequests.length === 0 ? (
                     <div className="rounded-lg border border-dashed border-[#CFCFC2] bg-[#FBFAF7] py-10 text-center">
                         <LinkIcon className="mx-auto mb-2 h-5 w-5 text-[#85897F]" />
@@ -320,5 +363,6 @@ export default function SentRequests() {
                 </div>
             )}
         </Card>
+        </div>
     );
 }
