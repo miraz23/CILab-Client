@@ -2,11 +2,11 @@
 
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { toast } from "react-toastify";
 import {
   Presentation,
   Upload,
   CheckCircle,
-  AlertCircle,
   Loader2,
   FileText,
   X,
@@ -34,7 +34,6 @@ export default function UploadPresentationForm() {
     "idle" | "success" | "error"
   >("idle");
 
-  const [errorMessage, setErrorMessage] = useState("");
 
   const allowedMimeTypes = [
     "application/pdf",
@@ -49,10 +48,9 @@ export default function UploadPresentationForm() {
 
     if (allowedMimeTypes.includes(uploadedFile.type)) {
       setFile(uploadedFile);
-      setErrorMessage("");
       setUploadStatus("idle");
     } else {
-      setErrorMessage(
+      toast.error(
         "Only PDF, PPT, or PPTX files are allowed."
       );
       setFile(null);
@@ -79,7 +77,6 @@ export default function UploadPresentationForm() {
 
   const removeFile = () => {
     setFile(null);
-    setErrorMessage("");
     setUploadStatus("idle");
   };
 
@@ -87,17 +84,17 @@ export default function UploadPresentationForm() {
     e.preventDefault();
 
     if (!file) {
-      setErrorMessage("Please select a presentation file.");
+      toast.error("Please select a presentation file.");
       return;
     }
 
     if (!title.trim()) {
-      setErrorMessage("Presentation title is required.");
+      toast.error("Presentation title is required.");
       return;
     }
 
     if (!type) {
-      setErrorMessage("Please select a presentation type.");
+      toast.error("Please select a presentation type.");
       return;
     }
 
@@ -107,7 +104,7 @@ export default function UploadPresentationForm() {
       try {
         new URL(trimmedPublicationLink);
       } catch {
-        setErrorMessage(
+        toast.error(
           "Please enter a valid publication link, e.g. https://doi.org/10.1000/xyz123."
         );
         return;
@@ -116,7 +113,6 @@ export default function UploadPresentationForm() {
 
     setIsUploading(true);
     setUploadStatus("idle");
-    setErrorMessage("");
 
     try {
       const formData = new FormData();
@@ -152,6 +148,7 @@ export default function UploadPresentationForm() {
       }
 
       setUploadStatus("success");
+      toast.success("Presentation uploaded successfully.");
 
       setTitle("");
       setEvent("");
@@ -166,7 +163,7 @@ export default function UploadPresentationForm() {
       window.dispatchEvent(new Event("uploads:changed"));
     } catch (error) {
       setUploadStatus("error");
-      setErrorMessage(
+      toast.error(
         error instanceof Error ? error.message : "Failed to upload presentation. Please try again."
       );
     } finally {
@@ -235,7 +232,6 @@ export default function UploadPresentationForm() {
                   value={type}
                   onChange={(e) => {
                     setType(e.target.value);
-                    setErrorMessage("");
                   }}
                   placeholder="e.g. Seminar, Thesis, Conference"
                   required
@@ -492,32 +488,6 @@ export default function UploadPresentationForm() {
                 </div>
               )}
             </div>
-
-            {/* Error */}
-            {errorMessage && (
-              <div className="flex items-center gap-2 rounded-lg border border-[#E6C9C6] bg-[#F6E9E7] px-3 py-2 text-xs text-[#A84D47]">
-                <AlertCircle
-                  className="h-4 w-4 shrink-0"
-                  aria-hidden
-                />
-
-                <span>{errorMessage}</span>
-              </div>
-            )}
-
-            {/* Success */}
-            {uploadStatus === "success" && (
-              <div className="flex items-center gap-2 rounded-lg border border-[#C8D9CB] bg-[#EAF1EB] px-3 py-2 text-xs text-[#4F8A63]">
-                <CheckCircle
-                  className="h-4 w-4 shrink-0"
-                  aria-hidden
-                />
-
-                <span>
-                  Presentation uploaded successfully.
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Footer */}

@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useResearch } from "@/lib/hooks/use-research";
 import type { Presentation } from "@/lib/types/research";
+import PresentationCard from "./PresentationCard";
 import {
     DetailModal,
-    ResearchCard,
     ResearchGrid,
     presentationModal,
+    formatDate as formatPresentationDate,
     presentationYear,
     type ModalData,
 } from "./research-shared";
@@ -28,6 +29,7 @@ export default function PresentationsSection({ showHeading = true }: { showHeadi
                 loading={loading}
                 error={error}
                 showHeading={showHeading}
+                layout="landscape"
                 searchPlaceholder="Search title, speaker, event, topic or year…"
                 searchText={(p) =>
                     [p.title, p.speakers.join(" "), p.event, p.location ?? "", p.topic, p.type, presentationYear(p)].join(
@@ -35,17 +37,17 @@ export default function PresentationsSection({ showHeading = true }: { showHeadi
                     )
                 }
                 renderCard={(p, i, tokens) => (
-                    <ResearchCard
+                    <PresentationCard
                         index={i}
                         tokens={tokens}
                         topic={p.topic}
+                        type={p.type}
                         year={presentationYear(p)}
+                        date={formatPresentationDate(p.date)}
                         title={p.title}
-                        byline={`${p.speakers[0]}${p.speakers.length > 1 ? " et al." : ""}`}
-                        meta={p.type}
-                        venue={[p.event, p.location].filter(Boolean).join(" · ")}
-                        abstract={p.description}
-                        summaryLabel="Description"
+                        speakers={`${p.speakers[0]}${p.speakers.length > 1 ? " et al." : ""}`}
+                        event={[p.event, p.location].filter(Boolean).join(" · ")}
+                        description={p.description}
                         shareText={p.videoUrl ?? ""}
                         openLabel={`View details: ${p.title}`}
                         onOpen={() => {

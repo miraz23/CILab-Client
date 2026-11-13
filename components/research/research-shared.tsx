@@ -42,7 +42,7 @@ const tokenize = (q: string) => q.toLowerCase().split(/\s+/).filter(Boolean);
 
 export const presentationYear = (p: Presentation) => Number.parseInt(p.date.slice(0, 4), 10);
 
-const formatDate = (iso: string) => {
+export const formatDate = (iso: string) => {
     const d = new Date(iso.includes("T") ? iso : `${iso}T00:00:00`);
     return Number.isNaN(d.getTime()) ? iso : format(d, "MMM d, yyyy");
 };
@@ -62,7 +62,7 @@ function pageItems(page: number, pages: number): (number | "…")[] {
     return out;
 }
 
-function Highlight({ text, tokens }: { text: string; tokens: string[] }) {
+export function Highlight({ text, tokens }: { text: string; tokens: string[] }) {
     if (tokens.length === 0) return <>{text}</>;
     const re = new RegExp(`(${tokens.map(escapeRe).join("|")})`, "ig");
     return (
@@ -392,6 +392,7 @@ export function ResearchGrid<T extends { id: string }>({
     showHeading = true,
     searchText,
     searchPlaceholder,
+    layout = "portrait",
     renderCard,
 }: {
     id: string;
@@ -406,6 +407,8 @@ export function ResearchGrid<T extends { id: string }>({
     showHeading?: boolean;
     searchText: (item: T) => string;
     searchPlaceholder: string;
+    /** "portrait" = stacked-sheet paper cards, "landscape" = wide slide cards */
+    layout?: "portrait" | "landscape";
     renderCard: (item: T, index: number, tokens: string[]) => ReactNode;
 }) {
     const [query, setQuery] = useState("");
@@ -513,14 +516,18 @@ export function ResearchGrid<T extends { id: string }>({
 
             {/* grid */}
             {loading ? (
-                <ResearchGridSkeleton />
+                <ResearchGridSkeleton variant={layout} />
             ) : filtered.length > 0 ? (
                 <motion.div
                     key={`${current}-${query}`}
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45, ease }}
-                    className="mt-8 grid grid-cols-1 gap-x-16 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                    className={
+                        layout === "landscape"
+                            ? "mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+                            : "mt-8 grid grid-cols-1 gap-x-16 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                    }
                 >
                     {visible.map((item, i) => (
                         <div key={item.id}>{renderCard(item, start + i, tokens)}</div>

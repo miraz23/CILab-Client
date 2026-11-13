@@ -2,10 +2,10 @@
 
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { toast } from "react-toastify";
 import {
   Upload,
   CheckCircle,
-  AlertCircle,
   Loader2,
   X,
 } from "lucide-react";
@@ -35,7 +35,6 @@ export default function UploadPaperForm() {
     "idle" | "success" | "error"
   >("idle");
 
-  const [errorMessage, setErrorMessage] = useState("");
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -44,10 +43,9 @@ export default function UploadPaperForm() {
 
     if (file.type === "application/pdf") {
       setPdfFile(file);
-      setErrorMessage("");
       setUploadStatus("idle");
     } else {
-      setErrorMessage("Only PDF files are allowed.");
+      toast.error("Only PDF files are allowed.");
       setPdfFile(null);
     }
   }, []);
@@ -69,7 +67,6 @@ export default function UploadPaperForm() {
 
   const removeFile = () => {
     setPdfFile(null);
-    setErrorMessage("");
     setUploadStatus("idle");
   };
 
@@ -77,17 +74,17 @@ export default function UploadPaperForm() {
     e.preventDefault();
 
     if (!pdfFile) {
-      setErrorMessage("Please select a PDF file.");
+      toast.error("Please select a PDF file.");
       return;
     }
 
     if (!title.trim()) {
-      setErrorMessage("Paper title is required.");
+      toast.error("Paper title is required.");
       return;
     }
 
     if (!category) {
-      setErrorMessage("Please select a paper category.");
+      toast.error("Please select a paper category.");
       return;
     }
 
@@ -97,7 +94,7 @@ export default function UploadPaperForm() {
       try {
         new URL(trimmedPublicationLink);
       } catch {
-        setErrorMessage(
+        toast.error(
           "Please enter a valid publication link, e.g. https://doi.org/10.1000/xyz123."
         );
         return;
@@ -106,7 +103,6 @@ export default function UploadPaperForm() {
 
     setIsUploading(true);
     setUploadStatus("idle");
-    setErrorMessage("");
 
     try {
       const formData = new FormData();
@@ -144,6 +140,7 @@ export default function UploadPaperForm() {
       }
 
       setUploadStatus("success");
+      toast.success("Research paper uploaded successfully.");
 
       setTitle("");
       setAuthors("");
@@ -161,7 +158,7 @@ export default function UploadPaperForm() {
       window.dispatchEvent(new Event("uploads:changed"));
     } catch (error) {
       setUploadStatus("error");
-      setErrorMessage(
+      toast.error(
         error instanceof Error ? error.message : "Failed to upload paper. Please try again."
       );
     } finally {
@@ -229,7 +226,6 @@ export default function UploadPaperForm() {
                   value={category}
                   onChange={(e) => {
                     setCategory(e.target.value);
-                    setErrorMessage("");
                   }}
                   placeholder="e.g. Machine Learning, Computer Vision"
                   required
@@ -515,34 +511,6 @@ export default function UploadPaperForm() {
                 </div>
               )}
             </div>
-
-            {/* Error */}
-            {errorMessage && (
-              <div
-                className="flex items-center gap-2 rounded-lg border border-[#E6C9C6] bg-[#F6E9E7] px-3 py-2 text-xs text-[#A84D47]"
-              >
-                <AlertCircle
-                  className="h-4 w-4 shrink-0"
-                  aria-hidden
-                />
-
-                <span>{errorMessage}</span>
-              </div>
-            )}
-
-            {/* Success */}
-            {uploadStatus === "success" && (
-              <div className="flex items-center gap-2 rounded-lg border border-[#C8D9CB] bg-[#EAF1EB] px-3 py-2 text-xs text-[#4F8A63]">
-                <CheckCircle
-                  className="h-4 w-4 shrink-0"
-                  aria-hidden
-                />
-
-                <span>
-                  Research paper uploaded successfully.
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Footer */}

@@ -41,16 +41,47 @@ function ResearchCardSkeleton() {
     );
 }
 
+function PresentationCardSkeleton() {
+    return (
+        <div className="overflow-hidden rounded-lg border border-[#D8D5C9] bg-white">
+            <Skeleton className="aspect-video w-full rounded-none" />
+            <div className="space-y-3 p-4">
+                <Skeleton className="h-3 w-2/3" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-4/5" />
+                <div className="flex items-center justify-between border-t border-neutral-100 pt-3">
+                    <Skeleton className="h-6 w-28" />
+                    <div className="flex gap-1.5">
+                        <Skeleton className="size-8 rounded-lg" />
+                        <Skeleton className="h-8 w-14 rounded-lg" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 /** Card grid placeholder that mirrors the real research grid layout. */
-function ResearchGridSkeleton({ count = CARD_COUNT }: { count?: number }) {
+function ResearchGridSkeleton({
+    count,
+    variant = "portrait",
+}: {
+    count?: number;
+    variant?: "portrait" | "landscape";
+}) {
+    const isLandscape = variant === "landscape";
     return (
         <div
             aria-hidden
-            className="mt-8 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            className={
+                isLandscape
+                    ? "mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+                    : "mt-8 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            }
         >
-            {Array.from({ length: count }).map((_, index) => (
-                <ResearchCardSkeleton key={index} />
-            ))}
+            {Array.from({ length: count ?? (isLandscape ? 6 : CARD_COUNT) }).map((_, index) =>
+                isLandscape ? <PresentationCardSkeleton key={index} /> : <ResearchCardSkeleton key={index} />
+            )}
         </div>
     );
 }

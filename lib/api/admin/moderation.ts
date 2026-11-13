@@ -35,8 +35,17 @@ export async function submitModerationDecision(
             body: {
                 decision: payload.decision,
                 note: payload.note,
-                featured: payload.featured,
             },
         }
+    );
+}
+
+export async function setSubmissionFeatured(
+    submissionId: string,
+    featured: boolean
+): Promise<ModerationQueueResponse> {
+    return adminRequest<ModerationQueueResponse>(
+        `/api/admin/moderation/${submissionId}/featured`,
+        { method: "PATCH", body: { featured } }
     );
 }
