@@ -35,7 +35,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import { fetchManagedUsers, updateUserAccess } from "@/lib/api/admin/users";
+import { deleteManagedUser, fetchManagedUsers, updateUserAccess } from "@/lib/api/admin/users";
 import { decideMemberRequest, fetchMemberRequests } from "@/lib/api/admin/member-requests";
 import { confirmAction, type ConfirmOptions } from "@/lib/confirm";
 import { useDashboardLoading } from "@/lib/hooks/use-dashboard-loading";
@@ -220,13 +220,38 @@ export default function UserManagement() {
                     ? `${user.name} is now a ${changes.appRole === "ADMIN" ? "administrator" : changes.appRole === "MEMBER" ? "member" : "user"}.`
                     : changes.status === "active"
                         ? `${user.name} has been reinstated.`
-                        : `${user.name} has been suspended.`
+                        : `${user.name} has been updated.`
             );
         } catch (error) {
             toast.error(
                 error instanceof Error
                     ? error.message
                     : "Unable to update this account."
+            );
+        } finally {
+            setBusyUserId(null);
+        }
+    };
+
+    const removeUser = async (user: ManagedUser) => {
+        const confirmed = await confirmAction({
+            title: `Delete ${user.name}?`,
+            text: `This permanently deletes ${user.name}'s account and their uploads, requests and related records. This cannot be undone.`,
+            confirmText: "Delete",
+            icon: "warning",
+            tone: "danger",
+        });
+        if (!confirmed) return;
+
+        setBusyUserId(user.id);
+
+        try {
+            await deleteManagedUser(user.id);
+            setUsers((current) => current.filter((item) => item.id !== user.id));
+            toast.success(`${user.name} has been deleted.`);
+        } catch (error) {
+            toast.error(
+                error instanceof Error ? error.message : "Unable to delete this account."
             );
         } finally {
             setBusyUserId(null);
@@ -502,29 +527,23 @@ export default function UserManagement() {
 
                                                                 Reinstate
                                                             </Button>
-                                                        ) : (
-                                                            <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                size="sm"
-                                                                disabled={isBusy}
-                                                                onClick={() =>
-                                                                    patchUser(
-                                                                        user,
-                                                                        { status: "suspended" },
-                                                                        { title: "Suspend user?", text: `Suspend ${user.name}? They will lose access immediately.`, confirmText: "Suspend", icon: "warning", tone: "danger" }
-                                                                    )
-                                                                }
-                                                                className="rounded-lg border-[#E4C2BC] text-[#A45B4B] hover:bg-[#FBF0EE]"
-                                                            >
-                                                                <UserX
-                                                                    className="mr-1 h-3.5 w-3.5"
-                                                                    aria-hidden
-                                                                />
+                                                        ) : null}
 
-                                                                Suspend
-                                                            </Button>
-                                                        )}
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            disabled={isBusy}
+                                                            onClick={() => removeUser(user)}
+                                                            className="rounded-lg border-[#E4C2BC] text-[#A45B4B] hover:bg-[#FBF0EE]"
+                                                        >
+                                                            <UserX
+                                                                className="mr-1 h-3.5 w-3.5"
+                                                                aria-hidden
+                                                            />
+
+                                                            Delete
+                                                        </Button>
 
                                                         {user.appRole === "ADMIN" ? (
                                                             <Button

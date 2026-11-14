@@ -12,7 +12,7 @@ import type { AppRole } from "@/lib/types/admin/role";
 const ROLE_PROTECTED_ROUTES: { prefix: string; roles: AppRole[] }[] = [
     { prefix: "/dashboard/admin", roles: ["ADMIN"] },
     { prefix: "/dashboard/upload", roles: ["MEMBER", "ADMIN"] },
-    { prefix: "/dashboard/my-papers", roles: ["MEMBER", "ADMIN"] },
+    { prefix: "/dashboard/my-uploads", roles: ["MEMBER", "ADMIN"] },
     { prefix: "/dashboard/paper-access/received-requests", roles: ["MEMBER", "ADMIN"] },
     // sent-requests is open to any signed-in user (same as access-requests)
 ];

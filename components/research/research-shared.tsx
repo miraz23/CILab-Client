@@ -684,7 +684,6 @@ const paperDetails = (p: Paper) =>
         ["Paper category", p.category],
         ["Paper tags", p.tags?.join(", ")],
         ["Indexed in", p.indexedIn?.join(", ")],
-        ["Access", p.access === "open" ? "Open access" : "Restricted"],
         ["File size", p.fileSizeMb ? `${p.fileSizeMb} MB` : undefined],
     ]);
 

@@ -22,20 +22,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import {
     updateUserProfile,
     type UpdateProfilePayload,
     type UserProfile,
     ProfileApiError,
 } from "@/lib/api/users/profile";
-import { ACADEMIC_ROLES, type AcademicRole } from "@/lib/types/auth/register";
+import { type AcademicRole } from "@/lib/types/auth/register";
 import { toast } from "react-toastify";
 import { updateStoredUser } from "@/lib/auth/session";
 import { submitMemberRequest } from "@/lib/api/member-requests";
@@ -167,7 +159,7 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
 
             if (!data.scholarId?.trim()) newErrors.scholarId = "Enter your Scholar ID.";
             if (!data.institution?.trim()) newErrors.institution = "Enter your institution.";
-            if (!data.role) newErrors.role = "Choose your academic role.";
+            if (!data.role) newErrors.role = "Academic role is required.";
 
             return newErrors;
         },
@@ -178,15 +170,6 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
         (field: keyof UpdateProfilePayload) => (event: ChangeEvent<HTMLInputElement>) => {
             const { value } = event.target;
             setFormData((prev) => ({ ...prev, [field]: value }));
-            setErrors((prev) => ({ ...prev, [field]: undefined }));
-            setIsDirty(true);
-        },
-        []
-    );
-
-    const handleSelectChange = useCallback(
-        (field: keyof UpdateProfilePayload) => (value: string | null) => {
-            setFormData((prev) => ({ ...prev, [field]: value || "" }));
             setErrors((prev) => ({ ...prev, [field]: undefined }));
             setIsDirty(true);
         },
@@ -410,30 +393,18 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                             Academic role
                         </FieldLabel>
                         <div className="relative mt-2">
-                            <GraduationCap className={`${iconClass} z-10`} />
-                            <Select value={formData.role || ""} onValueChange={handleSelectChange("role")}>
-                                <SelectTrigger
-                                    id="role"
-                                    className={`${fieldWithIcon} justify-between [&>span]:truncate`}
-                                    aria-invalid={Boolean(errors.role)}
-                                    aria-describedby={errors.role ? "role-error" : undefined}
-                                >
-                                    <SelectValue placeholder="Select your role" />
-                                </SelectTrigger>
-                                <SelectContent className="max-h-72 border-[#D8D5C9] bg-[#F4F3EE]">
-                                    <SelectGroup>
-                                        {ACADEMIC_ROLES.map((role) => (
-                                            <SelectItem
-                                                key={role}
-                                                value={role}
-                                                className="text-[#2D2D27] focus:bg-[#716F49] focus:text-white"
-                                            >
-                                                {role}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
+                            <GraduationCap className={iconClass} />
+                            <Input
+                                id="role"
+                                type="text"
+                                autoComplete="organization-title"
+                                placeholder="e.g. Undergraduate Student"
+                                value={formData.role ?? ""}
+                                onChange={handleTextChange("role")}
+                                className={fieldWithIcon}
+                                aria-invalid={Boolean(errors.role)}
+                                aria-describedby={errors.role ? "role-error" : undefined}
+                            />
                         </div>
                         <FieldError id="role-error" message={errors.role} />
                     </div>

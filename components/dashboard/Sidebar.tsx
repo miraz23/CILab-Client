@@ -102,7 +102,7 @@ export default function Sidebar() {
         : PAPER_ACCESS_ITEMS.filter((item) => item.href !== "/dashboard/paper-access/received-requests");
     const visibleNavItems = canManageUploads
         ? NAV_ITEMS
-        : NAV_ITEMS.filter((item) => item.href !== "/dashboard/upload" && item.href !== "/dashboard/my-papers");
+        : NAV_ITEMS.filter((item) => item.href !== "/dashboard/upload" && item.href !== "/dashboard/my-uploads");
 
     const handleLogout = () => {
         clearSession();

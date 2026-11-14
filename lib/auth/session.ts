@@ -85,6 +85,23 @@ export function updateStoredUser(patch: Record<string, unknown>) {
     window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
 }
 
+/**
+ * Applies a role change reported by the backend (and the refreshed token that carries it)
+ * to the stored session. Returns true when the role actually changed.
+ */
+export function syncSessionRole(appRole: AppRole, token?: string): boolean {
+    const stored = getStoredUser();
+    const previous = stored && "appRole" in stored ? stored.appRole : undefined;
+    if (token) {
+        localStorage.setItem(AUTH_TOKEN_KEY, token);
+        setCookie(AUTH_TOKEN_COOKIE, token, SESSION_MAX_AGE);
+    }
+    if (previous === appRole && !token) return false;
+    setCookie(AUTH_ROLE_COOKIE, appRole, SESSION_MAX_AGE);
+    updateStoredUser({ appRole });
+    return previous !== appRole;
+}
+
 /** The cookie is what the proxy checks, so it is the source of truth for "logged in". */
 export function hasSessionCookie(): boolean {
     return document.cookie.split("; ").some((c) => c.startsWith(`${AUTH_TOKEN_COOKIE}=`) && c.length > AUTH_TOKEN_COOKIE.length + 1);

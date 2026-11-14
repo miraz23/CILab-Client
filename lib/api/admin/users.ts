@@ -28,6 +28,12 @@ export function updateUserAccess(
     );
 }
 
+export function deleteManagedUser(userId: string): Promise<{ success: boolean }> {
+    return adminRequest<{ success: boolean }>(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+    });
+}
+
 export async function fetchManagedUserById(
     userId: string
 ): Promise<ManagedUser | null> {
