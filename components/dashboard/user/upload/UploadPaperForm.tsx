@@ -105,34 +105,63 @@ export default function UploadPaperForm() {
     setUploadStatus("idle");
 
     try {
-      const formData = new FormData();
+      const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+      const token = localStorage.getItem("token");
+      const authHeaders: Record<string, string> = token
+        ? { Authorization: `Bearer ${token}` }
+        : {};
+      const signatureResponse = await fetch(`${serverUrl}/api/papers/upload/signature`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders },
+        body: JSON.stringify({ filename: pdfFile.name }),
+      });
+      const signatureData = await signatureResponse.json().catch(() => null);
+      if (!signatureResponse.ok) {
+        throw new Error(signatureData?.message ?? "Unable to prepare the upload.");
+      }
 
-      formData.append("paper_file", pdfFile);
-      formData.append("paper_title", title.trim());
-      formData.append("authors_name", authors);
-      formData.append("authors_email", authorsEmail);
-      formData.append("paper_category", category);
-      formData.append("publication_type", publicationType);
-      formData.append("publication_venue", publicationVenue);
-      formData.append("publisher", publisher.trim());
-      formData.append("indexed_in", indexedIn);
-      formData.append("publication_date", publicationDate);
-      formData.append("paper_tags", tags);
-      formData.append("paper_url", trimmedPublicationLink);
-      formData.append("paper_abstract", abstract);
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/papers/upload`,
-        {
-          method: "POST",
-          headers: {
-            ...(localStorage.getItem("token")
-              ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
-              : {}),
-          },
-          body: formData,
-        }
+      const uploadDetails = signatureData.upload;
+      const cloudinaryData = new FormData();
+      cloudinaryData.append("file", pdfFile);
+      cloudinaryData.append("api_key", uploadDetails.apiKey);
+      cloudinaryData.append("timestamp", String(uploadDetails.timestamp));
+      cloudinaryData.append("signature", uploadDetails.signature);
+      cloudinaryData.append("folder", uploadDetails.folder);
+      cloudinaryData.append("public_id", uploadDetails.publicId);
+      const cloudinaryResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${uploadDetails.cloudName}/raw/upload`,
+        { method: "POST", body: cloudinaryData }
       );
+      const cloudinaryUpload = await cloudinaryResponse.json().catch(() => null);
+      if (!cloudinaryResponse.ok) {
+        throw new Error(cloudinaryUpload?.error?.message ?? "Unable to upload the paper file.");
+      }
+
+      const metadata = {
+        cloudinary_public_id: cloudinaryUpload.public_id,
+        cloudinary_url: cloudinaryUpload.secure_url,
+        original_filename: pdfFile.name,
+        mime_type: pdfFile.type,
+        file_size: pdfFile.size,
+        paper_title: title.trim(),
+        authors_name: authors,
+        authors_email: authorsEmail,
+        paper_category: category,
+        publication_type: publicationType,
+        publication_venue: publicationVenue,
+        publisher: publisher.trim(),
+        indexed_in: indexedIn,
+        publication_date: publicationDate,
+        paper_tags: tags,
+        paper_url: trimmedPublicationLink,
+        paper_abstract: abstract,
+      };
+
+      const response = await fetch(`${serverUrl}/api/papers/upload/finalize`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders },
+        body: JSON.stringify(metadata),
+      });
 
       if (!response.ok) {
         const data = await response.json().catch(() => null);
