@@ -43,7 +43,7 @@ const STEPS: Step[] = [
     },
     {
         title: "Start as a registered user",
-        text: "Browse the research archive and request access to specific papers. This is where every account begins.",
+        text: "Browse the research archive and ask members for papers you can't open, such as those on IEEE or Springer. This is where every account begins.",
         icon: Search,
     },
     {
@@ -66,14 +66,14 @@ const STEPS: Step[] = [
 
 const USER_CAN = [
     { icon: Search, text: "Browse papers and presentations" },
-    { icon: Send, text: "Request access to a specific paper" },
-    { icon: Lock, text: "Open private links shared with you" },
+    { icon: Send, text: "Send a paper's link to members and request a copy" },
+    { icon: Lock, text: "Receive the files members upload for you" },
 ];
 
 const MEMBER_CAN = [
     { icon: Check, text: "Everything a registered user can do" },
     { icon: FileUp, text: "Upload papers and presentations and manage your uploads" },
-    { icon: Inbox, text: "Receive access requests and share papers with other researchers" },
+    { icon: Inbox, text: "Receive paper requests, download the papers and upload them to the requesters" },
     { icon: Users, text: "Be listed in the lab's Members directory" },
 ];
 

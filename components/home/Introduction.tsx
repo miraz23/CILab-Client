@@ -43,8 +43,8 @@ const FEATURES: {
     },
     {
         icon: LockKeyhole,
-        title: "Controlled Paper Access",
-        text: "Restricted papers keep their abstract public. Request the full text and authors can grant a private, expiring share link.",
+        title: "Request Any Paper",
+        text: "Can't open a paper on IEEE, Springer or another publisher? Send its link to the lab's members. A member with access downloads it and shares the file with you.",
         href: "/auth/register",
         cta: "Create an account",
     },
@@ -83,7 +83,7 @@ const GRADIENTS = [
 
 const STEPS = [
     { n: "01", title: "Explore", text: "Search the archive freely - no account needed." },
-    { n: "02", title: "Connect", text: "Register to request restricted papers and reach authors." },
+    { n: "02", title: "Connect", text: "Register, then send a paper's link to members who can access it." },
     { n: "03", title: "Contribute", text: "Upload your own work and share it with the community." },
 ];
 

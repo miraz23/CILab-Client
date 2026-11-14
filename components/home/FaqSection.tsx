@@ -24,52 +24,27 @@ const FAQ_ITEMS = [
     {
         question: "Do I need an account to browse the archive?",
         answer:
-            "No. Approved papers and presentations can be browsed and searched without signing in. An account is needed to request a specific paper from its holder, track your requests and keep a profile. Uploading your own work is for lab members.",
+            "No. Approved papers and presentations can be browsed and searched without signing in. An account is needed to request papers from members, track your requests and keep a profile.",
     },
     {
-        question: "How do I request a specific paper?",
+        question: "How do I get a paper I can't open on IEEE or Springer?",
         answer:
-            "Sign in, open Paper Access and choose Access Requests. Add the link to the paper, pick the people you are asking, write a short message and set an optional expiry date. Recipients are notified and can respond by uploading the paper for you.",
+            "Publisher papers can usually be downloaded only by members with access. Sign in, open Paper Access and choose Access Requests, then add the paper's link, pick the members you are asking and write a short message. A member who has access downloads the paper and uploads it to you. Track every request under Sent Access Requests.",
     },
     {
-        question: "How do I follow up on the requests I sent?",
+        question: "How do I become a member, and what can members do?",
         answer:
-            "Open Sent Access Requests under Paper Access. Every request shows its recipients and whether it is pending, accepted or declined. Pending requests can be edited or deleted, and an accepted one gives you the link to open or the paper to download.",
-    },
-    {
-        question: "How do I become a member of the lab?",
-        answer:
-            "Create an account with your name, email, institution, academic role and Google Scholar ID, then verify your email. From your Profile, press Join as member. A lab administrator reviews the request; if it is declined you can request again later. The Join page walks through every step.",
-    },
-    {
-        question: "What can members do that other users cannot?",
-        answer:
-            "Members can upload papers and presentations and manage them under My Uploads, receive access requests from other researchers and answer them by uploading the requested paper, and appear in the Members directory. Registered users who are not members can browse the archive and send requests.",
+            "Create an account, verify your email, then press Join as member on your Profile. A lab administrator reviews the request. Members can upload papers and presentations, answer paper requests by uploading the requested file, and appear in the Members directory. The Join page walks through every step.",
     },
     {
         question: "How do I get my own paper or talk listed?",
         answer:
-            "As a member, open Upload in your dashboard and submit a paper or a presentation with its details. An administrator reviews it before it appears publicly, and any review note is shown next to the upload in My Uploads. You can edit the details or replace the file there at any time.",
-    },
-    {
-        question: "How does a paper become featured?",
-        answer:
-            "Featured papers are the ones highlighted on the home page. Only an administrator can feature a paper, and only after it has been approved. Rejected papers are always unfeatured.",
+            "As a member, open Upload in your dashboard and submit a paper or a presentation with its details. An administrator reviews it before it appears publicly, and any review note is shown next to the upload in My Uploads.",
     },
     {
         question: "When does the lab meet, and can I attend?",
         answer:
-            "The weekly availability board on the Schedule page lists every slot with its day, time, mode (in person or online) and place. Open a day to see the full details, and check News for open seminars and announcements that guests are welcome to join.",
-    },
-    {
-        question: "Where do I find slides of past talks?",
-        answer:
-            "The Presentations archive lists every approved talk we have given - conferences, seminars, thesis proposals and more - with its event, date, category and slides, and a link to the related publication when one was provided.",
-    },
-    {
-        question: "Can I collaborate with the lab, and who built this platform?",
-        answer:
-            "Yes. We work with students, faculty and industry researchers on shared problems, joint publications and funded projects; tell us what you are working on through the contact page. The platform itself was designed and built by the team introduced on the Building Team page.",
+            "The weekly availability board on the Schedule page lists every slot with its day, time, mode (in person or online) and place. Check News for open seminars and announcements that guests are welcome to join.",
     },
 ];
 

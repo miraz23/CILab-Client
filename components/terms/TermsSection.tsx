@@ -77,14 +77,14 @@ const SECTIONS: TermsBlock[] = [
     {
         id: "restricted",
         icon: LockKeyhole,
-        title: "Restricted papers & access links",
+        title: "Paper requests",
         intro:
-            "Some papers are locked, for example because of a publisher embargo. Their title, authors and abstract stay public; the full text does not.",
+            "Many papers on publisher sites such as IEEE and Springer can be downloaded only by members with institutional or paid access. Regular users can ask a member for a copy.",
         points: [
-            "Full text of a restricted paper is shared only when its authors approve your request, through a private link tied to your account.",
-            "Share links are personal and expire or can be revoked at any time. Do not forward, republish or redistribute them or the files behind them.",
-            "Access is granted for your own reading and research. Authors may decline a request without giving a reason.",
-            "Misusing a link, or sharing restricted material, can lead to loss of access and removal of your account.",
+            "To request a paper, send its publisher link to one or more members through the platform. A member who has access may download it and upload the file back to you.",
+            "Members decide whether to fulfil a request and may decline without giving a reason.",
+            "Files you receive are for your own reading and research. Do not republish or redistribute them, and respect the publisher's copyright and licence terms.",
+            "Members should share a paper only where their access and the publisher's terms allow it. Misuse can lead to loss of access and removal of your account.",
         ],
     },
     {
@@ -150,7 +150,7 @@ const SECTIONS: TermsBlock[] = [
 const HIGHLIGHTS = [
     { icon: BookOpenCheck, title: "Open to read", text: "The archive needs no account." },
     { icon: FileCheck2, title: "Reviewed uploads", text: "Admins check every submission." },
-    { icon: LockKeyhole, title: "Private links", text: "Restricted papers stay personal." },
+    { icon: LockKeyhole, title: "Paper requests", text: "Ask members for papers you can't open." },
 ];
 
 /* -------------------------------------------------------------------------- */

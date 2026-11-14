@@ -47,7 +47,7 @@ const SECTIONS: PolicyBlock[] = [
             "The Computational Intelligence Lab publishes research openly, so we keep what we collect about people to a minimum.",
         points: [
             "Visitors can read the paper and presentation archive, news and schedule without an account and without giving us any personal details.",
-            "We only ask for personal information when you register, upload work, request a restricted paper or contact the lab.",
+            "We only ask for personal information when you register, upload work, request a paper or contact the lab.",
             "We do not sell your data or use it for advertising.",
         ],
     },
@@ -69,7 +69,7 @@ const SECTIONS: PolicyBlock[] = [
         points: [
             "To create and secure your account and keep you signed in.",
             "To list approved papers and talks, credit their authors and let people find them by keyword, author or topic.",
-            "To route access requests between researchers and let authors grant private, expiring share links to restricted papers.",
+            "To route paper requests from users to members and deliver the files members upload in response.",
             "To let lab admins review submissions, manage accounts and keep the archive accurate.",
             "To understand how the platform is used, for example overall visits and uploads, so we can improve it.",
             "To reply to your enquiries and send essential account or service messages.",
@@ -82,8 +82,8 @@ const SECTIONS: PolicyBlock[] = [
         intro: "Some information is visible to others by design, because it is part of publishing research.",
         points: [
             "Approved papers and presentations show their title, authors, affiliations, abstract and related metadata to everyone.",
-            "Restricted papers keep their abstract public, but the full text is visible only to people the authors approve.",
-            "Your email and other account details are not shown publicly. A paper author's name appears with their work, and an access request is visible to the author you ask and to lab admins.",
+            "Files delivered in answer to a paper request are visible only to the person who requested them, the member who sent them and lab admins.",
+            "Your email and other account details are not shown publicly. A paper author's name appears with their work, and a paper request is visible to the members you send it to and to lab admins.",
         ],
     },
     {
@@ -91,7 +91,7 @@ const SECTIONS: PolicyBlock[] = [
         icon: Handshake,
         title: "Who we share it with",
         points: [
-            "Paper authors see the name, institution and request message of people who ask for access to their restricted papers.",
+            "Members you send a paper request to see your name, institution, the paper link and your message.",
             "Lab admins can view account, upload and request information so they can moderate the platform.",
             "Service providers that host the website and its backend process data on our behalf, only to run the platform.",
             "We may disclose information when the law requires it or to protect the platform and its users from abuse.",
@@ -114,7 +114,7 @@ const SECTIONS: PolicyBlock[] = [
         title: "Security & retention",
         points: [
             "Account and content data are processed by our backend server, and sign-in cookies are scoped to this site.",
-            "Restricted-paper share links are personal to your account and expire or can be revoked by the author.",
+            "Files delivered for a paper request are tied to your account and are not listed in the public archive.",
             "We keep account information while your account is active and content while it remains in the archive. Rejected or deleted submissions are removed from public view.",
             "No system is perfectly secure. Choose a strong, unique password and tell us promptly if you suspect misuse.",
         ],
