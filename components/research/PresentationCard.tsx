@@ -2,7 +2,7 @@
 
 import { useState, type MouseEvent } from "react";
 import { motion } from "motion/react";
-import { CalendarDays, Check, MapPin, Mic2, Presentation as PresentationIcon, Share2 } from "lucide-react";
+import { CalendarDays, Check, MapPin, Mic2, Presentation as PresentationIcon, Share2, Tickets } from "lucide-react";
 import { Highlight, ease } from "./research-shared";
 
 // Deep tones so the white slide text always reads clearly.
@@ -115,7 +115,7 @@ export default function PresentationCard({
                     </span>
                     {event && (
                         <span className="inline-flex min-w-0 items-center gap-1.5">
-                            <MapPin className="size-3.5 shrink-0 text-[#716f49]" aria-hidden />
+                            <Tickets className="size-3.5 shrink-0 text-[#716f49]" aria-hidden />
                             <span className="truncate">
                                 <Highlight text={event} tokens={tokens} />
                             </span>

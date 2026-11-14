@@ -139,7 +139,7 @@ const SEARCH_FIELD =
 export default function ContentModeration() {
     const [submissions, setSubmissions] = useState<ModerationSubmission[]>([]);
     const [contentType, setContentType] = useState<ModerationContentType | "all">("all");
-    const [status, setStatus] = useState<ModerationStatus | "all">("pending");
+    const [status, setStatus] = useState<ModerationStatus | "all">("all");
     const [search, setSearch] = useState("");
     const [openNoteId, setOpenNoteId] = useState<string | null>(null);
     const [note, setNote] = useState("");
@@ -386,10 +386,10 @@ export default function ContentModeration() {
                                 value={status}
                                 onValueChange={setStatus}
                                 options={[
+                                    { value: "all", label: "Any Status" },
                                     { value: "pending", label: "Pending", count: counts.pending },
                                     { value: "approved", label: "Approved", count: counts.approved },
                                     { value: "rejected", label: "Rejected", count: counts.rejected },
-                                    { value: "all", label: "Default" },
                                 ]}
                             />
                         </div>
