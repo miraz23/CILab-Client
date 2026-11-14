@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
                             id="reset-email"
                             type="email"
                             autoComplete="email"
-                            placeholder="khalilcse021@gmail.com"
+                            placeholder="khalil@iiuc.ac.bd"
                             value={email}
                             onChange={(event) => {
                                 setEmail(event.target.value);

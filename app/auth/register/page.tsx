@@ -126,7 +126,7 @@ export default function RegisterForm() {
                     <Input
                         id="email"
                         type="email"
-                        placeholder="khalilcse021@gmail.com"
+                        placeholder="khalil@iiuc.ac.bd"
                         value={formData.email}
                         onChange={handleTextChange("email")}
                         className={`mt-1.5 ${authInputClass}`}

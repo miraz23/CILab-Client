@@ -15,7 +15,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 const CONTACT = {
     address: ["Computational Intelligence Lab", "Computer Science & Engineering, Room no.", "International Islamic University Chittagong, Chittagong, Bangladesh"],
     phone: "+880 1711-199212",
-    email: "khalilcse021@gmail.com",
+    email: "khalil@iiuc.ac.bd",
     hours: ["Saturday – Wednesday", "10:00 am – 4:00 pm"],
     // Exact embed URL: Google Maps → Share → Embed a map → Copy HTML → src="..."
     mapEmbedSrc:
