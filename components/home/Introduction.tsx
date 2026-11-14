@@ -149,19 +149,19 @@ export default function Introduction() {
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-14">
                     {/* Left column - sticky intro + step selector */}
-                    <motion.div {...reveal()} className="lg:sticky lg:top-32 lg:self-start">
+                    <motion.div {...reveal()} className="lg:sticky lg:top-32 lg:self-start text-center lg:text-left">
                         <h2 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
                             One home for the lab&apos;s{" "}
                             <span className="text-[#716f49]">research, people and ideas</span>
                         </h2>
-                        <p className="mt-5 max-w-xl text-base leading-relaxed text-neutral-500 lg:text-lg">
+                        <p className="mt-5 max-w-xl mx-auto text-base leading-relaxed text-neutral-500 lg:text-lg">
                             The Computational Intelligence Lab brings its publications, weekly talks and
                             community together on a single platform - openly browsable for visitors,
                             and a full workspace for the researchers who build it.
                         </p>
 
                         {/* step buttons */}
-                        <div className="mt-8 hidden flex-wrap gap-3 md:flex">
+                        <div className="mt-8 hidden flex-wrap gap-3 lg:flex">
                             {FEATURES.map((feature, index) => (
                                 <motion.button
                                     key={feature.title}
