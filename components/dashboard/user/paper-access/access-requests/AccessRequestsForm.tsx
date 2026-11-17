@@ -245,11 +245,11 @@ export default function AccessRequestsForm() {
                 <div>
                     <div className="flex items-center gap-3">
                         <div>
-                            <h1 className="text-xl font-semibold tracking-tight text-white md:text-2xl">
+                            <h1 className="text-2xl font-bold text-white">
                                 Create Access Request
                             </h1>
 
-                            <p className="mt-1 text-sm text-white/60">
+                            <p className="mt-1 text-white/80">
                                 Share research material securely with collaborators.
                             </p>
                         </div>

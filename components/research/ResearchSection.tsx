@@ -20,7 +20,7 @@ export default function ResearchSection() {
             }
         >
             {/* research papers */}
-            <div className="mt-16">
+            <div className="my-20">
                 <PapersSection />
             </div>
 

@@ -281,7 +281,7 @@ export default function Resources() {
     }, []);
 
     return (
-        <section id="research-papers" className="relative overflow-hidden bg-[#F8FAFC] pt-20">
+        <section id="research-papers" className="relative overflow-hidden bg-[#F8FAFC] py-20">
             {/* marquee keyframes: top row left → right, bottom row right → left, seamless, respects reduced motion */}
             <style>{`
         @keyframes rp-ltr { from { transform: translateX(-50%); } to { transform: translateX(0); } }

@@ -83,7 +83,14 @@ export default function UploadPaperForm() {
       return;
     }
 
-    if (!category) {
+    const requiredFields = [authors, authorsEmail, publicationType, publicationVenue, publisher, indexedIn, publicationDate, tags, publicationLink, abstract];
+
+    if (requiredFields.some((value) => !value.trim())) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (!category.trim()) {
       toast.error("Please select a paper category.");
       return;
     }
@@ -270,10 +277,12 @@ export default function UploadPaperForm() {
                 className="text-xs font-semibold text-[#565D54]"
               >
                 Authors
+                <span className="ml-1 text-[#B85C55]">*</span>
               </Label>
 
               <Input
                 id="authors"
+                required
                 value={authors}
                 onChange={(e) =>
                   setAuthors(e.target.value)
@@ -289,9 +298,11 @@ export default function UploadPaperForm() {
                 className="text-xs font-semibold text-[#565D54]"
               >
                 Author Emails
+                <span className="ml-1 text-[#B85C55]">*</span>
               </Label>
               <Input
                 id="authors-email"
+                required
                 value={authorsEmail}
                 onChange={(e) => setAuthorsEmail(e.target.value)}
                 placeholder="Emails, separated by commas"
@@ -306,9 +317,11 @@ export default function UploadPaperForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Publication Type
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
                 <Input
                   id="publication-type"
+                  required
                   value={publicationType}
                   onChange={(e) => setPublicationType(e.target.value)}
                   placeholder="e.g. journal"
@@ -321,9 +334,11 @@ export default function UploadPaperForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Publication Venue
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
                 <Input
                   id="publication-venue"
+                  required
                   value={publicationVenue}
                   onChange={(e) => setPublicationVenue(e.target.value)}
                   placeholder="Journal or conference name"
@@ -340,10 +355,12 @@ export default function UploadPaperForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Publisher
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
 
                 <Input
                   id="publisher"
+                  required
                   value={publisher}
                   onChange={(e) =>
                     setPublisher(e.target.value)
@@ -359,9 +376,11 @@ export default function UploadPaperForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Indexed In
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
                 <Input
                   id="indexed-in"
+                  required
                   value={indexedIn}
                   onChange={(e) => setIndexedIn(e.target.value)}
                   placeholder="Scopus, Web of Science"
@@ -377,9 +396,11 @@ export default function UploadPaperForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Publication Date
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
                 <Input
                   id="publication-date"
+                  required
                   type="date"
                   value={publicationDate}
                   onChange={(e) => setPublicationDate(e.target.value)}
@@ -394,10 +415,12 @@ export default function UploadPaperForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Research Tags
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
 
                 <Input
                   id="tags"
+                  required
                   value={tags}
                   onChange={(e) =>
                     setTags(e.target.value)
@@ -415,10 +438,12 @@ export default function UploadPaperForm() {
                 className="text-xs font-semibold text-[#565D54]"
               >
                 Publication Link
+                <span className="ml-1 text-[#B85C55]">*</span>
               </Label>
 
               <Input
                 id="publicationLink"
+                required
                 type="url"
                 value={publicationLink}
                 onChange={(e) =>
@@ -436,10 +461,12 @@ export default function UploadPaperForm() {
                 className="text-xs font-semibold text-[#565D54]"
               >
                 Abstract
+                <span className="ml-1 text-[#B85C55]">*</span>
               </Label>
 
               <textarea
                 id="abstract"
+                required
                 value={abstract}
                 onChange={(e) =>
                   setAbstract(e.target.value)

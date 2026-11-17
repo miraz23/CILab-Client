@@ -93,7 +93,14 @@ export default function UploadPresentationForm() {
       return;
     }
 
-    if (!type) {
+    const requiredFields = [event, category, presenterNames, presenterEmails, date, tags, publicationLink, description];
+
+    if (requiredFields.some((value) => !value.trim())) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (!type.trim()) {
       toast.error("Please select a presentation type.");
       return;
     }
@@ -247,10 +254,12 @@ export default function UploadPresentationForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Event name
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
 
                 <Input
                   id="pres-event"
+                  required
                   value={event}
                   onChange={(e) =>
                     setEvent(e.target.value)
@@ -265,9 +274,11 @@ export default function UploadPresentationForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Presentation Category
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
                 <Input
                   id="presentation-category"
+                  required
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="AI, computer vision, robotics"
@@ -283,9 +294,11 @@ export default function UploadPresentationForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Presenter Names
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
                 <Input
                   id="presenter-name"
+                  required
                   value={presenterNames}
                   onChange={(e) => setPresenterNames(e.target.value)}
                   placeholder="Names, separated by commas"
@@ -298,9 +311,11 @@ export default function UploadPresentationForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Presenter Emails
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
                 <Input
                   id="presenter-email"
+                  required
                   value={presenterEmails}
                   onChange={(e) => setPresenterEmails(e.target.value)}
                   placeholder="Emails, separated by commas"
@@ -316,10 +331,12 @@ export default function UploadPresentationForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Presentation Date
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
 
                 <Input
                   id="pres-date"
+                  required
                   type="date"
                   value={date}
                   onChange={(e) =>
@@ -334,9 +351,11 @@ export default function UploadPresentationForm() {
                   className="text-xs font-semibold text-[#565D54]"
                 >
                   Presentation Tags
+                  <span className="ml-1 text-[#B85C55]">*</span>
                 </Label>
                 <Input
                   id="pres-tags"
+                  required
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   placeholder="AI, computer vision, research"
@@ -352,10 +371,12 @@ export default function UploadPresentationForm() {
                 className="text-xs font-semibold text-[#565D54]"
               >
                 Publication Link
+                <span className="ml-1 text-[#B85C55]">*</span>
               </Label>
 
               <Input
                 id="publicationLink"
+                required
                 type="url"
                 value={publicationLink}
                 onChange={(e) =>
@@ -373,10 +394,12 @@ export default function UploadPresentationForm() {
                 className="text-xs font-semibold text-[#565D54]"
               >
                 Description
+                <span className="ml-1 text-[#B85C55]">*</span>
               </Label>
 
               <textarea
                 id="pres-desc"
+                required
                 value={description}
                 onChange={(e) =>
                   setDescription(e.target.value)

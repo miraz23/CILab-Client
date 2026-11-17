@@ -27,8 +27,8 @@ export default function ProfilePage() {
       <div className="w-[95%] mx-auto py-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white font-heading">Profile</h1>
-            <p className="text-white/70 mt-1">Manage your account information and preferences</p>
+            <h1 className="text-2xl font-bold text-white">Profile</h1>
+            <p className="mt-1 text-white/80">Manage your account information and preferences</p>
           </div>
         </div>
 
@@ -50,8 +50,8 @@ export default function ProfilePage() {
     <div className="w-[95%] mx-auto py-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white font-heading">Profile</h1>
-          <p className="text-white/70 mt-1">Manage your account information and preferences</p>
+          <h1 className="text-2xl font-bold text-white">Profile</h1>
+          <p className="mt-1 text-white/80">Manage your account information and preferences</p>
         </div>
       </div>
 

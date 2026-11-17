@@ -163,10 +163,10 @@ export default function ReceivedRequests() {
         <div className="w-full space-y-7 pb-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-xl font-semibold tracking-tight text-white md:text-2xl">
+                    <h1 className="text-2xl font-bold text-white">
                         Received Requests
                     </h1>
-                    <p className="mt-1 text-sm text-white/60">
+                    <p className="mt-1 text-white/80">
                         Manage incoming paper access requests.
                     </p>
                 </div>
