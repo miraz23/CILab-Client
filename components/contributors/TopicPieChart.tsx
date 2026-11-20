@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 export interface TopicSlice {
     topic: string;
@@ -13,19 +14,6 @@ export interface TopicSlice {
 const PALETTE = ["#1F321C", "#716f49", "#A3A171", "#4F6B52", "#C9A24B", "#8C5E3C", "#5B7F95", "#B0654F"];
 const OTHER_COLOR = "#B8B6AA";
 const MAX_SLICES = PALETTE.length;
-
-const SIZE = 200;
-const C = SIZE / 2;
-const R = 92;
-
-const point = (angle: number, radius = R) => [C + radius * Math.cos(angle), C + radius * Math.sin(angle)];
-
-function slicePath(start: number, end: number) {
-    const [x1, y1] = point(start);
-    const [x2, y2] = point(end);
-    const large = end - start > Math.PI ? 1 : 0;
-    return `M ${C} ${C} L ${x1} ${y1} A ${R} ${R} 0 ${large} 1 ${x2} ${y2} Z`;
-}
 
 /** Collapse the long tail into one "Other" slice so the pie stays legible. */
 function group(rows: TopicSlice[]): (TopicSlice & { color: string })[] {
@@ -49,64 +37,54 @@ export default function TopicPieChart({ rows }: { rows: TopicSlice[] }) {
     const total = slices.reduce((n, s) => n + s.total, 0);
     const [active, setActive] = useState<number | null>(null);
 
-    const arcs = useMemo(
-        () =>
-            slices.map((slice, i) => {
-                const before = slices.slice(0, i).reduce((n, s) => n + s.total, 0);
-                const start = -Math.PI / 2 + (before / total) * Math.PI * 2;
-                const sweep = (slice.total / total) * Math.PI * 2;
-                return { start, end: start + sweep, mid: start + sweep / 2 };
-            }),
-        [slices, total]
-    );
-
     const shown = active !== null ? slices[active] : null;
     const pct = (n: number) => `${Math.round((n / total) * 100)}%`;
 
     return (
-        <div className="mt-5 grid grid-cols-1 items-center gap-6 md:grid-cols-[minmax(0,20rem)_1fr] md:gap-10">
-            <div className="mx-auto w-full max-w-72 md:max-w-none">
-                <svg
-                    viewBox={`0 0 ${SIZE} ${SIZE}`}
+        <div className="mt-5 grid grid-cols-1 items-center gap-6 @2xl:grid-cols-[minmax(0,20rem)_1fr] @2xl:gap-10">
+            <div className="mx-auto w-full max-w-72 @2xl:max-w-none">
+                <div
                     role="img"
                     aria-label={`Pie chart of ${total} contributions across ${slices.length} topics`}
-                    className="h-auto w-full overflow-visible"
+                    className="h-60 w-full"
                 >
-                    {slices.length === 1 ? (
-                        <circle
-                            cx={C}
-                            cy={C}
-                            r={R}
-                            fill={slices[0].color}
-                            stroke="#fff"
-                            strokeWidth={2}
-                            onMouseEnter={() => setActive(0)}
-                            onMouseLeave={() => setActive(null)}
-                        />
-                    ) : (
-                        slices.map((slice, i) => {
-                            const isActive = active === i;
-                            const [dx, dy] = isActive ? point(arcs[i].mid, 6) : [C, C];
-                            return (
-                                <path
-                                    key={slice.topic}
-                                    d={slicePath(arcs[i].start, arcs[i].end)}
-                                    fill={slice.color}
-                                    stroke="#fff"
-                                    strokeWidth={2}
-                                    strokeLinejoin="round"
-                                    opacity={active === null || isActive ? 1 : 0.55}
-                                    style={{
-                                        transform: `translate(${dx - C}px, ${dy - C}px)`,
-                                        transition: "transform 150ms, opacity 150ms",
-                                    }}
-                                    onMouseEnter={() => setActive(i)}
-                                    onMouseLeave={() => setActive(null)}
-                                />
-                            );
-                        })
-                    )}
-                </svg>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={slices}
+                                dataKey="total"
+                                nameKey="topic"
+                                outerRadius="92%"
+                                stroke="#fff"
+                                strokeWidth={2}
+                                startAngle={90}
+                                endAngle={-270}
+                                onMouseEnter={(_, index) => setActive(index)}
+                                onMouseLeave={() => setActive(null)}
+                            >
+                                {slices.map((slice, i) => (
+                                    <Cell
+                                        key={slice.topic}
+                                        fill={slice.color}
+                                        fillOpacity={active === null || active === i ? 1 : 0.55}
+                                    />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                formatter={(value, _name, item) => {
+                                    const slice = item?.payload as TopicSlice | undefined;
+                                    return [
+                                        `${value} (${pct(Number(value))})${
+                                            slice ? ` · ${slice.papers} papers, ${slice.presentations} presentations` : ""
+                                        }`,
+                                        slice?.topic ?? "",
+                                    ];
+                                }}
+                                contentStyle={{ borderRadius: 8, border: "1px solid #D8D5C9", fontSize: 12 }}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
 
                 <p className="mt-3 min-h-10 text-center text-sm text-neutral-600" aria-live="polite">
                     {shown ? (
@@ -124,7 +102,7 @@ export default function TopicPieChart({ rows }: { rows: TopicSlice[] }) {
                 </p>
             </div>
 
-            <ul className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2 md:grid-cols-1">
+            <ul className="grid grid-cols-1 gap-x-6 gap-y-1 @md:grid-cols-2 @2xl:grid-cols-1">
                 {slices.map((slice, i) => (
                     <li key={slice.topic}>
                         <button

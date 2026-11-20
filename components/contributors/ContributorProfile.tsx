@@ -4,6 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
 import {
     Building2,
+    ExternalLink,
     GraduationCap,
     IdCard,
     Mail,
@@ -12,6 +13,7 @@ import type { ContributorData } from "@/lib/api/contributors";
 import { ease } from "@/components/research/research-shared";
 import { scholarUrl } from "@/lib/scholar";
 import ContributionLists from "./ContributionLists";
+import PublisherBarChart from "./PublisherBarChart";
 import TopicPieChart from "./TopicPieChart";
 
 interface TopicRow {
@@ -37,7 +39,7 @@ function buildTopicStats(data: ContributorData): TopicRow[] {
     return [...map.values()].sort((a, b) => b.total - a.total || a.topic.localeCompare(b.topic));
 }
 
-const initialsOf =(name: string) =>
+const initialsOf = (name: string) =>
     name
         .replace(/^(Dr|Prof|Mr|Ms|Mrs)\.?\s+/i, "")
         .split(/\s+/)
@@ -137,6 +139,9 @@ export default function ContributorProfile({ data }: { data: ContributorData }) 
                                                 className="inline-flex max-w-full items-center gap-1 hover:text-[#716f49] hover:underline"
                                             >
                                                 <span className="truncate">{value}</span>
+                                                {href.startsWith("http") && (
+                                                    <ExternalLink className="size-3.5 shrink-0" aria-hidden />
+                                                )}
                                             </a>
                                         ) : (
                                             value
@@ -149,42 +154,64 @@ export default function ContributorProfile({ data }: { data: ContributorData }) 
                 </section>
             </Reveal>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-stretch">
+            <div className="space-y-4">
                 {/* ---------------- headline numbers ---------------- */}
-                <Reveal
-                    delay={0.05}
-                    className="grid grid-cols-3 gap-3 sm:gap-4 lg:h-full lg:grid-cols-1 lg:auto-rows-fr"
-                >
+                <Reveal delay={0.05} className="grid grid-cols-3 gap-3 sm:gap-4">
                     {stats.map(({ label, value }) => (
                         <div
                             key={label}
-                            className="flex flex-col justify-center rounded-lg border border-[#D8D5C9] bg-white p-3 text-center shadow-[0_8px_20px_-16px_rgba(31,50,28,0.5)] sm:p-5 lg:px-6 lg:text-left"
+                            className="flex flex-col items-center justify-center rounded-lg border border-[#D8D5C9] bg-white px-3 py-4 text-center shadow-[0_8px_20px_-16px_rgba(31,50,28,0.5)] sm:py-6"
                         >
-                            <p className="text-2xl font-bold leading-none text-neutral-900 sm:text-4xl">{value}</p>
-                            <p className="mt-1.5 text-[11px] font-medium text-neutral-500 sm:text-sm">{label}</p>
+                            <p className="text-3xl font-bold leading-none text-neutral-900 sm:text-4xl">{value}</p>
+                            <p className="mt-2 text-xs font-medium text-neutral-500 sm:text-sm">{label}</p>
                         </div>
                     ))}
                 </Reveal>
 
-                {/* ---------------- statistics by topic ---------------- */}
-                <Reveal delay={0.05} className="min-w-0 lg:h-full">
-                    <section
-                        aria-labelledby="topic-stats"
-                        className="h-full rounded-lg border border-[#D8D5C9] bg-white p-5 shadow-[0_8px_20px_-16px_rgba(31,50,28,0.5)] sm:p-7"
-                    >
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <h2 id="topic-stats" className="text-lg font-semibold text-neutral-900 sm:text-xl">
-                                Contributions by topic
-                            </h2>
-                        </div>
+                {/* ---------------- charts: equal-height cards side by side ---------------- */}
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-stretch">
+                    <div>
+                        <Reveal delay={0.05} className="min-w-0 lg:h-full">
+                            <section
+                                aria-labelledby="topic-stats"
+                                className="@container flex h-full flex-col rounded-lg border border-[#D8D5C9] bg-white p-5 shadow-[0_8px_20px_-16px_rgba(31,50,28,0.5)] sm:p-7"
+                            >
+                                <h2 id="topic-stats" className="text-lg font-semibold text-neutral-900 sm:text-xl">
+                                    Contributions by topic
+                                </h2>
 
-                        {topics.length === 0 ? (
-                            <p className="mt-5 text-sm text-neutral-500">No published contributions yet.</p>
-                        ) : (
-                            <TopicPieChart rows={topics} />
-                        )}
-                    </section>
-                </Reveal>
+                                <div className="flex flex-1 flex-col justify-center">
+                                    {topics.length === 0 ? (
+                                        <p className="mt-5 text-sm text-neutral-500">No published contributions yet.</p>
+                                    ) : (
+                                        <TopicPieChart rows={topics} />
+                                    )}
+                                </div>
+                            </section>
+                        </Reveal>
+                    </div>
+
+                    <div>
+                        <Reveal delay={0.1} className="min-w-0 lg:h-full">
+                            <section
+                                aria-labelledby="publisher-stats"
+                                className="flex h-full flex-col rounded-lg border border-[#D8D5C9] bg-white p-5 shadow-[0_8px_20px_-16px_rgba(31,50,28,0.5)] sm:p-7"
+                            >
+                                <h2 id="publisher-stats" className="text-lg font-semibold text-neutral-900 sm:text-xl">
+                                    Papers by publisher
+                                </h2>
+
+                                <div className="flex flex-1 flex-col justify-center">
+                                    {papers.length === 0 ? (
+                                        <p className="mt-5 text-sm text-neutral-500">No published papers yet.</p>
+                                    ) : (
+                                        <PublisherBarChart papers={papers} />
+                                    )}
+                                </div>
+                            </section>
+                        </Reveal>
+                    </div>
+                </div>
             </div>
 
             {/* ---------------- papers & presentations ---------------- */}
