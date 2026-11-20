@@ -31,6 +31,8 @@ import { type AcademicRole } from "@/lib/types/auth/register";
 import { toast } from "react-toastify";
 import { updateStoredUser } from "@/lib/auth/session";
 import { submitMemberRequest } from "@/lib/api/member-requests";
+import ShareProfile from "./ShareProfile";
+import AvatarEditor from "./AvatarEditor";
 
 interface ProfileFormProps {
     initialData: UserProfile;
@@ -122,6 +124,7 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [memberRequest, setMemberRequest] = useState(initialData.memberRequest);
+    const [avatarUrl, setAvatarUrl] = useState(initialData.avatarUrl ?? null);
     const [isRequestingMembership, setIsRequestingMembership] = useState(false);
 
     const initials = useMemo(() => {
@@ -255,9 +258,7 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                 ================================================== */}
                 <Card className="overflow-hidden rounded-lg border border-[#D8D5C9] bg-[#F4F3EE]">
                     <CardContent className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-6">
-                        <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-lg bg-[#716F49]/10 text-2xl font-semibold tracking-wide text-[#716F49] ring-1 ring-[#D8D5C9]">
-                            {initials || <User className="h-9 w-9 text-[#969386]" />}
-                        </div>
+                        <AvatarEditor initials={initials} avatarUrl={avatarUrl} onChange={setAvatarUrl} />
 
                         <div className="min-w-0">
                             <p className="truncate text-lg font-semibold text-[#25251F]">
@@ -284,6 +285,7 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                                     </Button>
                                 )}
                             </div>
+                            <ShareProfile />
                         </div>
                     </CardContent>
                 </Card>

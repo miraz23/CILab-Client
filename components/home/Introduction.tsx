@@ -27,49 +27,49 @@ const FEATURES: {
     href: string;
     cta: string;
 }[] = [
-    {
-        icon: LibraryBig,
-        title: "Research Archive",
-        text: "Peer-reviewed papers across machine learning, vision, NLP, cybersecurity and blockchain - searchable by keyword, author or topic.",
-        href: "/research/papers",
-        cta: "Browse papers",
-    },
-    {
-        icon: Presentation,
-        title: "Presentation Library",
-        text: "Conference talks, seminars, workshops and posters, with slides and recordings attached wherever speakers shared them.",
-        href: "/research/presentations",
-        cta: "View presentations",
-    },
-    {
-        icon: LockKeyhole,
-        title: "Request Any Paper",
-        text: "Can't open a paper on IEEE, Springer or another publisher? Send its link to the lab's members. A member with access downloads it and shares the file with you.",
-        href: "/auth/register",
-        cta: "Create an account",
-    },
-    {
-        icon: UploadCloud,
-        title: "Contributor Dashboard",
-        text: "Upload your papers and talks, manage your profile and track access requests. Every submission is reviewed before it goes live.",
-        href: "/auth/login",
-        cta: "Open dashboard",
-    },
-    {
-        icon: CalendarDays,
-        title: "Weekly Schedule",
-        text: "See when the lab meets - day, time, mode and place - so you can plan to join in person or online.",
-        href: "/schedule",
-        cta: "See the schedule",
-    },
-    {
-        icon: Megaphone,
-        title: "News & Announcements",
-        text: "Open seminars, publications and lab updates in one place, so the community never misses what is happening.",
-        href: "/news",
-        cta: "Read the news",
-    },
-];
+        {
+            icon: LibraryBig,
+            title: "Research Archive",
+            text: "Peer-reviewed papers across machine learning, vision, NLP, cybersecurity and blockchain - searchable by keyword, author or topic.",
+            href: "/research/papers",
+            cta: "Browse papers",
+        },
+        {
+            icon: Presentation,
+            title: "Presentation Library",
+            text: "Conference talks, seminars, workshops and posters, with slides and recordings attached wherever speakers shared them.",
+            href: "/research/presentations",
+            cta: "View presentations",
+        },
+        {
+            icon: LockKeyhole,
+            title: "Request Any Paper",
+            text: "Can't open a paper on IEEE, Springer or another publisher? Send its link to the lab's members. A member with access downloads it and shares the file with you.",
+            href: "/auth/register",
+            cta: "Create an account",
+        },
+        {
+            icon: UploadCloud,
+            title: "Contributor Dashboard",
+            text: "Upload your papers and talks, manage your profile and track access requests. Every submission is reviewed before it goes live.",
+            href: "/auth/login",
+            cta: "Open dashboard",
+        },
+        {
+            icon: CalendarDays,
+            title: "Weekly Schedule",
+            text: "See when the lab meets - day, time, mode and place - so you can plan to join in person or online.",
+            href: "/schedule",
+            cta: "See the schedule",
+        },
+        {
+            icon: Megaphone,
+            title: "News & Announcements",
+            text: "Open seminars, publications and lab updates in one place, so the community never misses what is happening.",
+            href: "/news",
+            cta: "Read the news",
+        },
+    ];
 
 // Palette-only gradients stand in for the images of the original layout.
 const GRADIENTS = [
@@ -173,11 +173,10 @@ export default function Introduction() {
                                     whileHover={{ scale: 1.05 }}
                                     animate={{ scale: index === activeStep ? 1.1 : 1 }}
                                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className={`cursor-pointer rounded-lg px-6 py-2.5 text-lg font-medium transition-colors duration-300 ${
-                                        index === activeStep
+                                    className={`cursor-pointer rounded-lg px-6 py-2.5 text-lg font-medium transition-colors duration-300 ${index === activeStep
                                             ? "bg-[#716f49] text-white"
                                             : "border border-[#dddbd8] bg-[#F3F2E8] text-[#716f49] hover:border-[#716f49]"
-                                    }`}
+                                        }`}
                                 >
                                     {String(index + 1).padStart(2, "0")}
                                 </motion.button>
@@ -200,7 +199,14 @@ export default function Introduction() {
                                 <div className="overflow-hidden rounded-lg bg-[#F3F2E8] p-3 shadow-[0_0px_8px_rgba(31,50,28,0.12)] ring-1 ring-[#dddbd8]">
                                     {/* gradient "image" */}
                                     <div className={`relative h-56 overflow-hidden rounded-lg md:h-72 ${GRADIENTS[i]}`}>
-                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,0.25),transparent_55%)]" />
+                                        <div
+                                            aria-hidden
+                                            className="pointer-events-none absolute inset-0 opacity-[0.12]"
+                                            style={{
+                                                backgroundImage: "radial-gradient(#fff 2px, transparent 2px)",
+                                                backgroundSize: "18px 18px",
+                                            }}
+                                        />
                                         <Icon
                                             className="absolute -right-6 -top-6 size-48 text-white/10"
                                             strokeWidth={1}

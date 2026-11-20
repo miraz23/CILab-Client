@@ -34,7 +34,7 @@ const list = (value: MetadataValue) =>
 
 const sizeMb = (upload: ResearchUpload) => Number((Number(upload.file_size) / 1024 / 1024).toFixed(2));
 
-function toPaper(upload: ResearchUpload): Paper {
+export function toPaper(upload: ResearchUpload): Paper {
     const m = upload.metadata ?? {};
     const authors = list(m.authors_name);
     const category = text(m.paper_category);
@@ -65,7 +65,7 @@ function toPaper(upload: ResearchUpload): Paper {
     };
 }
 
-function toPresentation(upload: ResearchUpload): Presentation {
+export function toPresentation(upload: ResearchUpload): Presentation {
     const m = upload.metadata ?? {};
     const speakers = list(m.presenter_name);
     const category = text(m.presentation_category);

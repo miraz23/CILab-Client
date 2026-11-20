@@ -12,6 +12,7 @@ export interface UserProfile {
     institution: string;
     role: AcademicRole;
     appRole: AppRole;
+    avatarUrl?: string | null;
     memberRequest: MemberRequest | null;
 }
 
@@ -78,6 +79,39 @@ export async function fetchUserProfile(): Promise<UserProfile> {
         throw new ProfileApiError("Network error. Check your connection and try again.", 0);
     }
 }
+
+export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+export const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+async function avatarRequest(method: "PUT" | "DELETE", body?: FormData): Promise<string | null> {
+    if (!API_BASE_URL) throw new ProfileApiError("NEXT_PUBLIC_SERVER_URL is not configured.", 0);
+
+    const token = localStorage.getItem("token");
+    let response: Response;
+    try {
+        // No Content-Type here: the browser must set the multipart boundary itself.
+        response = await fetch(`${API_BASE_URL}/api/profile/avatar`, {
+            method,
+            headers: token ? { Authorization: "Bearer " + token } : {},
+            body,
+            credentials: "include",
+        });
+    } catch {
+        throw new ProfileApiError("Network error. Check your connection and try again.", 0);
+    }
+
+    const data = (await response.json().catch(() => null)) as { avatarUrl?: string | null; message?: string } | null;
+    if (!response.ok) throw new ProfileApiError(data?.message ?? "Something went wrong. Please try again.", response.status);
+    return data?.avatarUrl ?? null;
+}
+
+export function uploadAvatar(file: File): Promise<string | null> {
+    const form = new FormData();
+    form.append("avatar", file);
+    return avatarRequest("PUT", form);
+}
+
+export const removeAvatar = () => avatarRequest("DELETE");
 
 export async function updateUserProfile(payload: UpdateProfilePayload): Promise<UpdateProfileResponse> {
     if (!API_BASE_URL) {

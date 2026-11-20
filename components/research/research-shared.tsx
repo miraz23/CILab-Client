@@ -492,7 +492,7 @@ export function ResearchGrid<T extends { id: string }>({
             {loading ? (
                 <ResearchResultsSkeleton />
             ) : (
-                <p className="mt-5 text-sm text-neutral-600" aria-live="polite">
+                <p className="mt-5 text-sm text-neutral-600 pb-5" aria-live="polite">
                     {filtered.length > 0 ? (
                         <>
                             Showing{" "}
