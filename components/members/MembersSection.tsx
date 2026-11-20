@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 import type { Member } from "@/lib/api/members";
 import { motion, useReducedMotion } from "motion/react";
-import { Building2, ChevronLeft, ChevronRight, IdCard, Mail, Users } from "lucide-react";
+import { Building2, ChevronLeft, ChevronRight, ExternalLink, IdCard, Mail, Users } from "lucide-react";
+import { scholarUrl } from "@/lib/scholar";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -111,7 +112,20 @@ function MemberCard({ member, index }: { member: Member; index: number }) {
 
                         <span className="flex min-w-0 items-center gap-1.5 text-xs text-black/75">
                             <IdCard className="size-4 shrink-0" aria-hidden />
-                            <span className="truncate">{member.scholarId}</span>
+                            {scholarUrl(member.scholarId) ? (
+                                <a
+                                    href={scholarUrl(member.scholarId)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Open Google Scholar profile"
+                                    className="inline-flex min-w-0 items-center gap-1 hover:underline"
+                                >
+                                    <span className="truncate">{member.scholarId}</span>
+                                    <ExternalLink className="size-3 shrink-0" aria-hidden />
+                                </a>
+                            ) : (
+                                <span className="truncate">{member.scholarId}</span>
+                            )}
                         </span>
                     </div>
                 </div>

@@ -71,4 +71,4 @@ export const getShareToken = () => shareRequest("GET");
 export const createShareToken = () => shareRequest("POST");
 export const revokeShareToken = () => shareRequest("DELETE");
 
-export const contributorPath = (token: string) => `/contributors/${token}`;
+export const contributorPath = (token: string) => `/profile/${token}`;

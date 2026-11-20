@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
             },
         ],
     },
+    async redirects() {
+        return [
+            // Share links were briefly issued under /contributors; keep them working.
+            { source: "/contributors/:token", destination: "/profile/:token", permanent: true },
+        ];
+    },
 };
 
 export default nextConfig;

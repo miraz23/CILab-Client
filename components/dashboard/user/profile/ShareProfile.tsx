@@ -56,19 +56,6 @@ export default function ShareProfile() {
         }
     };
 
-    const handleStop = async () => {
-        setBusy(true);
-        try {
-            await revokeShareToken();
-            setToken(null);
-            toast.success("Sharing turned off. The old link no longer works.");
-        } catch (error) {
-            toast.error(error instanceof ShareApiError ? error.message : "Could not turn sharing off.");
-        } finally {
-            setBusy(false);
-        }
-    };
-
     return (
         <div className="mt-4 w-full max-w-xl">
             <Button
@@ -123,14 +110,6 @@ export default function ShareProfile() {
                             </Button>
                         </div>
                     </div>
-                    <button
-                        type="button"
-                        onClick={handleStop}
-                        disabled={busy}
-                        className="mt-2 cursor-pointer text-xs font-medium text-[#A45B4B] hover:underline disabled:opacity-50"
-                    >
-                        Stop sharing
-                    </button>
                 </div>
             )}
         </div>

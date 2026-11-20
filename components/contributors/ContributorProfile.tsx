@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { ContributorData } from "@/lib/api/contributors";
 import { ease } from "@/components/research/research-shared";
+import { scholarUrl } from "@/lib/scholar";
 import ContributionLists from "./ContributionLists";
 import TopicPieChart from "./TopicPieChart";
 
@@ -36,7 +37,7 @@ function buildTopicStats(data: ContributorData): TopicRow[] {
     return [...map.values()].sort((a, b) => b.total - a.total || a.topic.localeCompare(b.topic));
 }
 
-const initialsOf = (name: string) =>
+const initialsOf =(name: string) =>
     name
         .replace(/^(Dr|Prof|Mr|Ms|Mrs)\.?\s+/i, "")
         .split(/\s+/)
@@ -72,7 +73,7 @@ export default function ContributorProfile({ data }: { data: ContributorData }) 
     const details = [
         { icon: GraduationCap, label: "Role", value: profile.role, href: undefined as string | undefined },
         { icon: Building2, label: "Institution", value: profile.institution, href: undefined },
-        { icon: IdCard, label: "Scholar ID", value: profile.scholarId, href: undefined },
+        { icon: IdCard, label: "Scholar ID", value: profile.scholarId, href: scholarUrl(profile.scholarId) },
         { icon: Mail, label: "Email", value: profile.email, href: `mailto:${profile.email}` },
     ].filter((d) => d.value);
 
@@ -86,14 +87,14 @@ export default function ContributorProfile({ data }: { data: ContributorData }) 
                         aria-hidden
                         className="pointer-events-none absolute inset-0 opacity-[0.12]"
                         style={{
-                            backgroundImage: "radial-gradient(#fff 2px, transparent 2px)",
+                            backgroundImage: "radial-gradient(#fff 1px, transparent 1px)",
                             backgroundSize: "18px 18px",
                         }}
                     />
                     <div className="px-5 pb-6 sm:px-8">
-                        <div className="-mt-10 flex flex-col gap-4 sm:-mt-12 sm:flex-row sm:items-end sm:gap-6">
+                        <div className="-mt-10 flex flex-col gap-4 sm:-mt-20 sm:flex-row sm:items-end sm:gap-6">
                             <div
-                                className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border-4 border-[#F3F2E8] bg-[#716f49] text-2xl font-semibold tracking-wide text-white sm:size-24 sm:text-3xl"
+                                className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border-4 border-[#F3F2E8] bg-[#716f49] text-2xl font-semibold tracking-wide text-white sm:size-40 sm:text-3xl"
                             >
                                 {profile.avatarUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
@@ -128,8 +129,14 @@ export default function ContributorProfile({ data }: { data: ContributorData }) 
                                     </dt>
                                     <dd className="mt-1 truncate text-sm font-medium text-neutral-800" title={value}>
                                         {href ? (
-                                            <a href={href} className="hover:text-[#716f49] hover:underline">
-                                                {value}
+                                            <a
+                                                href={href}
+                                                {...(href.startsWith("http")
+                                                    ? { target: "_blank", rel: "noopener noreferrer" }
+                                                    : {})}
+                                                className="inline-flex max-w-full items-center gap-1 hover:text-[#716f49] hover:underline"
+                                            >
+                                                <span className="truncate">{value}</span>
                                             </a>
                                         ) : (
                                             value
